@@ -1,0 +1,216 @@
+{
+    "name": "PlayerControlls",
+    "maps": [
+        {
+            "name": "Playstation Controlls",
+            "id": "96eada3f-0ba2-4bd0-95ba-e2a71a4ed81b",
+            "actions": [
+                {
+                    "name": "DoubleJump",
+                    "type": "Button",
+                    "id": "a3527a49-a197-4991-9593-362422965b14",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Jump",
+                    "type": "Button",
+                    "id": "ae80001e-6de4-4c9d-bd1c-2da8919adad9",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Crouch",
+                    "type": "Button",
+                    "id": "e15294ef-11ea-4077-b414-c2b7ce347e8b",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "Hold",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "Shoot",
+                    "type": "Button",
+                    "id": "f91531e7-3b15-465d-87fd-eee123c849a7",
+                    "expectedControlType": "Button",
+                    "processors": "Invert",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Wrench",
+                    "type": "Button",
+                    "id": "9894c724-8494-41c7-bb99-a41506f721c0",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "QuickSelect",
+                    "type": "Button",
+                    "id": "4fa405cf-c29e-4dfc-b676-abafd305c15f",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "Menu",
+                    "type": "Button",
+                    "id": "bf873c95-1d57-485f-b3f0-33c8261fdc27",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Boots",
+                    "type": "Button",
+                    "id": "4b01ee8b-276c-4417-a30c-c61cdce857d4",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Movment",
+                    "type": "Value",
+                    "id": "d643f043-9866-4dfd-883e-3f2545d81026",
+                    "expectedControlType": "Vector2",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "f7b9c206-e4d0-4445-9def-413f3da7554a",
+                    "path": "<DualShockGamepad>/buttonSouth",
+                    "interactions": "Press",
+                    "processors": "",
+                    "groups": "Playstation",
+                    "action": "Jump",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "d0a52a3f-77ef-42ad-998f-fc4222b54e1d",
+                    "path": "<DualShockGamepad>/rightShoulder",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Playstation",
+                    "action": "Crouch",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "6575d863-1a75-49aa-9006-ac048136c450",
+                    "path": "<DualShockGamepad>/buttonEast",
+                    "interactions": "",
+                    "processors": "Invert",
+                    "groups": "",
+                    "action": "Shoot",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "138c500f-d1c6-46f6-9275-3d0aed274e37",
+                    "path": "<DualShockGamepad>/buttonWest",
+                    "interactions": "Press",
+                    "processors": "",
+                    "groups": "Playstation",
+                    "action": "Wrench",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "fa2d972f-2bc6-413f-bb8b-a8610a8b2395",
+                    "path": "<DualShockGamepad>/buttonNorth",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Playstation",
+                    "action": "QuickSelect",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "c7e517d0-1b1c-4e6f-a8a0-153baa294569",
+                    "path": "<DualShockGamepad>/start",
+                    "interactions": "Press",
+                    "processors": "",
+                    "groups": "Playstation",
+                    "action": "Menu",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "1241d45d-eccd-49ff-b91e-0be01b2ca8e1",
+                    "path": "<DualShockGamepad>/rightShoulder",
+                    "interactions": "MultiTap",
+                    "processors": "",
+                    "groups": "Playstation",
+                    "action": "Boots",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "7856bc4d-3c0c-4c56-80a7-d2b1bd2d8559",
+                    "path": "<DualShockGamepad>/buttonSouth",
+                    "interactions": "MultiTap",
+                    "processors": "",
+                    "groups": "Playstation",
+                    "action": "DoubleJump",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "06071ce8-4db2-4e88-aed0-9f927bde3026",
+                    "path": "<DualShockGamepad>/leftStick",
+                    "interactions": "",
+                    "processors": "NormalizeVector2",
+                    "groups": "Playstation",
+                    "action": "Movment",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "94724106-5d37-48f4-89ae-b079b25de1d6",
+                    "path": "<DualShockGamepad>/dpad",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Playstation",
+                    "action": "Movment",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": [
+        {
+            "name": "Playstation",
+            "bindingGroup": "Playstation",
+            "devices": []
+        },
+        {
+            "name": "PC",
+            "bindingGroup": "PC",
+            "devices": []
+        }
+    ]
+}
