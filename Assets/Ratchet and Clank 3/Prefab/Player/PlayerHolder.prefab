@@ -20825,7 +20825,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1324115163506416860
 Transform:
   m_ObjectHideFlags: 0
@@ -22587,7 +22587,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5543905689527651196}
-  m_LocalRotation: {x: 0.017421054, y: -0.5813162, z: 0.012450456, w: 0.81339604}
+  m_LocalRotation: {x: 0.016990554, y: 0.608684, z: -0.013039445, w: 0.79312366}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -22668,7 +22668,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5543905689837884224}
   m_LocalRotation: {x: 0.000000013065067, y: 0.58991575, z: -0.0000000025957487, w: 0.8074648}
-  m_LocalPosition: {x: -0.64747363, y: 9.503157, z: -33.49239}
+  m_LocalPosition: {x: -18.850357, y: 9.9279785, z: 29.469683}
   m_LocalScale: {x: 3.1362894, y: 3.1362903, z: 3.1362906}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -23238,7 +23238,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5543905690698983588}
-  m_LocalRotation: {x: -0.012137013, y: -0.58138484, z: -0.008674043, w: 0.81349194}
+  m_LocalRotation: {x: -0.011830841, y: 0.60875595, z: 0.009079582, w: 0.79321736}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -23455,7 +23455,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5543905690906127841}
-  m_LocalRotation: {x: 0.0026229157, y: -0.58144647, z: 0.0018745516, w: 0.81357837}
+  m_LocalRotation: {x: 0.0025612281, y: 0.6088205, z: -0.0019656355, w: 0.79330146}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -26623,8 +26623,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6826329527935379794}
-  m_LocalRotation: {x: 0.04159685, y: -0.49310762, z: 0.027728327, w: 0.8685308}
-  m_LocalPosition: {x: 4.6053824, y: 4.6642084, z: 2.2798455}
+  m_LocalRotation: {x: 0.00090855337, y: 0.95958215, z: -0.003098082, w: 0.28141025}
+  m_LocalPosition: {x: -18.850357, y: 9.9279785, z: 29.469683}
   m_LocalScale: {x: 0.65509707, y: 0.6550972, z: 0.6550972}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -26647,7 +26647,7 @@ Camera:
   m_FOVAxisMode: 0
   m_SensorSize: {x: 1, y: 1}
   m_LensShift: {x: 0, y: 0}
-  m_FocalLength: 0.86602545
+  m_FocalLength: 1.3737388
   m_NormalizedViewPortRect:
     serializedVersion: 2
     x: 0
@@ -26656,7 +26656,7 @@ Camera:
     height: 1
   near clip plane: 0.1
   far clip plane: 5000
-  field of view: 60.000004
+  field of view: 40
   orthographic: 0
   orthographic size: 10
   m_Depth: 0
@@ -37344,29 +37344,26 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: db29a45470313cd41934272dfcdc7b4f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  wrnechsound: {fileID: 2657457301484422928}
-  moveSpeed: 5
-  attackMoveDistance: 1
   player: {fileID: 6826329526788457822}
-  Isplaying: 0
-  damage: 1
-  controller: {fileID: 3957815001026341203}
-  particleSplash: {fileID: 2287357521623586535}
-  rot: {x: 0, y: 0, z: 0, w: 0}
-  Object: {fileID: 2315194324430715289}
   handPosition: {fileID: 7832602226812367955}
-  throwSpeed: 10
-  returnSpeed: 10
-  returnDelay: 0
-  throwDuration: 0.8
-  returnDuration: 0.5
-  autoAimRadius: 2
-  autoAimAngle: 60
+  Object: {fileID: 2315194324430715289}
+  controller: {fileID: 3957815001026341203}
+  anime: {fileID: 8775588196781613271}
+  animeWrench: {fileID: 4605982332473121482}
+  wrnechsound: {fileID: 2657457301484422928}
+  particleSplash: {fileID: 2287357521623586535}
   enemyLayer:
     serializedVersion: 2
     m_Bits: 256
+  moveSpeed: 5
+  attackMoveDistance: 1
+  autoAimRadius: 2
+  autoAimAngle: 60
   lungeDistance: 1
-  animeWrench: {fileID: 4605982332473121482}
+  damage: 1
+  throwSpeed: 10
+  returnDelay: 0
+  throwDuration: 0.8
 --- !u!114 &7917574196262191914
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -42951,29 +42948,26 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: db29a45470313cd41934272dfcdc7b4f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  wrnechsound: {fileID: 0}
-  moveSpeed: 5
-  attackMoveDistance: 1
   player: {fileID: 0}
-  Isplaying: 0
-  damage: 0
-  controller: {fileID: 0}
-  particleSplash: {fileID: 0}
-  rot: {x: 0, y: 0, z: 0, w: 0}
-  Object: {fileID: 0}
   handPosition: {fileID: 0}
-  throwSpeed: 0
-  returnSpeed: 0
-  returnDelay: 0
-  throwDuration: 0
-  returnDuration: 0
-  autoAimRadius: 2
-  autoAimAngle: 60
+  Object: {fileID: 0}
+  controller: {fileID: 0}
+  anime: {fileID: 0}
+  animeWrench: {fileID: 0}
+  wrnechsound: {fileID: 0}
+  particleSplash: {fileID: 0}
   enemyLayer:
     serializedVersion: 2
     m_Bits: 0
+  moveSpeed: 5
+  attackMoveDistance: 1
+  autoAimRadius: 2
+  autoAimAngle: 60
   lungeDistance: 1
-  animeWrench: {fileID: 0}
+  damage: 0
+  throwSpeed: 0
+  returnDelay: 0
+  throwDuration: 0
 --- !u!1001 &6110348845187477939
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -43469,29 +43463,26 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: db29a45470313cd41934272dfcdc7b4f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  wrnechsound: {fileID: 6222212800312940472}
-  moveSpeed: 5
-  attackMoveDistance: 1
   player: {fileID: 6826329526788457822}
-  Isplaying: 0
-  damage: 1
-  controller: {fileID: 3957815001026341203}
-  particleSplash: {fileID: 2287357521623586535}
-  rot: {x: 0, y: 0, z: 0, w: 0}
-  Object: {fileID: 0}
   handPosition: {fileID: 0}
-  throwSpeed: 0
-  returnSpeed: 0
-  returnDelay: 0
-  throwDuration: 0
-  returnDuration: 0
-  autoAimRadius: 2
-  autoAimAngle: 60
+  Object: {fileID: 0}
+  controller: {fileID: 3957815001026341203}
+  anime: {fileID: 0}
+  animeWrench: {fileID: 0}
+  wrnechsound: {fileID: 6222212800312940472}
+  particleSplash: {fileID: 2287357521623586535}
   enemyLayer:
     serializedVersion: 2
     m_Bits: 0
+  moveSpeed: 5
+  attackMoveDistance: 1
+  autoAimRadius: 2
+  autoAimAngle: 60
   lungeDistance: 1
-  animeWrench: {fileID: 0}
+  damage: 1
+  throwSpeed: 0
+  returnDelay: 0
+  throwDuration: 0
 --- !u!4 &6518816810959494440 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 354529a1bdc376142807fc276a194a15, type: 3}
@@ -45935,29 +45926,26 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: db29a45470313cd41934272dfcdc7b4f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  wrnechsound: {fileID: 0}
-  moveSpeed: 5
-  attackMoveDistance: 1
   player: {fileID: 0}
-  Isplaying: 0
-  damage: 0
-  controller: {fileID: 0}
-  particleSplash: {fileID: 0}
-  rot: {x: 0, y: 0, z: 0, w: 0}
-  Object: {fileID: 0}
   handPosition: {fileID: 0}
-  throwSpeed: 0
-  returnSpeed: 0
-  returnDelay: 0
-  throwDuration: 0
-  returnDuration: 0
-  autoAimRadius: 2
-  autoAimAngle: 60
+  Object: {fileID: 0}
+  controller: {fileID: 0}
+  anime: {fileID: 0}
+  animeWrench: {fileID: 0}
+  wrnechsound: {fileID: 0}
+  particleSplash: {fileID: 0}
   enemyLayer:
     serializedVersion: 2
     m_Bits: 0
+  moveSpeed: 5
+  attackMoveDistance: 1
+  autoAimRadius: 2
+  autoAimAngle: 60
   lungeDistance: 1
-  animeWrench: {fileID: 0}
+  damage: 0
+  throwSpeed: 0
+  returnDelay: 0
+  throwDuration: 0
 --- !u!4 &9107811054524006012 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 354529a1bdc376142807fc276a194a15, type: 3}

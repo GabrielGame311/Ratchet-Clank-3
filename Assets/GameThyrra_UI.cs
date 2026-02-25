@@ -33,7 +33,7 @@ public class GameThyrra_UI : MonoBehaviour
     {
         
             
-        StartKeyrooling.AddRange(KeycodeRooling);
+       
         
         Instance = GetComponent<GameThyrra_UI>();
         StartRooling = TimeRooling;
@@ -176,7 +176,8 @@ public class GameThyrra_UI : MonoBehaviour
     public void ResetGame()
     {
         KeycodeRooling.Clear();
-        KeycodeRooling.AddRange(StartKeyrooling);
+        // KeycodeRooling.AddRange(StartKeyrooling);
+        StartKeyrooling.Clear();
         KeycodeInt = 0;
         isThyrraGame = true;
         IsOn = true;
@@ -217,7 +218,10 @@ public class GameThyrra_UI : MonoBehaviour
         
         GameObject.FindObjectOfType<ThyrraGame>().EndDialog();
         GamePanel.SetActive(false);
-        enabled = false; // stoppar Update()
+        StartKeyrooling.Clear();
+        Buttons_.Clear();
+        StopCoroutine(Wait());
+        //enabled = false; // stoppar Update()
         Debug.Log("Alla tangenter har rullats klart.");
 
 

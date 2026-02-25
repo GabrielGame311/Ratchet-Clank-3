@@ -1,119 +1,111 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 public class Wrench : MonoBehaviour
 {
-
-    private GameObject WrenchObj;
-
-    
-    
-    public AudioSource wrnechsound;
-    Animator anime;
-    public float moveSpeed = 5f;
-    public float attackMoveDistance = 1f;
-    private Vector3 targetPosition;
-    private Vector3 moveDirection;
+    [Header("References")]
     public Transform player;
-    public bool Isplaying = false;
-    public int damage;
-    public RatchetController controller;
-    public ParticleSystem particleSplash;
-    
-    private bool isMoving = false;
-    PlayerControlls controls;
-    private bool isReturning = false;
-   
-    
-    float wrenchtime = 2;
-    bool isPlaying = false;
-    public Quaternion rot;
-    Vector3 poss;
-    public Transform Object;
-    Transform ps;
     public Transform handPosition;
-    public float throwSpeed;
-    public float returnSpeed;
-    public float returnDelay;
-    public float throwDuration;
-    public float returnDuration;
-    Vector3 pos;
-    private Vector3 initialPosition;
-    float returnTime = 0f;
-    bool moveback = false;
-
-
-
-    public float autoAimRadius = 2f;
-    public float autoAimAngle = 60f;
+    public Transform Object; // Själva rörtångs-modellen
+    public RatchetController controller;
+    public Animator anime; // Ratchet Animator
+    public Animator animeWrench; // Wrench Animator
+    public AudioSource wrnechsound;
+    public ParticleSystem particleSplash;
     public LayerMask enemyLayer;
-    public float lungeDistance = 1f;
-    public Animator animeWrench;
+
+    [Header("Melee Settings")]
+    public float moveSpeed = 10f;
+    public float attackMoveDistance = 2f;
+    public float autoAimRadius = 5f;
+    public float autoAimAngle = 60f;
+    public float lungeDistance = 1.5f;
+    public int damage = 1;
+
+    [Header("Throw Settings")]
+    public float throwSpeed = 20f;
+    public float returnDelay = 0.3f;
+    public float throwDuration = 0.6f;
+
+    // Privata kontrollvariabler
+    public bool Isplaying { get; private set; } // Används för Trigger-logik
+    private bool isMoving = false;
+    private bool isThrowing = false;
+    private Transform weaponParent;
+    private Vector3 targetPosition;
 
     private void Start()
     {
-        ps = GetComponentInParent<WeaponSwitcher>().transform;
-        pos = transform.position;
-        rot = Object.transform.rotation;
-        controls = new PlayerControlls();
+        // Spara föräldern (WeaponSwitcher) så vi kan sätta tillbaka den efter kast
+        weaponParent = transform.parent;
 
-        WrenchObj = GetComponent<GameObject>();
+        if (anime == null)
+            anime = GameObject.FindGameObjectWithTag("Ratchet").GetComponent<Animator>();
 
-
-        anime = GameObject.FindGameObjectWithTag("Ratchet").GetComponent<Animator>();
-
-        controller = GameObject.FindObjectOfType<RatchetController>();
-        
-        
+        if (controller == null)
+            controller = GameObject.FindObjectOfType<RatchetController>();
     }
-
 
     private void Update()
     {
-
+        // Sätt animation-state
         anime.SetBool("Gun", false);
+
         if (gameObject.activeSelf)
         {
-            if (Input.GetKeyDown(KeyCode.F) && !isMoving)
+            // Attack (Melee)
+            if (Input.GetKeyDown(KeyCode.F) && !Isplaying && !isThrowing)
             {
-                StartAttackMove();
-                TryAutoTargetAndAttack();
+                StartMeleeAttack();
             }
 
+            // Kast (Wrench Throw)
+            if (Input.GetKeyDown(KeyCode.Mouse1) && !isThrowing && !Isplaying)
+            {
+                StartCoroutine(ThrowWrenchRoutine());
+            }
+
+            // Hantera lunge-förflyttning
             if (isMoving)
             {
                 MoveForward();
             }
-
-
-            if (Input.GetKeyDown(KeyCode.Mouse1) && !isReturning)
-            {
-                anime.SetTrigger("ThrowWrench");
-                //StartCoroutine(ThrowWrench());
-            }
         }
-
-          
-
-
-       
-
     }
 
-    void TryAutoTargetAndAttack()
-    {
-        // 1. Leta efter fiender i närheten (inom sfär)
-        Collider[] enemies = Physics.OverlapSphere(player.transform.position, autoAimRadius, enemyLayer);
+    // --- MELEE LOGIK ---
 
+    void StartMeleeAttack()
+    {
+        Isplaying = true; // Nu kan vi göra skada via OnTriggerEnter
+        if (wrnechsound) wrnechsound.Play();
+
+        // 1. Auto-aim: Titta på närmsta fiende
+        TryAutoTarget();
+
+        // 2. Starta animationer
+        anime.SetTrigger("Wrench");
+        if (animeWrench) animeWrench.SetTrigger("Hit");
+
+        // 3. Starta Lunge (hoppet framåt)
+        targetPosition = player.position + player.forward * attackMoveDistance;
+        isMoving = true;
+
+        // 4. Stäng av skadan efter en kort stund (när svingen är klar)
+        Invoke("EndAttack", 0.6f);
+    }
+
+    void TryAutoTarget()
+    {
+        Collider[] enemies = Physics.OverlapSphere(player.position, autoAimRadius, enemyLayer);
         Transform closestEnemy = null;
         float closestAngle = autoAimAngle;
 
         foreach (var enemy in enemies)
         {
-            Vector3 dirToEnemy = (enemy.transform.position - player.transform.position).normalized;
-            float angle = Vector3.Angle(player.transform.forward, dirToEnemy);
+            Vector3 dirToEnemy = (enemy.transform.position - player.position).normalized;
+            float angle = Vector3.Angle(player.forward, dirToEnemy);
 
             if (angle < closestAngle)
             {
@@ -122,197 +114,118 @@ public class Wrench : MonoBehaviour
             }
         }
 
-        // 2. Om vi hittar en fiende i sikte
         if (closestEnemy != null)
         {
-            // Rota mot fienden
-            Vector3 lookDir = (closestEnemy.position - player.transform.position).normalized;
+            Vector3 lookDir = (closestEnemy.position - player.position).normalized;
             lookDir.y = 0;
-            player.transform.rotation = Quaternion.LookRotation(lookDir);
-
-            // Flytta spelaren lite framåt (lunge)
-            Vector3 lungeTarget = player.transform.position + lookDir * lungeDistance;
-            player.GetComponent<CharacterController>().Move(lookDir * lungeDistance);
+            player.rotation = Quaternion.LookRotation(lookDir);
         }
-
-        // 3. Spela attackanimation
-        animeWrench.SetTrigger("Hit");
-
-        // 4. Du kan koppla ett Animation Event som kallar på WrenchHit() vid rätt timing
-    }
-
-    public void Throw1()
-    {
-        StartCoroutine(ThrowWrench());
-    }
-
-    private IEnumerator ThrowWrench()
-    {
-        // Record initial position
-        initialPosition = transform.position;
-
-        // Move wrench forward
-        float throwTime = 0f;
-        while (throwTime < throwDuration)
-        {
-            transform.localPosition += transform.forward * throwSpeed * Time.deltaTime;
-            throwTime += Time.deltaTime;
-            Object.transform.Rotate(0f, 10f, 0f);
-            transform.parent = null;
-            yield return null;
-        }
-
-        // Wait before returning wrench
-        yield return new WaitForSeconds(returnDelay);
-        //Object.transform.Rotate(0f, 7f, 0f);
-        // Move wrench back to hand
-        moveback = true;
-        StartCoroutine(MoveWrenchBackToHandCoroutine());
-
-        // Snap wrench to hand
-
-    }
-
-    private IEnumerator MoveWrenchBackToHandCoroutine()
-    {
-
-        while (moveback)
-        {
-            transform.position = Vector3.MoveTowards(transform.localPosition, handPosition.transform.position, throwSpeed * Time.deltaTime);
-            Object.transform.Rotate(0f, 10f, 0f);
-            isPlaying = true;
-            if (Vector3.Distance(handPosition.transform.position, gameObject.transform.position) < 0.6f)
-            {
-                transform.SetParent(ps);
-                ;
-                
-                moveback = false;
-                isPlaying = false;
-
-                Object.transform.localRotation = Quaternion.identity;
-
-                transform.position = handPosition.position;
-                transform.rotation = handPosition.rotation;
-                transform.localScale = handPosition.localScale;
-                
-
-            }
-          
-            yield return null;
-        }
-
-
-
-    }
-
-
-    void StartAttackMove()
-    {
-        isMoving = true;
-        isPlaying = true;
-        animeWrench.SetTrigger("Hit");
-        // Räkna ut målpositionen framåt
-        targetPosition = player.transform.position + player.transform.forward * attackMoveDistance;
-
-        // Starta attackanimationen
-        anime.SetTrigger("Wrench");
     }
 
     void MoveForward()
     {
-        // Räkna ut rörelsesteg denna frame
-        Vector3 moveStep = moveSpeed * Time.deltaTime * player.transform.forward;
+        Vector3 moveStep = player.forward * moveSpeed * Time.deltaTime;
+        controller.MyController.Move(moveStep);
 
-        // Flytta spelaren
-        GameObject.FindObjectOfType<RatchetController>().MyController.Move(moveStep);
-
-        // Kolla om spelaren har nått eller passerat målpositionen
-        if (Vector3.Distance(player.transform.position, targetPosition) <= moveStep.magnitude)
+        // Stoppa om vi nått målet eller tiden ute
+        if (Vector3.Distance(player.position, targetPosition) < 0.2f)
         {
-            // Sätt exakt position till målet
-            player.transform.position = targetPosition;
-
             isMoving = false;
-            isPlaying = false;
         }
     }
 
-    private void OnEnable()
+    void EndAttack()
     {
-        anime.SetBool("Gun", false);
-       
-
-    }
-
-
-    public void EndAnime()
-    {
+        Isplaying = false;
         isMoving = false;
-        isPlaying = false;
-        player.transform.position = targetPosition;
     }
 
+    // --- THROW LOGIK ---
+
+
+    public void Throw1()
+    {
+        StartCoroutine(ThrowWrenchRoutine());
+    }
+
+
+    private IEnumerator ThrowWrenchRoutine()
+    {
+        isThrowing = true;
+        Isplaying = true;
+
+        // Nollställ triggern först för att vara säker på att den inte "köar"
+        anime.ResetTrigger("ThrowWrench");
+        anime.SetTrigger("ThrowWrench");
+
+        transform.SetParent(null);
+
+        // Ut-kast
+        float timer = 0f;
+        while (timer < throwDuration)
+        {
+            transform.position += transform.forward * throwSpeed * Time.deltaTime;
+            Object.Rotate(0f, 1000f * Time.deltaTime, 0f);
+            timer += Time.deltaTime;
+            yield return null;
+        }
+
+        yield return new WaitForSeconds(returnDelay);
+
+        // Hem-väg (Vi lägger till en säkerhetstimer här så den inte loopar för evigt)
+        float returnTimer = 0f;
+        while (Vector3.Distance(transform.position, handPosition.position) > 0.6f && returnTimer < 3f)
+        {
+            transform.position = Vector3.MoveTowards(transform.position, handPosition.position, throwSpeed * Time.deltaTime);
+            Object.Rotate(0f, 1000f * Time.deltaTime, 0f);
+            returnTimer += Time.deltaTime; // Om den inte hittar hem på 3 sekunder, avbryt
+            yield return null;
+        }
+
+        // Återställ allt
+        transform.SetParent(weaponParent);
+        transform.localPosition = Vector3.zero; // Använd nollställd lokal position
+        transform.localRotation = Quaternion.identity;
+        Object.localRotation = Quaternion.identity;
+
+        isThrowing = false;
+        Isplaying = false;
+    }
+
+    // --- COLLISION LOGIK ---
 
     private void OnTriggerEnter(Collider other)
     {
-        
-        //Box
-        
+        // Kolla om rörtången är "aktiv" (under sving eller kast)
+        if (!Isplaying) return;
 
-
-
-        if(other.CompareTag("Box"))
+        // Här använder vi "TryGetComponent" för att slippa errors om script saknas
+        if (other.CompareTag("Box"))
         {
-           
-
-            if(Isplaying == true)
-            {
-                other.GetComponent<Box>().Break(damage);
-                Isplaying = false;
-            }
-            
-
-
-        }
-        else if(other.CompareTag("Health"))
-        {
-
-            if (Isplaying == true)
-            {
-
-                other.GetComponent<HealthItem>().Break(damage);
-                Isplaying = false;
-            }
-
-            
-            
-        }
-        else if(other.CompareTag("AmmoBox"))
-        {
-            if(Isplaying == true)
-            {
-                other.GetComponent<AmmoCrate>().Break(damage);
-                Isplaying = false;
-            }
+            if (other.TryGetComponent(out Box box)) box.Break(damage);
+            SpawnEffect();
         }
         else if (other.CompareTag("Enemie"))
         {
-            if (Isplaying == true)
-            {
-                other.GetComponent<EnemiesHealth>().TakeDamage(damage);
-                Isplaying = false;
-            }
+            if (other.TryGetComponent(out EnemiesHealth enemy)) enemy.TakeDamage(damage);
+            SpawnEffect();
         }
-
-
-
-
+        else if (other.CompareTag("Health"))
+        {
+            if (other.TryGetComponent(out HealthItem health)) health.Break(damage);
+        }
+        else if (other.CompareTag("AmmoBox"))
+        {
+            if (other.TryGetComponent(out AmmoCrate ammo)) ammo.Break(damage);
+        }
     }
 
-
-
-   
-
-
-
+    void SpawnEffect()
+    {
+        if (particleSplash != null)
+        {
+            particleSplash.Play();
+        }
+        // Här kan du lägga till Isplaying = false om du bara vill träffa ETT objekt per slag
+    }
 }

@@ -23,17 +23,27 @@ public class ThyrraGame : MonoBehaviour
     GameObject GameThyrraUI;
     bool IsMovingEnemy = false;
     public GameObject BlockScreen;
-    // Start is called before the first frame update
-    void Start()
+    public ThyrraGame NextThyrraGame;
+
+    public List<string> KeycodeRooling;
+
+
+    private void Start()
     {
+
+        GameObject.FindObjectOfType<GameThyrra_UI>().KeycodeRooling.AddRange(KeycodeRooling);
+        GameObject.FindObjectOfType<GameThyrra_UI>().StartKeyrooling.AddRange(KeycodeRooling);
         GameThyrraUI = GameObject.FindObjectOfType<GameThyrra_UI>().GamePanel;
-        Player_ = GameObject.FindGameObjectWithTag("Player");
+        PointEnemyButton.transform.parent = null;
+        Point_.transform.parent = null;
+        //Player_ = GameObject.FindGameObjectWithTag("Player");
         //Point_ = GameObject.FindGameObjectWithTag("DialogPoint");
-       // anime = GetComponent<Animator>();
+        // anime = GetComponent<Animator>();
         freeLookCam = GameObject.FindObjectOfType<CinemachineFreeLook>();
         dialogCam = GameObject.FindObjectOfType<CinemachineVirtualCamera>();
     }
 
+   
     // Update is called once per frame
     void Update()
     {
@@ -127,7 +137,11 @@ public class ThyrraGame : MonoBehaviour
                 anime.SetBool("Walk", false);
                 BlockScreen.GetComponent<Animator>().SetTrigger("Button");
                 IsMovingEnemy = false;
-
+                //GameObject.FindObjectOfType<GameThyrra_UI>().KeycodeRooling.Clear();
+                //GameObject.FindObjectOfType<GameThyrra_UI>().StartKeyrooling.Clear();
+                //GameObject.FindObjectOfType<GameThyrra_UI>().ResetGame();
+                NextThyrraGame.enabled = true;
+                enabled = false;
                 // (valfritt) Starta nästa steg i dialog eller animation här
             }
 
@@ -172,7 +186,7 @@ public class ThyrraGame : MonoBehaviour
     {
         if(other.tag == "Player")
         {
-
+            Player_ = other.gameObject;
             IsTrigger = true;
         }
     }
@@ -182,7 +196,7 @@ public class ThyrraGame : MonoBehaviour
     {
         if (other.tag == "Player")
         {
-
+            Player_ = null;
             IsTrigger = false;
         }
     }
