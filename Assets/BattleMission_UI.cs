@@ -10,10 +10,12 @@ public class BattleMission_UI : MonoBehaviour
     public string LoadScene = "Thyrra_Mission";
     public int MissionsList = 0;
     public static BattleMission_UI BattleMission;
-
+    public GameObject InGame_;
     public Sprite[] MissionImage;
     public Image Image;
     public int selected = 0;
+    public GameObject MissionShip;
+    public GameObject Player_;
     
     // Start is called before the first frame update
     void Start()
@@ -109,7 +111,18 @@ public class BattleMission_UI : MonoBehaviour
 
         MissionsList = mission;
 
-        SceneManager.LoadScene(LoadScene);
+        if(LoadScene != null)
+        {
+            SceneManager.LoadScene(LoadScene);
+        }
+        MissionMap(MissionsList);
+        InGame_.SetActive(true);
+        Player_.SetActive(true);
+        MissionShip.SetActive(false);
+        gameObject.SetActive(false);
+
+
+        
 
     }
 

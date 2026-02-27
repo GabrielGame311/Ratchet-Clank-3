@@ -39,7 +39,7 @@ public class TriggerEnemies : MonoBehaviour
             {
                 trigger.SetActive(true);
             }
-            Destroy(gameObject);
+            
         }
         
        
@@ -76,7 +76,7 @@ public class TriggerEnemies : MonoBehaviour
 
 
                 trigger = true;
-
+                Destroy(gameObject);
 
             }
         }
