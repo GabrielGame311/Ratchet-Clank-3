@@ -186,7 +186,7 @@ public class Player : MonoBehaviour
         yield return new WaitForSeconds(1.1f);
 
         ShipMenuTrigger.ReloadSceneOnDeath();
-        if (SceneLoad == null)
+        if (SceneLoad != null)
         {
             SceneManager.LoadScene(SceneLoad);
         }

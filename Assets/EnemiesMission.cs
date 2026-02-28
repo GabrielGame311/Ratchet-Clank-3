@@ -13,54 +13,98 @@ public class EnemiesMission : MonoBehaviour
     public int NumberMusic;
     bool IS = false;
     public List<GameObject> EnemiesList = new List<GameObject>();
-    public static EnemiesMission EnemiesMission_;
+    public static EnemiesMission instance;
     float loadsceneTime = 10;
     public bool SetactiveEnemies = false;
     public int Mission;
     public bool IsWin = false;
     GameObject player;
     bool isfalse = true;
-    public string LoadScene = "RangerShip";
+    public string LoadScene;
 
     public bool SetactivePlayer = false;
 
     // Start is called before the first frame update
     void Start()
     {
-        EnemiesMission_ = GetComponent<EnemiesMission>();
+        instance = GetComponent<EnemiesMission>();
 
         Enemies = FindObjectsOfType<EnemiesHealth>();
         player = GameObject.FindGameObjectWithTag("Player");
-       
 
-
-        
-
+        if(gameObject.activeSelf == true)
+        {
             foreach (EnemiesHealth enemy in Enemies)
             {
                 EnemiesList.Add(enemy.gameObject);
-                
 
-                if(SetactiveEnemies)
+
+                if (SetactiveEnemies)
                 {
                     enemy.gameObject.SetActive(false);
                 }
             }
-        
+        }
+
+      
 
 
-       
+
+
+
+
 
     }
+
+   
 
     // Update is called once per frame
     void Update()
     {
 
-        
+        if (IsWin)
+        {
 
 
-        if (GetComponent<RocketMission>() == null)
+
+
+
+
+
+            if (isfalse)
+            {
+                Bolts.Bolt.BoltCount += MissionCompleteUI.MissionComplete.Bolts[MissionCompleteUI.MissionComplete.Mission];
+                isfalse = false;
+            }
+            // GetComponent<MissionSound>().i = NumberMusic;
+            //GetComponent<MissionSound>().Mission4(NumberMusic);
+            MissionCompleteUI.MissionComplete.gameObject.SetActive(true);
+
+            loadsceneTime -= Time.deltaTime;
+
+            if (loadsceneTime < 0)
+            {
+
+                if (LoadScene != null)
+                {
+                    SceneManager.LoadScene(LoadScene);
+                }
+                else
+                {
+                    SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+                }
+
+
+                loadsceneTime = 10;
+            }
+        }
+        else
+        {
+
+        }
+
+
+        if (GetComponent<RocketMission>() != null)
         {
 
             MissionCompleteUI.MissionComplete.Mission = Mission;
@@ -91,7 +135,7 @@ public class EnemiesMission : MonoBehaviour
                 if (loadsceneTime < 0)
                 {
 
-                    SceneManager.LoadScene(LoadScene);
+                    SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
                     loadsceneTime = 10;
                 }
 
@@ -104,36 +148,6 @@ public class EnemiesMission : MonoBehaviour
 
         
 
-        if(IsWin)
-        {
-
-            
-
-
-
-
-
-            if(isfalse)
-            {
-                Bolts.Bolt.BoltCount += MissionCompleteUI.MissionComplete.Bolts[MissionCompleteUI.MissionComplete.Mission];
-                isfalse = false;
-            }
-           // GetComponent<MissionSound>().i = NumberMusic;
-            //GetComponent<MissionSound>().Mission4(NumberMusic);
-            MissionCompleteUI.MissionComplete.gameObject.SetActive(true);
-
-            loadsceneTime -= Time.deltaTime;
-
-            if (loadsceneTime < 0)
-            {
-
-                SceneManager.LoadScene(LoadScene);
-                loadsceneTime = 10;
-            }
-        }
-        else
-        {
-
-        }
+       
     }
 }

@@ -43,7 +43,7 @@ public class EnemieActive : MonoBehaviour
                 
             }
 
-            EnemiesMission.EnemiesMission_.EnemiesList.Remove(Enemies[EnemieIndex].gameObject);
+            //EnemiesMission.instance.EnemiesList.Remove(Enemies[EnemieIndex].gameObject);
 
 
         }

@@ -45,6 +45,7 @@ public class PlayerShip : MonoBehaviour
     float startshoots;
     bool isshooting = false;
     float shooter = 2;
+    public bool DisablePlayerDirectly;
     // Start is called before the first frame update
     void Start()
     {
@@ -52,7 +53,11 @@ public class PlayerShip : MonoBehaviour
         sound.GetComponent<AudioSource>();
         playerHolder = GameObject.FindGameObjectWithTag("Playerholder");
         player = GameObject.FindObjectOfType<RatchetController>().gameObject;
-
+        if(DisablePlayerDirectly)
+        {
+            playerHolder.SetActive(false);
+        }
+        Cursor.lockState = CursorLockMode.Locked;
        // player.SetActive(false);
         playership_ = GetComponent<PlayerShip>();
         MaxHealth = CurrentHealth;
@@ -67,7 +72,7 @@ public class PlayerShip : MonoBehaviour
     {
 
         
-
+      
         
 
         if (IsController)
@@ -339,16 +344,19 @@ public class PlayerShip : MonoBehaviour
         Destroy(Ship);
         yield return new WaitForSeconds(2);
 
-        if(LoadScene == null)
+        if(LoadScene != null)
         {
             SceneManager.LoadScene(LoadScene);
         }
         else
         {
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        }
+        
            
            
             Destroy(gameObject);
-        }
+        
 
     }
 

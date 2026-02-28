@@ -122,8 +122,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 9135542911201331561}
-  m_LocalRotation: {x: 0.15512322, y: 0.0000002682209, z: -0.000000040978193, w: 0.98789513}
-  m_LocalPosition: {x: -0.0000059604645, y: 6, z: -10.870003}
+  m_LocalRotation: {x: 0.15512326, y: -0, z: -0.000000007450581, w: 0.9878952}
+  m_LocalPosition: {x: -0.00000047683716, y: 6, z: -10.869999}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -305,7 +305,7 @@ MonoBehaviour:
   ParticlePrefab: {fileID: 5075950687895014103, guid: 4094060e66e915a40b311882d8359483, type: 3}
   CurrentHealth: 100
   MaxHealth: 0
-  LoadScene: RangerShip
+  LoadScene: 
   point: {fileID: 9135542911677199606}
   cn: {fileID: 9135542912199046395}
   mouseSensitivity: 60
@@ -319,6 +319,7 @@ MonoBehaviour:
   - {fileID: 8300000, guid: ca9590a3de6098f4d897d81d390d5b8b, type: 3}
   sound: {fileID: 192296191590588162}
   holdTimeThreshold: 0
+  DisablePlayerDirectly: 1
 --- !u!65 &9135542911303151921
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -512,8 +513,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 9135542912199046341}
-  m_LocalRotation: {x: 0.15512322, y: 0.0000002682209, z: -0.000000040978193, w: 0.98789513}
-  m_LocalPosition: {x: -0.0000059604645, y: 6, z: -10.870003}
+  m_LocalRotation: {x: 0.15512326, y: -0, z: -0.000000007450581, w: 0.9878952}
+  m_LocalPosition: {x: -0.00000047683716, y: 6, z: -10.869999}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:

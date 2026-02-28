@@ -68,7 +68,7 @@ public class RocketMission : MonoBehaviour
         {
             if(MissionSound.MissionSound_.i == 8)
             {
-                EnemiesMission.EnemiesMission_.IsWin = true;
+                EnemiesMission.instance.IsWin = true;
             }
         }
       

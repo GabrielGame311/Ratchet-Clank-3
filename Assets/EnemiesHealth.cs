@@ -125,24 +125,21 @@ public class EnemiesHealth : MonoBehaviour
     }
 
 
+    void OnEnable()
+    {
+        if (EnemiesMission.instance != null)
+        {
+           // EnemiesMission.instance.EnemiesList.Add(gameObject);
+        }
+    }
 
-  
     public void Die()
     {
         if(anime != null)
         {
             anime.SetTrigger("Die");
         }
-        MonoBehaviour[] scripts = GetComponents<MonoBehaviour>();
-        // Iterate through all scripts and disable them
-        foreach (MonoBehaviour script in scripts)
-        {
-            // Ensure we don't disable the DisableAllScripts script itself
-            if (script != this)
-            {
-                script.enabled = false;
-            }
-        }
+       
 
         if(GetComponent<BloodFly>() != null)
         {
@@ -150,17 +147,20 @@ public class EnemiesHealth : MonoBehaviour
         }
 
         
-        Destroy(gameObject, 2f);
+
+        
+            
+        
+       
+            
+        
+           
+        
+
+        Destroy(gameObject, 0.2f);
 
 
-        if (EnemiesMission.EnemiesMission_.EnemiesList != null)
-        {
-
-
-            EnemiesMission.EnemiesMission_.EnemiesList.Remove(gameObject);
-
-
-        }
+       
 
 
 
@@ -192,9 +192,34 @@ public class EnemiesHealth : MonoBehaviour
 
         //WeaponsUI.WeaponsUI_.levelAmount += LevelXp;
         Instantiate(Bolt, transform.position, transform.rotation);
-       
-            GameObject.FindObjectOfType<WeaponsUI>().levelAmount += LevelXp;
-        
+
+        if (EnemiesMission.instance.gameObject.activeSelf == true)
+        {
+            EnemiesMission.instance.EnemiesList.Remove(gameObject);
+        }
+
+        if (RocketMission.RocketMission_.gameObject.activeSelf == true)
+        {
+            RocketMission.RocketMission_.DropShip.Remove(gameObject);
+        }
+        if (RocketMission.RocketMission_.gameObject.activeSelf == true)
+        {
+            RocketMission.RocketMission_.Enemies.Remove(gameObject);
+        }
+        if (RocketMission.RocketMission_.gameObject.activeSelf == true)
+        {
+            RocketMission.RocketMission_.Rockets.Remove(gameObject);
+        }
+
+
+
+
+        WeaponsUI ui = FindObjectOfType<WeaponsUI>();
+        if (ui != null)
+        {
+            ui.levelAmount += LevelXp;
+        }
+
         if (GameObject.FindObjectOfType<SpawnTime>().DropshipsSpawned != null)
         {
             GameObject.FindObjectOfType<SpawnTime>().DropshipsSpawned.Remove(gameObject);
@@ -218,33 +243,26 @@ public class EnemiesHealth : MonoBehaviour
                 gm.AddExplosionForce(10, transform.position, 5);
             }
 
-            if (RocketMission.RocketMission_.DropShip != null)
-            {
-                RocketMission.RocketMission_.DropShip.Remove(gameObject);
-            }
+            
         }
-        else
+        
+
+
+        MonoBehaviour[] scripts = GetComponents<MonoBehaviour>();
+        // Iterate through all scripts and disable them
+        foreach (MonoBehaviour script in scripts)
         {
-
-          
-            if (RocketMission.RocketMission_.Enemies != null)
+            // Ensure we don't disable the DisableAllScripts script itself
+            if (script != this)
             {
-                RocketMission.RocketMission_.Enemies.Remove(gameObject);
-            }
-            if (RocketMission.RocketMission_.Rockets != null)
-            {
-                RocketMission.RocketMission_.Rockets.Remove(gameObject);
+                script.enabled = false;
             }
         }
 
-       
-       
-       
-       
 
 
 
-      
+
 
 
 

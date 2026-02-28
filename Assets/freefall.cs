@@ -87,7 +87,7 @@ public class freefall : MonoBehaviour
 
         if(IsScene)
         {
-            if(EnemiesMission.EnemiesMission_.Mission == 0)
+            if(EnemiesMission.instance.Mission == 0)
             {
                 if (IsMoving)
                 {
