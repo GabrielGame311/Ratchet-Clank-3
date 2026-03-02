@@ -15,7 +15,7 @@ public class freefall : MonoBehaviour
 
     [Header("Camera Settings")]
     public GameObject CamFreefall;
-    private CinemachineVirtualCamera vCam; // Den faktiska kamerakomponenten
+    private CinemachineFreeLook vCam; // Den faktiska kamerakomponenten
 
     [Header("Fall Settings")]
     public float falldawnSpeed = 20f;
@@ -32,8 +32,14 @@ public class freefall : MonoBehaviour
     public float hInput;
     public float vInput;
     float GravityStart;
+    public LayerMask groundLayer;
+    // Lägg till dessa i toppen av ditt freefall-skript
+    [Header("Landing Settings")]
+    public float helicopterDistance = 5f; // Avståndet till marken när helikoptern startar
+    public float helicopterFallSpeed = 5f; // Hur mycket han bromsar (lägre värde = långsammare)
+    private bool isHelicoptering = false;
+    
 
-   
 
     private void Start()
     {
@@ -42,12 +48,13 @@ public class freefall : MonoBehaviour
         controller = GetComponent<CharacterController>();
         
         ratchet = GetComponent<RatchetController>();
-        anim = GetComponent<Animator>();
+        anim = GameObject.FindGameObjectWithTag("Ratchet").GetComponent<Animator>();
 
         // Hämta Cinemachine-komponenten från ditt CamFreefall objekt
         if (CamFreefall != null)
-            vCam = CamFreefall.GetComponent<CinemachineVirtualCamera>();
-
+            vCam = CamFreefall.GetComponent<CinemachineFreeLook>();
+        vCam.enabled = false;
+        CamFreefall.SetActive(true);
         GravityStart = ratchet.Gravity;
 
     }
@@ -75,15 +82,40 @@ public class freefall : MonoBehaviour
     {
         anim.SetBool("FreeFall", true);
         CamFreefall.SetActive(true);
+        vCam.enabled = true;
         ratchet.CanMove = false;
         ratchet.enabled = false;
+
+
+        // 1. Skjut en stråle neråt för att se om vi ska starta helikoptern
+        RaycastHit hit;
+        if (Physics.Raycast(transform.position, Vector3.down, out hit, helicopterDistance, groundLayer))
+        {
+            if (!isHelicoptering)
+            {
+                isHelicoptering = true;
+
+                 // Se till att du har denna trigger i din Animator
+                anim.SetBool("FreeFall", false); // Stäng av fritt fall-loopen
+                HelikopterController.Instance.StartHelikopter();
+            }
+        }
+
+        // 2. Rörelse nedåt
+        float currentSpeed = isHelicoptering ? helicopterFallSpeed : falldawnSpeed;
+        controller.Move(Vector3.down * currentSpeed * Time.deltaTime);
+
+        // 3. Rörelse i sidled (Styrning fungerar fortfarande men kanske långsammare?)
+        float currentMoveSpeed = isHelicoptering ? MoveSpeed * 0.5f : MoveSpeed;
+        Vector3 horizontalMove = new Vector3(hInput, 0, vInput) * currentMoveSpeed;
+        controller.Move(horizontalMove * Time.deltaTime);
 
         // 1. Rörelse nedåt
         controller.Move(Vector3.down * falldawnSpeed * Time.deltaTime);
 
         // 2. Rörelse i sidled (Styrning)
-        hInput = Input.GetAxis("Horizontal");
-        vInput = Input.GetAxis("Vertical");
+        hInput = Input.GetAxisRaw("Horizontal");
+        vInput = Input.GetAxisRaw("Vertical");
 
         if (IOSController.IosController_ != null)
         {
@@ -91,7 +123,7 @@ public class freefall : MonoBehaviour
             vInput = IOSController.IosController_.JoyStick_.Vertical;
         }
 
-        pos = new Vector3(hInput, 0, vInput);
+        pos = new Vector3(vInput, 0, -hInput);
         controller.Move(pos * MoveSpeed * Time.deltaTime);
 
         // 3. Dynamisk FOV (Fartkänsla!)
@@ -111,14 +143,21 @@ public class freefall : MonoBehaviour
         }
     }
 
-    void StopFalling()
+    public void StopFalling()
     {
+        
+        
+       
+        isHelicoptering = false;
+        vCam.enabled = false;
+        CamFreefall.SetActive(false);
         ItsFalling = false;
         IsMoving = false;
         ratchet.Gravity = GravityStart;
         ratchet.enabled = true;
         ratchet.CanMove = true;
-        CamFreefall.SetActive(false);
+        
+       
         anim.SetBool("FreeFall", false);
     }
     // Hanterar vad som händer när vi INTE faller
@@ -127,8 +166,8 @@ public class freefall : MonoBehaviour
         // Säkerställ att vi inte råkar ha kvar fall-inställningar
         if (ratchet != null)
         {
-            ratchet.enabled = true;
-            ratchet.CanMove = true;
+           // ratchet.enabled = true;
+           // ratchet.CanMove = true;
         }
 
         if (CamFreefall != null && CamFreefall.activeSelf)

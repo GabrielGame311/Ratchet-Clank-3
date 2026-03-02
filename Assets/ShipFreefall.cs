@@ -5,158 +5,227 @@ using UnityEngine;
 public class ShipFreefall : MonoBehaviour
 {
     public GameObject player;
-    public GameObject playerholder;// Spelaren
-    public GameObject[] robots; // Robotarna
-    public Transform doorPosition; // Dörrens position
-    public float speed = 5f; // Rörelsehastighet
+    public GameObject playerholder;
+    public GameObject[] robots;
+    public Transform doorPosition;
+    public float speed = 5f;
     public Transform SpawnPoint;
 
-    //RobotsFalling
-    public float fallSpeed = 10f; // Hastighet när robotarna flyger neråt
-    public float slowSpeed = 2f; // Hastighet när robotarna saktar ner
-    public float slowDownDistance = 2f; // Avstånd från marken när de börjar sakta ner
-    public LayerMask groundLayer; // Layer-mask för att identifiera marken
-    public float slowDownDuration = 2f; // Tid de saktar ner innan de stannar
+    [Header("Fall Settings")]
+    public float fallSpeed = 15f;
+    public float slowSpeed = 2f;
+    public float slowDownDistance = 3f;
+    public LayerMask groundLayer;
+    public float slowDownDuration = 1.5f;
+    Animator anime;
+    CharacterController controller;
+    RatchetController playercontroller;
 
-    private bool isSlowingDown = false; 
     void Start()
     {
+        anime = GameObject.FindGameObjectWithTag("Ratchet").GetComponent<Animator>();
+        // Ignorera kollisioner mellan robotar direkt
+        for (int i = 0; i < robots.Length; i++)
+        {
+            for (int j = i + 1; j < robots.Length; j++)
+            {
+                Physics.IgnoreCollision(robots[i].GetComponent<Collider>(), robots[j].GetComponent<Collider>());
+            }
+        }
 
-      //  player = GameObject.FindGameObjectWithTag("Player");
+        // Ställ in startposition
+        playercontroller = player.GetComponent<RatchetController>();
+        playercontroller.CanMove = false;
 
-        // Starta sekvensen där robotarna rör sig först, följt av spelaren
-        player.GetComponentInChildren<CharacterController>().enabled = false;
-        playerholder.transform.rotation = SpawnPoint.rotation;
-
-        playerholder.transform.position = SpawnPoint.transform.position;
-
+        controller = player.GetComponentInChildren<CharacterController>();
+        controller.enabled = false;
         
+        //player.transform.position = SpawnPoint.position;
+       // player.transform.rotation = SpawnPoint.rotation;
+        playerholder.transform.position = SpawnPoint.position;
+        playerholder.transform.rotation = SpawnPoint.rotation;
+        controller.enabled = true;
         StartCoroutine(MoveRobotsThenPlayer());
     }
 
     IEnumerator MoveRobotsThenPlayer()
     {
-        // Förflytta robotarna mot dörren
         foreach (var robot in robots)
         {
-            StartCoroutine(MoveToDoor(robot));
+            StartCoroutine(MoveToDoorAndJump(robot, true));
+            yield return new WaitForSeconds(0.4f);
         }
 
-        // Vänta 2 sekunder innan spelaren börjar röra sig
-        yield return new WaitForSeconds(2f);
+        yield return new WaitForSeconds(1.0f);
 
-        // Förflytta spelaren mot dörren
-        StartCoroutine(MoveToDoor(player));
+        
+        StartCoroutine(MoveToDoorAndJump(player, false));
     }
 
-    IEnumerator MoveToDoor(GameObject character)
+    IEnumerator MoveToDoorAndJump(GameObject character, bool isRobot)
     {
-        // Flytta karaktären rakt fram tills den är nära dörrens z-position
-        while (Mathf.Abs(character.transform.position.z - doorPosition.position.z) > 0.1f)
+        // 1. Gå fram till dörren
+        // 1. Gå fram till dörren
+        while (Vector3.Distance(new Vector3(0, 0, character.transform.position.z), new Vector3(0, 0, doorPosition.position.z)) > 0.3f)
         {
-            // Flytta karaktären rakt framåt längs dess lokala z-axel
-            character.transform.Translate(Vector3.forward * speed * Time.deltaTime);
+            // Vi skapar en stabil framåtrörelse med lite press nedåt (gravity)
+            Vector3 direction = character.transform.forward * speed;
+            direction.y = -9.81f; // Pressa ner gubben mot golvet så han inte "lyfter"
 
+            if (!isRobot)
+            {
+                anime.SetBool("Run", true);
+            }
+           
+
+
+            CharacterController cc = character.GetComponentInChildren<CharacterController>();
+            if (cc != null)
+            {
+                cc.Move(direction * Time.deltaTime);
+               
+            }
+            else
+            {
+                character.transform.Translate(Vector3.forward * speed * Time.deltaTime);
+                
+            }
+           
             yield return null;
         }
 
-       
-
-        // När karaktären når dörren, kan du exempelvis starta hoppet eller någon annan handling
-        Jump();
-
-        StartCoroutine(PlayerJump(player));
-    }
-
-
-    IEnumerator PlayerJump(GameObject character)
-    {
-        yield return new WaitForSeconds(3);
-        character.GetComponent<CharacterController>().enabled = true;
-        character.GetComponent<freefall>().ItsFalling = true;
-       
-    }
-
-    void Jump()
-    {
-
-        player.GetComponent<freefall>().RunForward();
-
-
-            foreach (var robot in robots)
-            {
-                robot.GetComponent<Rigidbody>().useGravity = false;
-                GalacticRangers gl = robot.GetComponent<GalacticRangers>();
-                gl.enabled = false;
-                isSlowingDown = true;
-            }
-        
-
-
-
-
-    }
-
-    private void Update()
-    {
-        foreach (var robot in robots)
+        if (!isRobot)
         {
-            if (isSlowingDown)
-            {
-                // Flytta roboten neråt
-                robot.transform.Translate(Vector3.down * fallSpeed * Time.deltaTime);
-
-                // Använd Raycast för att kontrollera avståndet till marken
-                RaycastHit hit;
-                if (Physics.Raycast(robot.transform.position, Vector3.down, out hit, Mathf.Infinity, groundLayer))
-                {
-                    float distanceToGround = hit.distance;
-
-                    // Kontrollera om roboten är inom nedtrappningsavståndet
-                    if (distanceToGround <= slowDownDistance)
-                    {
-                        StartCoroutine(SlowDownAndStop(robot, hit.point.y));
-                    }
-                }
-            }
+            anime.SetBool("Run", false);
         }
 
-        for (int i = 0; i < robots.Length; i++)
-        {
-            for (int j = i + 1; j < robots.Length; j++)
-            {
-                Collider collider1 = robots[i].GetComponent<Collider>();
-                Collider collider2 = robots[j].GetComponent<Collider>();
+        // 2. Själva hoppet ut från kanten
+        float jumpForce = 5f; // Hur långt fram de hoppar
+        float jumpUp = 2f;    // En liten båge uppåt
 
-                if (collider1 != null && collider2 != null)
-                {
-                    Physics.IgnoreCollision(collider1, collider2);
-                }
+        // Vi skapar en hopp-rörelse
+        Vector3 jumpVelocity = (character.transform.forward * jumpForce) + (Vector3.up * jumpUp);
+
+        if (isRobot)
+        {
+            // För robotar: Starta fallet men skicka med hopp-kraften
+            StartCoroutine(IndividualRobotFall(character, jumpVelocity));
+        }
+        else
+        {
+            freefall ff = character.GetComponent<freefall>();
+            CharacterController cc = character.GetComponentInChildren<CharacterController>();
+            anime.SetBool("Run", false);
+            
+            anime.SetTrigger("Jump");
+
+            // Ge hoppet en chans att synas innan freefall tar över helt
+            StartCoroutine(PlayerJumpMomentum(cc, jumpVelocity));
+
+            if (ff != null)
+            {
+                // Om ditt freefall-skript har en funktion som nollställer fart, 
+                // kalla på den EFTER hoppet eller modifiera den.
+                ff.RunForward();
+
+                // Vi väntar ett litet ögonblick med att säga "nu faller vi fritt" 
+                // så att momentum-skriptet hinner knuffa ut oss från skeppet
+                StartCoroutine(DelayedFreefall(ff, 0.2f));
             }
+
+            //playercontroller.CanMove = true;
+        }
+    }
+    IEnumerator DelayedFreefall(freefall ff, float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        ff.ItsFalling = true;
+    }
+
+    IEnumerator PlayerJumpMomentum(CharacterController cc, Vector3 velocity)
+    {
+        float timer = 0;
+        float duration = 0.8f; // Hur länge "hoppet" framåt ska påverka spelaren
+
+        while (timer < duration)
+        {
+            // Lägg till gravitation på hopp-hastigheten
+            velocity.y += -8 * Time.deltaTime;
+
+            // Flytta spelaren med CharacterController
+            if (cc != null && cc.enabled)
+            {
+                cc.Move(velocity * Time.deltaTime);
+            }
+
+            timer += Time.deltaTime;
+            yield return null;
         }
     }
 
-
-    private IEnumerator SlowDownAndStop(GameObject robot, float groundHeight)
+    IEnumerator IndividualRobotFall(GameObject robot, Vector3 currentVelocity)
     {
-        isSlowingDown = false;
+        // Stäng av AI så den inte försöker gå mitt i luften
+        //robot.GetComponent<GalacticRangers>().enabled = false;
 
-        // Sakta ner robotens fall under en viss tid
+        float gravity = -9.81f;
+        bool falling = true;
+        // 1. Lägg till gravitation på Y-axeln över tid
+        currentVelocity.y -= gravity * Time.deltaTime;
+
+        // 2. Flytta roboten baserat på hastigheten (framåt + neråt)
+        robot.transform.position += currentVelocity * Time.deltaTime;
+
+
+        while (falling)
+        {
+           
+            // 3. Håll roboten innanför den gröna boxen (Vägg-känsla)
+            Vector3 pos = robot.transform.position;
+            
+            robot.transform.position = pos;
+
+            // 4. Mark-check (Raycast)
+            RaycastHit hit;
+            // Vi kollar lite framåt i rörelseriktningen
+            Vector3 rayOrigin = robot.transform.position + (new Vector3(currentVelocity.x, 0, currentVelocity.z).normalized * 0.5f);
+
+            if (Physics.Raycast(rayOrigin, Vector3.down, out hit, slowDownDistance, groundLayer))
+            {
+                falling = false;
+                StartCoroutine(SlowDownAndStop(robot, hit.point.y));
+            }
+
+            yield return null;
+        }
+    }
+
+    IEnumerator SlowDownAndStop(GameObject robot, float groundHeight)
+    {
         float elapsedTime = 0f;
+        Vector3 startPos = robot.transform.position;
+        Vector3 endPos = new Vector3(startPos.x, groundHeight, startPos.z);
+
         while (elapsedTime < slowDownDuration)
         {
-            robot.transform.Translate(Vector3.down * slowSpeed * Time.deltaTime);
+            robot.transform.position = Vector3.Lerp(startPos, endPos, elapsedTime / slowDownDuration);
             elapsedTime += Time.deltaTime;
             yield return null;
         }
 
-        GalacticRangers gl = robot.GetComponent<GalacticRangers>();
-        gl.enabled = true;
-        // Stoppa roboten och placera den exakt på marken
-        
-        robot.GetComponent<Rigidbody>().useGravity = true; // Detta stoppar all rörelse
-        robot.transform.position = new Vector3(robot.transform.position.x, groundHeight, robot.transform.position.z);
-        enabled = false;
-        
+      
+      
+
+        robot.transform.position = endPos;
+
+        // Tvinga ner dem och lås dem till marken
+        Rigidbody rb = robot.GetComponent<Rigidbody>();
+        if (rb != null)
+        {
+            rb.isKinematic = false;
+            rb.useGravity = true;
+        }
+
+        robot.GetComponent<GalacticRangers>().enabled = true;
     }
 }

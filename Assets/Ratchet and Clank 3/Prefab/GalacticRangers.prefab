@@ -162,6 +162,7 @@ GameObject:
   - component: {fileID: 5329340119167329795}
   - component: {fileID: 2583134202594703947}
   - component: {fileID: 32089201307787789}
+  - component: {fileID: 6443301131787814089}
   m_Layer: 7
   m_Name: GalacticRangers
   m_TagString: Ranger
@@ -408,6 +409,24 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 1, y: 2.379837, z: 1}
   m_Center: {x: 0, y: -0.29504395, z: 0}
+--- !u!143 &6443301131787814089
+CharacterController:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1486857019903000986}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Height: 2.67
+  m_Radius: 0.5
+  m_SlopeLimit: 45
+  m_StepOffset: 0.3
+  m_SkinWidth: 0.08
+  m_MinMoveDistance: 0.001
+  m_Center: {x: 0, y: -0.26, z: 0}
 --- !u!1 &2332284434117442820
 GameObject:
   m_ObjectHideFlags: 0
@@ -1058,6 +1077,7 @@ MonoBehaviour:
   head: {fileID: 8082594728401315589}
   headrot: {fileID: 2985540595453114385}
   IsPatrol: 1
+  RangerGame: {fileID: 0}
 --- !u!4 &2291697295089475664 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8399250583100694583, guid: bbbc2cb84b485474397ed9b9a2dbcaf9, type: 3}
