@@ -181,8 +181,8 @@ public class Thyrranoidship : MonoBehaviour
         GameObject prefab2 = Instantiate(BulletPrefab, Point2.transform.position, Point2.transform.rotation);
 
 
-        prefab.GetComponent<Rigidbody>().velocity = Point1.transform.forward * ShootForce;
-        prefab2.GetComponent<Rigidbody>().velocity = Point2.transform.forward * ShootForce;
+        prefab.GetComponent<Rigidbody>().linearVelocity = Point1.transform.forward * ShootForce;
+        prefab2.GetComponent<Rigidbody>().linearVelocity = Point2.transform.forward * ShootForce;
 
 
         Destroy(prefab, 8);

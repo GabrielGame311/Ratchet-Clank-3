@@ -74,7 +74,7 @@ public class Shooter : MonoBehaviour
             GameObject particle = Instantiate(Prefab_Particle, LeftPoint.transform.position, LeftPoint.transform.rotation);
 
             anime.SetTrigger("ShootLeft");
-            particle.GetComponent<Rigidbody>().velocity = LeftPoint.transform.forward * ParticleSpeed;
+            particle.GetComponent<Rigidbody>().linearVelocity = LeftPoint.transform.forward * ParticleSpeed;
             Destroy(particle, 10);
             ShootInt++;
 
@@ -86,7 +86,7 @@ public class Shooter : MonoBehaviour
         {
             GameObject particle2 = Instantiate(Prefab_Particle, RightPoint.transform.position, RightPoint.transform.rotation);
 
-            particle2.GetComponent<Rigidbody>().velocity = RightPoint.transform.forward * ParticleSpeed;
+            particle2.GetComponent<Rigidbody>().linearVelocity = RightPoint.transform.forward * ParticleSpeed;
             anime.SetTrigger("ShootRight");
             Destroy(particle2, 10);
             ShootInt--;

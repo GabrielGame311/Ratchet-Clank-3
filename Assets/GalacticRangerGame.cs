@@ -115,9 +115,9 @@ public class GalacticRangerGame : MonoBehaviour
 
         GameObject prefab = Instantiate(Granade, Point.transform.position, Point.transform.rotation);
         Vector3 launchVelocity = Point.transform.forward * ForceBall + Vector3.up * (ForceBall / 2f);
-        prefab.GetComponent<Rigidbody>().velocity = launchVelocity;
+        prefab.GetComponent<Rigidbody>().linearVelocity = launchVelocity;
 
-        // Aktivera gravitation så att den faller naturligt
+        // Aktivera gravitation sï¿½ att den faller naturligt
         prefab.GetComponent<Rigidbody>().useGravity = true;
 
 

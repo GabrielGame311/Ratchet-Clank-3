@@ -93,7 +93,7 @@ public class RocketShooter2 : MonoBehaviour
     {
         GameObject prefab = Instantiate(Bullet, BulletPoint.transform.position, BulletPoint.transform.rotation);
 
-        prefab.GetComponent<Rigidbody>().velocity = BulletPoint.transform.forward * BulletSpeed;
+        prefab.GetComponent<Rigidbody>().linearVelocity = BulletPoint.transform.forward * BulletSpeed;
 
         //prefab.GetComponent<Rigidbody>().useGravity = true;
           prefablist = prefab;

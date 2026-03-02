@@ -193,7 +193,7 @@ public class BloodFly : MonoBehaviour
     void Die()
     {
        // transform.position += transform.forward * DieSpeed * Time.deltaTime;
-        GetComponent<Rigidbody>().velocity = -transform.forward * DieSpeed;
+        GetComponent<Rigidbody>().linearVelocity = -transform.forward * DieSpeed;
         anime.transform.Rotate(0, 0, +500 * Time.deltaTime);
 
     }

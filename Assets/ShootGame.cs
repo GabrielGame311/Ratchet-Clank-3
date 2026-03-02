@@ -230,7 +230,7 @@ public class ShootGame : MonoBehaviour
     {
         // Spawn the bullet at ShootPoint
        GameObject obj = Instantiate(bullet, ShootPoint.position, ShootPoint.rotation);
-        obj.GetComponent<Rigidbody>().velocity = ShootPoint.transform.forward * ShootSpeed;
+        obj.GetComponent<Rigidbody>().linearVelocity = ShootPoint.transform.forward * ShootSpeed;
         obj.transform.parent = Circle.transform;
         Destroy(obj, 2);
     }

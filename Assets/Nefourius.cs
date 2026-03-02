@@ -303,7 +303,7 @@ public class Nefourius : MonoBehaviour
         {
             GameObject prefabInstance = Instantiate(Prefab, transform.position, transform.rotation);
 
-            prefabInstance.GetComponent<Rigidbody>().velocity = prefabInstance.transform.forward * ShootSpeed;
+            prefabInstance.GetComponent<Rigidbody>().linearVelocity = prefabInstance.transform.forward * ShootSpeed;
             transform.LookAt(player.transform);
             Destroy(prefabInstance, 3);
         }
@@ -352,7 +352,7 @@ public class Nefourius : MonoBehaviour
         // Assuming you want to move at a constant speed, adjust as needed
         float moveSpeed = 3f;
         Vector3 moveDirection = new Vector3(-2f, 0f, 0f);
-        RB.velocity = moveDirection * moveSpeed;
+        RB.linearVelocity = moveDirection * moveSpeed;
 
         // You may want to reset the velocity or apply additional logic based on your game's requirements
         // For example, you might want to stop moving after a certain distance or time
@@ -367,7 +367,7 @@ public class Nefourius : MonoBehaviour
         // Assuming you want to move at a constant speed, adjust as needed
         float moveSpeed = 3f;
         Vector3 moveDirection = new Vector3(2f, 0f, 0f);
-        RB.velocity = moveDirection * moveSpeed;
+        RB.linearVelocity = moveDirection * moveSpeed;
 
         // You may want to reset the velocity or apply additional logic based on your game's requirements
         // For example, you might want to stop moving after a certain distance or time

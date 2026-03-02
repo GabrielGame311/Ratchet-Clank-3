@@ -114,7 +114,7 @@ public class Torret : MonoBehaviour
     public void Shooting()
     {
         ParticleSystem prefab = Instantiate(particle, spawn.transform.position, spawn.transform.rotation);
-        prefab.gameObject.GetComponent<Rigidbody>().velocity = -spawn.transform.forward * speed;
+        prefab.gameObject.GetComponent<Rigidbody>().linearVelocity = -spawn.transform.forward * speed;
         Destroy(prefab.gameObject, 20);
         
 

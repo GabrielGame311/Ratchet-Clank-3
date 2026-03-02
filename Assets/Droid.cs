@@ -80,7 +80,7 @@ public class Droid : MonoBehaviour
     {
         GameObject prefab = Instantiate(Particle, point.transform.position, point.transform.rotation);
 
-        prefab.GetComponent<Rigidbody>().velocity = prefab.transform.forward * ShootForce;
+        prefab.GetComponent<Rigidbody>().linearVelocity = prefab.transform.forward * ShootForce;
 
         Destroy(prefab, 10);
     }

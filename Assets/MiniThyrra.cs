@@ -138,7 +138,7 @@ public class MiniThyrra : MonoBehaviour
     {
         isPatrolWaiting = true;
         anim.SetBool("Walk", false);
-        rb.velocity = Vector3.zero;
+        rb.linearVelocity = Vector3.zero;
 
         // Vänta stilla först
         yield return new WaitForSeconds(3.5f);
@@ -183,7 +183,7 @@ public class MiniThyrra : MonoBehaviour
 
         yield return new WaitForSeconds(1.0f); // vänta under hopp
 
-        rb.velocity = Vector3.zero;
+        rb.linearVelocity = Vector3.zero;
         rb.isKinematic = true;
 
         yield return new WaitForSeconds(0.5f); // kort vila efter hopp

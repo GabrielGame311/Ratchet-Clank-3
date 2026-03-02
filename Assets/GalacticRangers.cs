@@ -155,10 +155,10 @@ public class GalacticRangers : MonoBehaviour
            // HeadControll.transform.LookAt(enemie.transform);
             Vector3 direction = (enemie.transform.position - HeadControll.transform.position).normalized;
 
-            // Beräkna målrotationen med riktningen mot spelaren
+            // Berï¿½kna mï¿½lrotationen med riktningen mot spelaren
             Quaternion lookRotation = Quaternion.LookRotation(direction);
 
-            // Roterar objektet långsamt mot spelaren med RotateTowards
+            // Roterar objektet lï¿½ngsamt mot spelaren med RotateTowards
             HeadControll.transform.rotation = Quaternion.RotateTowards(HeadControll.transform.rotation, lookRotation, RotateSpeed * Time.deltaTime);
             //
 
@@ -208,19 +208,19 @@ public class GalacticRangers : MonoBehaviour
 
                     if (distanceToTarget <= stoppingDistance)
                     {
-                        isMoving = false; // Stanna när vi når målet
+                        isMoving = false; // Stanna nï¿½r vi nï¿½r mï¿½let
 
                         if (!returning)
                         {
-                            // Om vi inte är på väg tillbaka, gå till nästa punkt (punkt 0)
+                            // Om vi inte ï¿½r pï¿½ vï¿½g tillbaka, gï¿½ till nï¿½sta punkt (punkt 0)
                             currentPoint = 0;
-                            returning = true; // Vi har nu gått till punkt 0 och är redo att gå tillbaka
+                            returning = true; // Vi har nu gï¿½tt till punkt 0 och ï¿½r redo att gï¿½ tillbaka
                         }
                         else
                         {
-                            // Om vi redan är på punkt 0, gå tillbaka till startpunkten (punkt 1)
+                            // Om vi redan ï¿½r pï¿½ punkt 0, gï¿½ tillbaka till startpunkten (punkt 1)
                             currentPoint = 1;
-                            returning = false; // Nu är vi tillbaka till startpunkten
+                            returning = false; // Nu ï¿½r vi tillbaka till startpunkten
                         }
 
 
@@ -236,18 +236,18 @@ public class GalacticRangers : MonoBehaviour
                         // transform.LookAt(targetPoint[currentPoint]);
                         Vector3 direction2 = (targetPoint[currentPoint].transform.position - transform.position).normalized;
 
-                        // Beräkna målrotationen med riktningen mot spelaren
+                        // Berï¿½kna mï¿½lrotationen med riktningen mot spelaren
                         Quaternion lookRotation2 = Quaternion.LookRotation(direction2);
 
-                        // Roterar objektet långsamt mot spelaren med RotateTowards
+                        // Roterar objektet lï¿½ngsamt mot spelaren med RotateTowards
                         transform.rotation = Quaternion.RotateTowards(transform.rotation, lookRotation2, RotateSpeed * Time.deltaTime);
                         //HeadControll.transform.LookAt(targetPoint[currentPoint]);
                         Vector3 direction = (targetPoint[currentPoint].transform.position - HeadControll.transform.position).normalized;
 
-                        // Beräkna målrotationen med riktningen mot spelaren
+                        // Berï¿½kna mï¿½lrotationen med riktningen mot spelaren
                         Quaternion lookRotation = Quaternion.LookRotation(direction);
 
-                        // Roterar objektet långsamt mot spelaren med RotateTowards
+                        // Roterar objektet lï¿½ngsamt mot spelaren med RotateTowards
                         HeadControll.transform.rotation = Quaternion.RotateTowards(HeadControll.transform.rotation, lookRotation, RotateSpeed * Time.deltaTime);
                         // Check if we reached the target point
 
@@ -355,7 +355,7 @@ public class GalacticRangers : MonoBehaviour
                     if (PatrolIdleTime <= 0)
                     {
                         PatrolIdleTime = StartPatrolTime;
-                        isMoving = true; // Starta rörelse igen
+                        isMoving = true; // Starta rï¿½relse igen
                        
                     }
                 }
@@ -566,7 +566,7 @@ public class GalacticRangers : MonoBehaviour
     {
         sound.PlayOneShot(SoundShootFX);
         GameObject particle = Instantiate(ParticlePrefab, shootPoint.transform.position, shootPoint.transform.rotation);
-        particle.GetComponent<Rigidbody>().velocity = shootPoint.transform.forward * ShootSpeed;
+        particle.GetComponent<Rigidbody>().linearVelocity = shootPoint.transform.forward * ShootSpeed;
         particle.GetComponent<ParticleDamage>().Damage = TakeDamage;
         Destroy(particle, 10);
     }

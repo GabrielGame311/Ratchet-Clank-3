@@ -147,7 +147,7 @@ public class ThyrraNoid2 : MonoBehaviour
     {
         GameObject prefab = Instantiate(ParticlePrefab, pointGun.transform.position, pointGun.transform.rotation);
 
-        prefab.GetComponent<Rigidbody>().velocity = pointGun.transform.forward * ShootForce;
+        prefab.GetComponent<Rigidbody>().linearVelocity = pointGun.transform.forward * ShootForce;
 
         ParticlePrefab.GetComponent<ParticleSystem>().Play();
 

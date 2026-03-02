@@ -88,11 +88,11 @@ public class GranadeShooter : MonoBehaviour
             //ball.GetComponent<Rigidbody>().AddForce(Spawn.transform.forward * ForceBall);
             Vector3 direction = (Sight_.position - Spawn.position).normalized;
 
-            // Skjut granaten i en båge genom att lägga till en uppåtkomponent
+            // Skjut granaten i en bï¿½ge genom att lï¿½gga till en uppï¿½tkomponent
             Vector3 launchVelocity = direction * ForceBall + Vector3.up * (ForceBall / 2f);
-            ball.GetComponent<Rigidbody>().velocity = launchVelocity;
+            ball.GetComponent<Rigidbody>().linearVelocity = launchVelocity;
 
-            // Aktivera gravitation så att den faller naturligt
+            // Aktivera gravitation sï¿½ att den faller naturligt
             ball.GetComponent<Rigidbody>().useGravity = true;
 
 

@@ -47,7 +47,7 @@ public class Gun : MonoBehaviour
 
 
                 var bullet = Instantiate(bulletparticle, bulletSpawnPoint.transform.position, bulletSpawnPoint.transform.rotation);
-                bullet.GetComponent<Rigidbody>().velocity = bulletSpawnPoint.transform.forward * bulletspeed;
+                bullet.GetComponent<Rigidbody>().linearVelocity = bulletSpawnPoint.transform.forward * bulletspeed;
 
                 
             

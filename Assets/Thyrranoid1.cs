@@ -153,7 +153,7 @@ public class Thyrranoid1 : MonoBehaviour
             if (Physics.Raycast(transform.position, Vector3.down, out hit, Mathf.Infinity))
             {
                 transform.position = hit.point + Vector3.up * groundOffset;
-                rb.velocity = Vector3.zero;
+                rb.linearVelocity = Vector3.zero;
                 rb.angularVelocity = Vector3.zero;
             }
         }
@@ -164,7 +164,7 @@ public class Thyrranoid1 : MonoBehaviour
 
        
             GameObject shoot = Instantiate(ParticlePrefab, ParticlePoint1.transform.position, ParticlePoint1.transform.rotation);
-            shoot.GetComponent<Rigidbody>().velocity = ParticlePoint1.transform.forward * shootSpeed;
+            shoot.GetComponent<Rigidbody>().linearVelocity = ParticlePoint1.transform.forward * shootSpeed;
 
             Destroy(shoot, 10);
             ParticlePoint1.transform.LookAt(sightplayer.transform);
@@ -173,7 +173,7 @@ public class Thyrranoid1 : MonoBehaviour
       
 
             GameObject shoot2 = Instantiate(ParticlePrefab, particlePoint2.transform.position, particlePoint2.transform.rotation);
-            shoot2.GetComponent<Rigidbody>().velocity = particlePoint2.transform.forward * shootSpeed;
+            shoot2.GetComponent<Rigidbody>().linearVelocity = particlePoint2.transform.forward * shootSpeed;
 
             Destroy(shoot2, 10);
 

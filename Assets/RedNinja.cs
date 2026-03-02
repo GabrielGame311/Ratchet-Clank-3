@@ -180,7 +180,7 @@ public class RedNinja : MonoBehaviour
     {
 
         GameObject prefabs = Instantiate(prefabshoot, ShootPoint.transform.position, ShootPoint.transform.rotation);
-        prefabs.GetComponent<Rigidbody>().velocity = ShootPoint.transform.forward * ShootSpeed;
+        prefabs.GetComponent<Rigidbody>().linearVelocity = ShootPoint.transform.forward * ShootSpeed;
 
         Destroy(prefabs, 5);
     }

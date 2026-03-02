@@ -65,7 +65,7 @@ public class NeforiusBoss : MonoBehaviour
     void InstantiateBullet(Transform spawnPoint)
     {
         GameObject bullet = Instantiate(BulletPrefab, spawnPoint.position, spawnPoint.rotation);
-        bullet.GetComponent<Rigidbody>().velocity = bullet.transform.forward * ShootSpeed;
+        bullet.GetComponent<Rigidbody>().linearVelocity = bullet.transform.forward * ShootSpeed;
     }
 
     IEnumerator ShootBullets()

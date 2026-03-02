@@ -48,7 +48,7 @@ public class RocketBullet : MonoBehaviour
                     if(IsDistance == false)
                     {
                         transform.LookAt(player);
-                        GetComponent<Rigidbody>().velocity = directionToPlayer * Speed;
+                        GetComponent<Rigidbody>().linearVelocity = directionToPlayer * Speed;
                     }
                    
                 }
@@ -58,7 +58,7 @@ public class RocketBullet : MonoBehaviour
 
 
                     IsDistance = true;
-                    GetComponent<Rigidbody>().velocity = transform.forward * Speed;
+                    GetComponent<Rigidbody>().linearVelocity = transform.forward * Speed;
                 }
             }
         }

@@ -385,7 +385,7 @@ public class PlayerShip : MonoBehaviour
          
 
         GameObject prefab = Instantiate(ParticlePrefab, point.transform.position, point.transform.rotation);
-        prefab.GetComponent<Rigidbody>().velocity = point.transform.forward * ShootForce;
+        prefab.GetComponent<Rigidbody>().linearVelocity = point.transform.forward * ShootForce;
 
         Destroy(prefab, 10);
 

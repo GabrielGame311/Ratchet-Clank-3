@@ -115,7 +115,7 @@ public class GunShooter : MonoBehaviour
 
                     GameObject bullet = Instantiate(particle, ProjectileSpawn.position, ProjectileSpawn.transform.rotation);
                     Rigidbody bulletRigidbody = bullet.GetComponent<Rigidbody>();
-                    bulletRigidbody.velocity = direction * ShootSpeed;
+                    bulletRigidbody.linearVelocity = direction * ShootSpeed;
 
                     Quaternion rotation = Quaternion.LookRotation(direction);
                     bullet.transform.rotation = rotation;
@@ -130,7 +130,7 @@ public class GunShooter : MonoBehaviour
 
                     GameObject bullet2 = Instantiate(particle, Projectile2Spawn.position, Projectile2Spawn.transform.rotation);
                     Rigidbody bulletRigidbody2 = bullet2.GetComponent<Rigidbody>();
-                    bulletRigidbody2.velocity = direction2 * ShootSpeed;
+                    bulletRigidbody2.linearVelocity = direction2 * ShootSpeed;
 
                     Quaternion rotation2 = Quaternion.LookRotation(direction2);
                     bullet2.transform.rotation = rotation2;
@@ -152,7 +152,7 @@ public class GunShooter : MonoBehaviour
                 {
 
                     var projectile = Instantiate(particle, ProjectileSpawn.transform.position, ProjectileSpawn.transform.rotation);
-                    projectile.GetComponent<Rigidbody>().velocity = ProjectileSpawn.transform.forward * ShootSpeed;
+                    projectile.GetComponent<Rigidbody>().linearVelocity = ProjectileSpawn.transform.forward * ShootSpeed;
                     projectile.transform.localScale = ProjectileSpawn.transform.localScale;
                    
                     shootcount = 1;
@@ -161,7 +161,7 @@ public class GunShooter : MonoBehaviour
                 {
 
                     var projectile2 = Instantiate(particle, Projectile2Spawn.transform.position, Projectile2Spawn.transform.rotation);
-                    projectile2.GetComponent<Rigidbody>().velocity = Projectile2Spawn.transform.forward * ShootSpeed;
+                    projectile2.GetComponent<Rigidbody>().linearVelocity = Projectile2Spawn.transform.forward * ShootSpeed;
                     projectile2.transform.localScale = Projectile2Spawn.transform.localScale;
                     shootcount = 0;
                 }

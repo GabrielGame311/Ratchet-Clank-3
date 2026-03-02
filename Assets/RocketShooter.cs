@@ -82,7 +82,7 @@ public class RocketShooter : MonoBehaviour
         GameObject bulletPrefab = Instantiate(BulletPrefab, ShootPoint.transform.position, ShootPoint.transform.rotation);
       
         bullets.Add(bulletPrefab);
-        bulletPrefab.GetComponent<Rigidbody>().velocity = ShootPoint.transform.forward * ShootSpeed;
+        bulletPrefab.GetComponent<Rigidbody>().linearVelocity = ShootPoint.transform.forward * ShootSpeed;
 
 
 

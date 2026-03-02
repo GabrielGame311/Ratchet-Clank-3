@@ -48,7 +48,7 @@ public class GunQuark : MonoBehaviour
 
 
         GameObject pr = Instantiate(Particle, Point.transform.position, Point.transform.rotation);
-        pr.GetComponent<Rigidbody>().velocity = Point.transform.forward * ShootSpeed;
+        pr.GetComponent<Rigidbody>().linearVelocity = Point.transform.forward * ShootSpeed;
         GameObject.FindObjectOfType<QuarkController>().anime.SetTrigger("Shoot");
         IsSHoots = true;
 

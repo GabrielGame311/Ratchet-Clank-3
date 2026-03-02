@@ -84,14 +84,14 @@ public class TorretRanger : MonoBehaviour
             if (IntShoot == 0)
             {
                 GameObject prefab1 = Instantiate(Bullet, Point1.transform.position, Point1.transform.rotation);
-                prefab1.GetComponent<Rigidbody>().velocity = Point1.transform.forward * BulletSpeed;
+                prefab1.GetComponent<Rigidbody>().linearVelocity = Point1.transform.forward * BulletSpeed;
                 IntShoot = 1;
             }
             else if (IntShoot == 1)
             {
 
                 GameObject prefab1 = Instantiate(Bullet, Point2.transform.position, Point2.transform.rotation);
-                prefab1.GetComponent<Rigidbody>().velocity = Point2.transform.forward * BulletSpeed;
+                prefab1.GetComponent<Rigidbody>().linearVelocity = Point2.transform.forward * BulletSpeed;
                 IntShoot = 0;
             }
         }

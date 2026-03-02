@@ -40,7 +40,7 @@ public class ShooterClank : MonoBehaviour
         {
             Vector3 currentPosition = transform.position;
 
-            // Hämta spelarens X-position men behåll objektets nuvarande Y- och Z-position
+            // Hï¿½mta spelarens X-position men behï¿½ll objektets nuvarande Y- och Z-position
             Vector3 targetPosition = new Vector3(currentPosition.x, currentPosition.y, StartPos.z);
 
             // Flytta objektet mot spelarens X-position
@@ -69,7 +69,7 @@ public class ShooterClank : MonoBehaviour
         
         Vector3 currentPosition = transform.position;
 
-        // Hämta spelarens X-position men behåll objektets nuvarande Y- och Z-position
+        // Hï¿½mta spelarens X-position men behï¿½ll objektets nuvarande Y- och Z-position
         Vector3 targetPosition = new Vector3(currentPosition.x, currentPosition.y, Player.transform.position.z);
 
         // Flytta objektet mot spelarens X-position
@@ -89,7 +89,7 @@ public class ShooterClank : MonoBehaviour
     {
         GameObject obj = Instantiate(Particle, ShootPoint.transform.position, ShootPoint.transform.rotation);
 
-        obj.GetComponent<Rigidbody>().velocity = ShootPoint.transform.forward * shootSpeed;
+        obj.GetComponent<Rigidbody>().linearVelocity = ShootPoint.transform.forward * shootSpeed;
 
         Destroy(obj, 4);
     }

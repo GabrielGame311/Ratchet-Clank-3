@@ -85,10 +85,10 @@ public class NableNative : MonoBehaviour
 
                 Vector3 direction = (Player_.transform.position - transform.position).normalized;
 
-                // Beräkna målrotationen med riktningen mot spelaren
+                // Berï¿½kna mï¿½lrotationen med riktningen mot spelaren
                 Quaternion lookRotation = Quaternion.LookRotation(direction);
 
-                // Roterar objektet långsamt mot spelaren med RotateTowards
+                // Roterar objektet lï¿½ngsamt mot spelaren med RotateTowards
                 transform.rotation = Quaternion.RotateTowards(transform.rotation, lookRotation, RotateSpeed * Time.deltaTime);
 
                 anime.SetBool("Run", true);
@@ -154,7 +154,7 @@ public class NableNative : MonoBehaviour
     void die()
     {
         GetComponent<Rigidbody>().useGravity = false;
-        GetComponent<Rigidbody>().velocity = -transform.forward * 15;
+        GetComponent<Rigidbody>().linearVelocity = -transform.forward * 15;
 
 
     }
