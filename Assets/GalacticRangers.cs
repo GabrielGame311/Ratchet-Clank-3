@@ -54,7 +54,7 @@ public class GalacticRangers : MonoBehaviour
     Rigidbody rb;
     private bool isGrounded;
     float distanceToTarget;
-
+    public float _directionY;
     Vector3 alternativeDirection;
     public bool IsMovingShooting;
     public bool ShootingPatrolPoint;
@@ -65,12 +65,13 @@ public class GalacticRangers : MonoBehaviour
 
 
     public bool RangersModeActive = true;
-   
 
+    public CharacterController Controller;
     // Start is called before the first frame update
     void Start()
     {
         StartPatrolTime = PatrolIdleTime;
+        Controller = GetComponent<CharacterController>();
         rb = GetComponent<Rigidbody>();
         objectRadius = transform.localScale.x / 2f;
         findshoot = GetComponentInChildren<FindShoot>();
@@ -305,8 +306,16 @@ public class GalacticRangers : MonoBehaviour
 
                             if (!IsObstacleAhead(out alternativeDirection))
                             {
-                                // No obstacle detected, move towards the target point
-                                transform.position = Vector3.MoveTowards(transform.position, targetPoint[currentPoint].position, MoveSpeed * Time.deltaTime);
+                                Vector3 target = targetPoint[currentPoint].position;
+
+                                // direction mot waypoint
+                                Vector3 direction = (target - transform.position).normalized;
+                                // kombinera rörelse
+                                Vector3 move = new Vector3(direction.x * MoveSpeed, _directionY, direction.z * MoveSpeed);
+
+                                // flytta med CharacterController
+                                Controller.Move(move * Time.deltaTime);
+
                                 transform.LookAt(targetPoint[currentPoint]);
                                 HeadControll.transform.LookAt(targetPoint[currentPoint]);
 
@@ -327,7 +336,7 @@ public class GalacticRangers : MonoBehaviour
 
                                     if (currentPoint < targetPoint.Length)
                                     {
-                                        isMoving = true; // Move to the next point
+                                        isMoving = false; // Move to the next point
                                     }
                                 }
                             }
@@ -372,9 +381,20 @@ public class GalacticRangers : MonoBehaviour
 
 
 
+        if(Controller.isGrounded)
+        {
+            
+        }
+        else
+        {
+            _directionY -= Gravity * Time.deltaTime;
+           
+
+        }
+      
 
 
-        
+
 
 
 

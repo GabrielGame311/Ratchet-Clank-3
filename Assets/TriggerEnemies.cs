@@ -33,7 +33,7 @@ public class TriggerEnemies : MonoBehaviour
 
 
       
-        if(other.tag == "RangerFall")
+        if(other.tag == "Ranger")
         {
             foreach (GameObject trigger in triggers)
             {
@@ -74,7 +74,10 @@ public class TriggerEnemies : MonoBehaviour
                     }
                 }
 
-
+                foreach (GameObject trigger in triggers)
+                {
+                    trigger.SetActive(true);
+                }
                 trigger = true;
                 Destroy(gameObject);
 
