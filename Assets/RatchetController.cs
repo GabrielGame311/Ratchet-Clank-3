@@ -304,6 +304,99 @@ public class RatchetController : MonoBehaviour
                 jump.y = _directionY;
                 MyController.Move(jump * Speed * Time.deltaTime);
             }
+
+
+            if (MyController.isGrounded)
+            {
+                isGrounded = true;
+                doublejump = false;
+                Ground = true;
+                IsJump = false;
+                IsJumpForward = false;
+                HelikopterController.Instance.CancelHelikopter();
+                ISHelikopter = false;
+                if (gravity == true && ISHelikopter == false)
+                {
+                    if (IsJumpForward == false)
+                    {
+                        if (Input.GetKeyDown(KeyCode.Space) && !isClimbing)
+                        {
+                            anime.SetTrigger("Jump");
+                            if (cameraTarget != null)
+                            {
+                                cameraTarget.SetJumping(true);
+                            }
+                            _directionY = JumpSpeed;
+                            doublejump = true;
+                            IsJump = true;
+                            isGrounded = false;
+                        }
+                    }
+
+                    if (controls.PlaystationControlls.Jump.IsPressed())
+                    {
+                        isGrounded = false;
+                        _directionY = JumpSpeed;
+                        if (cameraTarget != null)
+                        {
+                            cameraTarget.SetJumping(true);
+                        }
+                        anime.SetTrigger("Jump");
+                    }
+                }
+
+                if (crouch == true)
+                {
+                    jump.y = _directionY;
+                    MyController.Move(jump * Speed * Time.deltaTime);
+                    if (Input.GetKeyDown(KeyCode.Space) && Input.GetKey(KeyCode.D))
+                    {
+                        _directionY = JumpSpeed;
+                        if (cameraTarget != null)
+                        {
+                            cameraTarget.SetJumping(true);
+                        }
+                        anime.SetTrigger("JumpRight");
+                    }
+                }
+            }
+            else
+            {
+                isGrounded = false;
+                if (MyController.enabled)
+                {
+                    Ground = false;
+                }
+
+                if (Input.GetKeyDown(KeyCode.Space) && doublejump && !isClimbing)
+                {
+                    doublejump = false;
+                    IsJump = true;
+                    _directionY = JumpSpeed * doublejumpMultiple;
+                    anime.SetTrigger("DoubleJump");
+                    if (cameraTarget != null)
+                    {
+                        cameraTarget.SetJumping(true);
+                    }
+                }
+
+                if (Input.GetKey(KeyCode.Space) && StartJump)
+                {
+                    HelikopterController.Instance.StartHelikopter();
+                    _directionY -= FlySpeed * Time.deltaTime;
+                    ISHelikopter = true;
+                    if (cameraTarget != null)
+                    {
+                        cameraTarget.SetJumping(false);
+                    }
+                }
+                else
+                {
+                    HelikopterController.Instance.CancelHelikopter();
+                    ISHelikopter = false;
+                }
+            }
+
         }
 
         float minAirHeight = 2.0f;
@@ -321,96 +414,7 @@ public class RatchetController : MonoBehaviour
             }
         }
 
-        if (MyController.isGrounded)
-        {
-            isGrounded = true;
-            doublejump = false;
-            Ground = true;
-            IsJump = false;
-            IsJumpForward = false;
-            HelikopterController.Instance.CancelHelikopter();
-            ISHelikopter = false;
-            if (gravity == true && ISHelikopter == false)
-            {
-                if (IsJumpForward == false)
-                {
-                    if (Input.GetKeyDown(KeyCode.Space) && !isClimbing)
-                    {
-                        anime.SetTrigger("Jump");
-                        if (cameraTarget != null)
-                        {
-                            cameraTarget.SetJumping(true);
-                        }
-                        _directionY = JumpSpeed;
-                        doublejump = true;
-                        IsJump = true;
-                        isGrounded = false;
-                    }
-                }
-
-                if (controls.PlaystationControlls.Jump.IsPressed())
-                {
-                    isGrounded = false;
-                    _directionY = JumpSpeed;
-                    if (cameraTarget != null)
-                    {
-                        cameraTarget.SetJumping(true);
-                    }
-                    anime.SetTrigger("Jump");
-                }
-            }
-
-            if (crouch == true)
-            {
-                jump.y = _directionY;
-                MyController.Move(jump * Speed * Time.deltaTime);
-                if (Input.GetKeyDown(KeyCode.Space) && Input.GetKey(KeyCode.D))
-                {
-                    _directionY = JumpSpeed;
-                    if (cameraTarget != null)
-                    {
-                        cameraTarget.SetJumping(true);
-                    }
-                    anime.SetTrigger("JumpRight");
-                }
-            }
-        }
-        else
-        {
-            isGrounded = false;
-            if (MyController.enabled)
-            {
-                Ground = false;
-            }
-
-            if (Input.GetKeyDown(KeyCode.Space) && doublejump && !isClimbing)
-            {
-                doublejump = false;
-                IsJump = true;
-                _directionY = JumpSpeed * doublejumpMultiple;
-                anime.SetTrigger("DoubleJump");
-                if (cameraTarget != null)
-                {
-                    cameraTarget.SetJumping(true);
-                }
-            }
-
-            if (Input.GetKey(KeyCode.Space) && StartJump)
-            {
-                HelikopterController.Instance.StartHelikopter();
-                _directionY -= FlySpeed * Time.deltaTime;
-                ISHelikopter = true;
-                if (cameraTarget != null)
-                {
-                    cameraTarget.SetJumping(false);
-                }
-            }
-            else
-            {
-                HelikopterController.Instance.CancelHelikopter();
-                ISHelikopter = false;
-            }
-        }
+        
 
         if (isSwimming == true)
         {

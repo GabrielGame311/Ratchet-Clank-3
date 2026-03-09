@@ -63,6 +63,10 @@ public class GalacticRangers : MonoBehaviour
 
     private bool returning = false;
 
+
+    public bool RangersModeActive = true;
+   
+
     // Start is called before the first frame update
     void Start()
     {
@@ -127,239 +131,242 @@ public class GalacticRangers : MonoBehaviour
     void Update()
     {
 
-        RaycastHit hit;
-
-        // Cast a ray downwards to check if AI is near the ground
-        isGrounded = Physics.Raycast(transform.position, Vector3.down, out hit, groundDistance, groundLayer);
-
-        if (isGrounded)
+        if(RangersModeActive)
         {
-            rb.isKinematic = true;
-        }
-        else
-        {
-            rb.isKinematic = false;
-        }
+            RaycastHit hit;
 
+            // Cast a ray downwards to check if AI is near the ground
+            isGrounded = Physics.Raycast(transform.position, Vector3.down, out hit, groundDistance, groundLayer);
 
-        HeadControll.transform.eulerAngles = new Vector3(0, HeadControll.transform.eulerAngles.y, 0);
-
-        transform.eulerAngles = new Vector3(0, transform.eulerAngles.y, 0);
-
-
-        if (enemie != null)
-        {
-
-            ShootTime -= Time.deltaTime;
-            shootPoint.transform.LookAt(enemie.transform);
-           // HeadControll.transform.LookAt(enemie.transform);
-            Vector3 direction = (enemie.transform.position - HeadControll.transform.position).normalized;
-
-            // Ber�kna m�lrotationen med riktningen mot spelaren
-            Quaternion lookRotation = Quaternion.LookRotation(direction);
-
-            // Roterar objektet l�ngsamt mot spelaren med RotateTowards
-            HeadControll.transform.rotation = Quaternion.RotateTowards(HeadControll.transform.rotation, lookRotation, RotateSpeed * Time.deltaTime);
-            //
-
-            
-
-            findshoot.IsPatrol = false;
-            HeadAnime.SetBool("ShootPos", true);
-            FootAnime.SetBool("ShootPos", true);
-            HeadAnime.SetBool("Run", false);
-            FootAnime.SetBool("Run", false);
-            rb.isKinematic = true;
-
-        }
-        else
-        {
-            HeadControll.transform.rotation = HeadRot;
-            findshoot.IsPatrol = false;
-            HeadAnime.SetBool("ShootPos", false);
-            FootAnime.SetBool("ShootPos", false);
-
-            if (isMoving == false)
+            if (isGrounded)
             {
-                if(IsMovingShooting)
-                {
-                    if (distanceToTarget <= stoppingDistance)
-                    {
-
-                        if (!IsObstacleAhead(out alternativeDirection))
-                        {
-                            HeadAnime.SetTrigger("Sir");
-                            FootAnime.SetTrigger("Sir");
-                            StartCoroutine(waitHide());
-                        }
-                    }
-                }
-                
-               
-
-            }
-
-            if (ShootingPatrolPoint)
-            {
-
-                if(isMoving)
-                {
-                    distanceToTarget = Vector3.Distance(transform.position, targetPoint[currentPoint].position);
-
-                    if (distanceToTarget <= stoppingDistance)
-                    {
-                        isMoving = false; // Stanna n�r vi n�r m�let
-
-                        if (!returning)
-                        {
-                            // Om vi inte �r p� v�g tillbaka, g� till n�sta punkt (punkt 0)
-                            currentPoint = 0;
-                            returning = true; // Vi har nu g�tt till punkt 0 och �r redo att g� tillbaka
-                        }
-                        else
-                        {
-                            // Om vi redan �r p� punkt 0, g� tillbaka till startpunkten (punkt 1)
-                            currentPoint = 1;
-                            returning = false; // Nu �r vi tillbaka till startpunkten
-                        }
-
-
-
-
-
-
-                    }
-                    else
-                    {
-
-                        transform.position = Vector3.MoveTowards(transform.position, targetPoint[currentPoint].position, MoveSpeed * Time.deltaTime);
-                        // transform.LookAt(targetPoint[currentPoint]);
-                        Vector3 direction2 = (targetPoint[currentPoint].transform.position - transform.position).normalized;
-
-                        // Ber�kna m�lrotationen med riktningen mot spelaren
-                        Quaternion lookRotation2 = Quaternion.LookRotation(direction2);
-
-                        // Roterar objektet l�ngsamt mot spelaren med RotateTowards
-                        transform.rotation = Quaternion.RotateTowards(transform.rotation, lookRotation2, RotateSpeed * Time.deltaTime);
-                        //HeadControll.transform.LookAt(targetPoint[currentPoint]);
-                        Vector3 direction = (targetPoint[currentPoint].transform.position - HeadControll.transform.position).normalized;
-
-                        // Ber�kna m�lrotationen med riktningen mot spelaren
-                        Quaternion lookRotation = Quaternion.LookRotation(direction);
-
-                        // Roterar objektet l�ngsamt mot spelaren med RotateTowards
-                        HeadControll.transform.rotation = Quaternion.RotateTowards(HeadControll.transform.rotation, lookRotation, RotateSpeed * Time.deltaTime);
-                        // Check if we reached the target point
-
-
-
-                        // Set running animation
-                        HeadAnime.SetBool("Run", true);
-                        FootAnime.SetBool("Run", true);
-                        HeadAnime.SetBool("ShootPos", false);
-                        FootAnime.SetBool("ShootPos", false);
-                        rb.isKinematic = false;
-                        ContinueMove = false;
-                        IsShooting = false;
-                    }
-                  
-                }
-
-               
-
-            }
-        }
-
-
-        if (targetPoint != null)
-        {
-
-          
-
-            if (isMoving)
-            {
-                if (currentPoint < targetPoint.Length)
-                {
-                   
-                    // Check for obstacles ahead
-                  
-
-                    if(ShootingPatrolPoint == false)
-                    {
-
-                        // Set running animation
-                        HeadAnime.SetBool("Run", true);
-                        FootAnime.SetBool("Run", true);
-                        HeadAnime.SetBool("ShootPos", false);
-                        FootAnime.SetBool("ShootPos", false);
-                        rb.isKinematic = false;
-                        ContinueMove = false;
-                        IsShooting = false;
-
-
-                        if (!IsObstacleAhead(out alternativeDirection))
-                        {
-                            // No obstacle detected, move towards the target point
-                            transform.position = Vector3.MoveTowards(transform.position, targetPoint[currentPoint].position, MoveSpeed * Time.deltaTime);
-                            transform.LookAt(targetPoint[currentPoint]);
-                            HeadControll.transform.LookAt(targetPoint[currentPoint]);
-
-                            // Check if we reached the target point
-                            distanceToTarget = Vector3.Distance(transform.position, targetPoint[currentPoint].position);
-                            if (distanceToTarget <= stoppingDistance)
-                            {
-                                if (ShootingPatrolPoint == false)
-                                {
-                                    isMoving = false;
-                                    currentPoint++;
-                                }
-
-                                if (Crouching)
-                                {
-                                    HeadAnime.SetBool("Crouch", true);
-                                }
-
-                                if (currentPoint < targetPoint.Length)
-                                {
-                                    isMoving = true; // Move to the next point
-                                }
-                            }
-                        }
-                        else if (alternativeDirection != Vector3.zero)
-                        {
-                            // Obstacle detected, move around the obstacle by adjusting direction
-                            transform.position += alternativeDirection * MoveSpeed * Time.deltaTime;
-                        }
-                        else
-                        {
-                            // No alternative path available, stop moving
-                            HeadAnime.SetBool("Run", false);
-                            FootAnime.SetBool("Run", false);
-                        }
-                    }
-
-                    
-                }
+                rb.isKinematic = true;
             }
             else
             {
-                // Stop running animation if not moving
+                rb.isKinematic = false;
+            }
+
+
+            HeadControll.transform.eulerAngles = new Vector3(0, HeadControll.transform.eulerAngles.y, 0);
+
+            transform.eulerAngles = new Vector3(0, transform.eulerAngles.y, 0);
+
+
+            if (enemie != null)
+            {
+
+                ShootTime -= Time.deltaTime;
+                shootPoint.transform.LookAt(enemie.transform);
+                // HeadControll.transform.LookAt(enemie.transform);
+                Vector3 direction = (enemie.transform.position - HeadControll.transform.position).normalized;
+
+                // Ber�kna m�lrotationen med riktningen mot spelaren
+                Quaternion lookRotation = Quaternion.LookRotation(direction);
+
+                // Roterar objektet l�ngsamt mot spelaren med RotateTowards
+                HeadControll.transform.rotation = Quaternion.RotateTowards(HeadControll.transform.rotation, lookRotation, RotateSpeed * Time.deltaTime);
+                //
+
+
+
+                findshoot.IsPatrol = false;
+                HeadAnime.SetBool("ShootPos", true);
+                FootAnime.SetBool("ShootPos", true);
                 HeadAnime.SetBool("Run", false);
                 FootAnime.SetBool("Run", false);
                 rb.isKinematic = true;
 
-                if(ShootingPatrolPoint)
-                {
+            }
+            else
+            {
+                HeadControll.transform.rotation = HeadRot;
+                findshoot.IsPatrol = false;
+                HeadAnime.SetBool("ShootPos", false);
+                FootAnime.SetBool("ShootPos", false);
 
-                    PatrolIdleTime -= Time.deltaTime;
-                    if (PatrolIdleTime <= 0)
+                if (isMoving == false)
+                {
+                    if (IsMovingShooting)
                     {
-                        PatrolIdleTime = StartPatrolTime;
-                        isMoving = true; // Starta r�relse igen
-                       
+                        if (distanceToTarget <= stoppingDistance)
+                        {
+
+                            if (!IsObstacleAhead(out alternativeDirection))
+                            {
+                                HeadAnime.SetTrigger("Sir");
+                                FootAnime.SetTrigger("Sir");
+                                StartCoroutine(waitHide());
+                            }
+                        }
                     }
+
+
+
                 }
 
+                if (ShootingPatrolPoint)
+                {
+
+                    if (isMoving)
+                    {
+                        distanceToTarget = Vector3.Distance(transform.position, targetPoint[currentPoint].position);
+
+                        if (distanceToTarget <= stoppingDistance)
+                        {
+                            isMoving = false; // Stanna n�r vi n�r m�let
+
+                            if (!returning)
+                            {
+                                // Om vi inte �r p� v�g tillbaka, g� till n�sta punkt (punkt 0)
+                                currentPoint = 0;
+                                returning = true; // Vi har nu g�tt till punkt 0 och �r redo att g� tillbaka
+                            }
+                            else
+                            {
+                                // Om vi redan �r p� punkt 0, g� tillbaka till startpunkten (punkt 1)
+                                currentPoint = 1;
+                                returning = false; // Nu �r vi tillbaka till startpunkten
+                            }
+
+
+
+
+
+
+                        }
+                        else
+                        {
+
+                            transform.position = Vector3.MoveTowards(transform.position, targetPoint[currentPoint].position, MoveSpeed * Time.deltaTime);
+                            // transform.LookAt(targetPoint[currentPoint]);
+                            Vector3 direction2 = (targetPoint[currentPoint].transform.position - transform.position).normalized;
+
+                            // Ber�kna m�lrotationen med riktningen mot spelaren
+                            Quaternion lookRotation2 = Quaternion.LookRotation(direction2);
+
+                            // Roterar objektet l�ngsamt mot spelaren med RotateTowards
+                            transform.rotation = Quaternion.RotateTowards(transform.rotation, lookRotation2, RotateSpeed * Time.deltaTime);
+                            //HeadControll.transform.LookAt(targetPoint[currentPoint]);
+                            Vector3 direction = (targetPoint[currentPoint].transform.position - HeadControll.transform.position).normalized;
+
+                            // Ber�kna m�lrotationen med riktningen mot spelaren
+                            Quaternion lookRotation = Quaternion.LookRotation(direction);
+
+                            // Roterar objektet l�ngsamt mot spelaren med RotateTowards
+                            HeadControll.transform.rotation = Quaternion.RotateTowards(HeadControll.transform.rotation, lookRotation, RotateSpeed * Time.deltaTime);
+                            // Check if we reached the target point
+
+
+
+                            // Set running animation
+                            HeadAnime.SetBool("Run", true);
+                            FootAnime.SetBool("Run", true);
+                            HeadAnime.SetBool("ShootPos", false);
+                            FootAnime.SetBool("ShootPos", false);
+                            rb.isKinematic = false;
+                            ContinueMove = false;
+                            IsShooting = false;
+                        }
+
+                    }
+
+
+
+                }
+            }
+
+
+            if (targetPoint != null)
+            {
+
+
+
+                if (isMoving)
+                {
+                    if (currentPoint < targetPoint.Length)
+                    {
+
+                        // Check for obstacles ahead
+
+
+                        if (ShootingPatrolPoint == false)
+                        {
+
+                            // Set running animation
+                            HeadAnime.SetBool("Run", true);
+                            FootAnime.SetBool("Run", true);
+                            HeadAnime.SetBool("ShootPos", false);
+                            FootAnime.SetBool("ShootPos", false);
+                            rb.isKinematic = false;
+                            ContinueMove = false;
+                            IsShooting = false;
+
+
+                            if (!IsObstacleAhead(out alternativeDirection))
+                            {
+                                // No obstacle detected, move towards the target point
+                                transform.position = Vector3.MoveTowards(transform.position, targetPoint[currentPoint].position, MoveSpeed * Time.deltaTime);
+                                transform.LookAt(targetPoint[currentPoint]);
+                                HeadControll.transform.LookAt(targetPoint[currentPoint]);
+
+                                // Check if we reached the target point
+                                distanceToTarget = Vector3.Distance(transform.position, targetPoint[currentPoint].position);
+                                if (distanceToTarget <= stoppingDistance)
+                                {
+                                    if (ShootingPatrolPoint == false)
+                                    {
+                                        isMoving = false;
+                                        currentPoint++;
+                                    }
+
+                                    if (Crouching)
+                                    {
+                                        HeadAnime.SetBool("Crouch", true);
+                                    }
+
+                                    if (currentPoint < targetPoint.Length)
+                                    {
+                                        isMoving = true; // Move to the next point
+                                    }
+                                }
+                            }
+                            else if (alternativeDirection != Vector3.zero)
+                            {
+                                // Obstacle detected, move around the obstacle by adjusting direction
+                                transform.position += alternativeDirection * MoveSpeed * Time.deltaTime;
+                            }
+                            else
+                            {
+                                // No alternative path available, stop moving
+                                HeadAnime.SetBool("Run", false);
+                                FootAnime.SetBool("Run", false);
+                            }
+                        }
+
+
+                    }
+                }
+                else
+                {
+                    // Stop running animation if not moving
+                    HeadAnime.SetBool("Run", false);
+                    FootAnime.SetBool("Run", false);
+                    rb.isKinematic = true;
+
+                    if (ShootingPatrolPoint)
+                    {
+
+                        PatrolIdleTime -= Time.deltaTime;
+                        if (PatrolIdleTime <= 0)
+                        {
+                            PatrolIdleTime = StartPatrolTime;
+                            isMoving = true; // Starta r�relse igen
+
+                        }
+                    }
+
+                }
             }
         }
 

@@ -24,9 +24,9 @@ public class Freefalltrigger2 : MonoBehaviour
         {
             // Starta fallet!
             freefall fallScript = other.GetComponent<freefall>();
-            fallScript.ItsFalling = false;
-            
-            fallScript.RunFalse(); // Startar ljudet också
+            //fallScript.ItsFalling = false;
+           // fallScript.Glide();
+            //fallScript.RunFalse(); // Startar ljudet också
         }
     }
 

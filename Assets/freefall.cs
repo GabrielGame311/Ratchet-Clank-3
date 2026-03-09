@@ -33,13 +33,19 @@ public class freefall : MonoBehaviour
     public float vInput;
     float GravityStart;
     public LayerMask groundLayer;
+
+    public Camera Mycam;
+    public CinemachineFreeLook Cinecam;
+
+   
+
     // Lägg till dessa i toppen av ditt freefall-skript
     [Header("Landing Settings")]
     public float helicopterDistance = 5f; // Avståndet till marken när helikoptern startar
     public float helicopterFallSpeed = 5f; // Hur mycket han bromsar (lägre värde = långsammare)
-    private bool isHelicoptering = false;
-    
+    public bool isHelicoptering = false;
 
+   
 
     private void Start()
     {
@@ -76,78 +82,98 @@ public class freefall : MonoBehaviour
         {
             StopFalling();
         }
+
+       
+       
+
+
     }
 
     void HandleFalling()
     {
-        anim.SetBool("FreeFall", true);
+        // Aktivera freefall-kameran (den som tittar ner)
         CamFreefall.SetActive(true);
         vCam.enabled = true;
-        ratchet.CanMove = false;
-        ratchet.enabled = false;
 
-
-        // 1. Skjut en stråle neråt för att se om vi ska starta helikoptern
-        RaycastHit hit;
-        if (Physics.Raycast(transform.position, Vector3.down, out hit, helicopterDistance, groundLayer))
-        {
-            if (!isHelicoptering)
-            {
-                isHelicoptering = true;
-
-                 // Se till att du har denna trigger i din Animator
-                anim.SetBool("FreeFall", false); // Stäng av fritt fall-loopen
-                HelikopterController.Instance.StartHelikopter();
-            }
-        }
-
-        // 2. Rörelse nedåt
-        float currentSpeed = isHelicoptering ? helicopterFallSpeed : falldawnSpeed;
-        controller.Move(Vector3.down * currentSpeed * Time.deltaTime);
-
-        // 3. Rörelse i sidled (Styrning fungerar fortfarande men kanske långsammare?)
-        float currentMoveSpeed = isHelicoptering ? MoveSpeed * 0.5f : MoveSpeed;
-        Vector3 horizontalMove = new Vector3(hInput, 0, vInput) * currentMoveSpeed;
-        controller.Move(horizontalMove * Time.deltaTime);
-
-        // 1. Rörelse nedåt
-        controller.Move(Vector3.down * falldawnSpeed * Time.deltaTime);
-
-        // 2. Rörelse i sidled (Styrning)
+        // Hämta input
         hInput = Input.GetAxisRaw("Horizontal");
         vInput = Input.GetAxisRaw("Vertical");
-
         if (IOSController.IosController_ != null)
         {
             hInput = IOSController.IosController_.JoyStick_.Horizontal;
             vInput = IOSController.IosController_.JoyStick_.Vertical;
         }
 
-        pos = new Vector3(vInput, 0, -hInput);
-        controller.Move(pos * MoveSpeed * Time.deltaTime);
+        // Raycast för att se om vi ska fälla ut helikoptern
+        RaycastHit hit;
+        bool nearGround = Physics.Raycast(transform.position, Vector3.down, out hit, helicopterDistance, groundLayer);
 
-        // 3. Dynamisk FOV (Fartkänsla!)
-        if (vCam != null)
+        if (nearGround)
         {
-            // Vi baserar FOV på falldawnSpeed. Ju snabbare fall, desto mer FOV.
-            // Här mappar vi hastigheten (t.ex. 20) till ett FOV mellan 60 och 90.
-            float targetFOV = Mathf.Lerp(60, 90, falldawnSpeed / 50f);
-            vCam.m_Lens.FieldOfView = Mathf.Lerp(vCam.m_Lens.FieldOfView, targetFOV, Time.deltaTime * 2f);
-        }
+            if (!isHelicoptering)
+            {
+                isHelicoptering = true;
+                if (HelikopterController.Instance != null)
+                    HelikopterController.Instance.StartHelikopter();
 
-        // Ljudhantering
-        if (PlayMusic && sound != null)
-        {
-            sound.gameObject.SetActive(true);
-            MusicPlayed.gameObject.SetActive(false);
+                anim.SetBool("FreeFall", false);
+                
+                anim.SetBool("IsHelicopter", true);
+            }
+            Glide();
         }
+        else
+        {
+            // VANLIGT SNABBT FALL (Ratchet faller med huvudet först)
+            isHelicoptering = false;
+            anim.SetBool("FreeFall", true);
+
+            // Rörelse i World Space (Gör att kameran INTE roterar)
+            Vector3 moveDir = new Vector3(vInput, 0, -hInput).normalized;
+            Vector3 fallVelocity = (Vector3.down * falldawnSpeed) + (moveDir * MoveSpeed);
+
+            // Ändra alla rader där du har controller.Move till detta:
+            if (controller != null && controller.enabled)
+            {
+                controller.Move(fallVelocity * Time.deltaTime);
+            }
+        }
+    }
+
+    public void Glide()
+    {
+        // 1. Rörelse i sidled (World Space)
+        // Vi använder hInput/vInput direkt så vi inte behöver hämta dem igen
+        Vector3 moveDir = new Vector3(hInput, 0, vInput).normalized;
+
+        // 2. Hastigheter (R&C 3 värden)
+        float glideDescentSpeed = 4f; // Saktar ner fallet ordentligt
+        float glideSideSpeed = MoveSpeed * 0.7f; // Lite segare styrning i sidled
+
+        // 3. Slå ihop neråt-fart och styrning
+        Vector3 finalVelocity = (Vector3.down * glideDescentSpeed) + (moveDir * glideSideSpeed);
+
+        // 4. Utför förflyttningen
+        controller.Move(finalVelocity * Time.deltaTime);
+
+        // VIKTIGT: Vi roterar INTE Ratchet här. 
+        // Om du vill att han ska luta lite, rotera bara grafiken/modellen, inte hela spelar-objektet.
     }
 
     public void StopFalling()
     {
-        
-        
-       
+        // Lägg till i StopFalling
+        if (vCam != null)
+        {
+            var noise = vCam.GetRig(1).GetCinemachineComponent<CinemachineBasicMultiChannelPerlin>();
+            if (noise != null)
+            {
+                noise.m_AmplitudeGain = 2f; // Starta skak
+                                            // Du kan använda en Invoke eller Coroutine för att stänga av skaket efter 0.2 sekunder
+            }
+        }
+
+        Cinecam.enabled = false;
         isHelicoptering = false;
         vCam.enabled = false;
         CamFreefall.SetActive(false);
@@ -155,7 +181,7 @@ public class freefall : MonoBehaviour
         IsMoving = false;
         ratchet.Gravity = GravityStart;
         ratchet.enabled = true;
-        ratchet.CanMove = true;
+       // ratchet.CanMove = true;
         
        
         anim.SetBool("FreeFall", false);
@@ -167,7 +193,7 @@ public class freefall : MonoBehaviour
         if (ratchet != null)
         {
            // ratchet.enabled = true;
-           // ratchet.CanMove = true;
+            //ratchet.CanMove = true;
         }
 
         if (CamFreefall != null && CamFreefall.activeSelf)
@@ -206,6 +232,7 @@ public class freefall : MonoBehaviour
         }
     }
 
+   
     public void RunForward()
     {
         sound.Play();

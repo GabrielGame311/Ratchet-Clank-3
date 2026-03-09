@@ -45,6 +45,7 @@ public class ShipFreefall : MonoBehaviour
         playerholder.transform.position = SpawnPoint.position;
         playerholder.transform.rotation = SpawnPoint.rotation;
         controller.enabled = true;
+
         StartCoroutine(MoveRobotsThenPlayer());
     }
 
@@ -75,7 +76,18 @@ public class ShipFreefall : MonoBehaviour
             if (!isRobot)
             {
                 anime.SetBool("Run", true);
+
+                
             }
+            else
+            {
+                // Hämta robotens script och sätt animationen
+                var ranger = character.GetComponent<GalacticRangers>();
+                ranger.RangersModeActive = false;
+                ranger.HeadAnime.SetBool("Run", true);
+                ranger.FootAnime.SetBool("Run", true);
+            }
+           
            
 
 
@@ -97,7 +109,9 @@ public class ShipFreefall : MonoBehaviour
         if (!isRobot)
         {
             anime.SetBool("Run", false);
+            
         }
+       
 
         // 2. Själva hoppet ut från kanten
         float jumpForce = 5f; // Hur långt fram de hoppar
@@ -127,13 +141,14 @@ public class ShipFreefall : MonoBehaviour
                 // Om ditt freefall-skript har en funktion som nollställer fart, 
                 // kalla på den EFTER hoppet eller modifiera den.
                 ff.RunForward();
-
+                ff.ItsFalling = true;
                 // Vi väntar ett litet ögonblick med att säga "nu faller vi fritt" 
                 // så att momentum-skriptet hinner knuffa ut oss från skeppet
                 StartCoroutine(DelayedFreefall(ff, 0.2f));
             }
-
+           
             //playercontroller.CanMove = true;
+           
         }
     }
     IEnumerator DelayedFreefall(freefall ff, float delay)
@@ -163,13 +178,21 @@ public class ShipFreefall : MonoBehaviour
         }
     }
 
+   
+
     IEnumerator IndividualRobotFall(GameObject robot, Vector3 currentVelocity)
     {
         // Stäng av AI så den inte försöker gå mitt i luften
-        //robot.GetComponent<GalacticRangers>().enabled = false;
-
+        
+        var ranger = robot.GetComponent<GalacticRangers>();
+       
         float gravity = -9.81f;
         bool falling = true;
+        // Vi stänger av Run-animationen precis när de hoppar ut
+        ranger.HeadAnime.SetBool("Run", false);
+        ranger.FootAnime.SetBool("Run", false);
+        ranger.HeadAnime.SetBool("FreeFall", true);
+        ranger.FootAnime.SetBool("FreeFall", true);
         // 1. Lägg till gravitation på Y-axeln över tid
         currentVelocity.y -= gravity * Time.deltaTime;
 
@@ -179,7 +202,7 @@ public class ShipFreefall : MonoBehaviour
 
         while (falling)
         {
-           
+            
             // 3. Håll roboten innanför den gröna boxen (Vägg-känsla)
             Vector3 pos = robot.transform.position;
             
@@ -213,9 +236,11 @@ public class ShipFreefall : MonoBehaviour
             yield return null;
         }
 
-      
-      
 
+        var ranger = robot.GetComponent<GalacticRangers>();
+        ranger.RangersModeActive = true;
+        ranger.HeadAnime.SetBool("FreeFall", false);
+        ranger.FootAnime.SetBool("FreeFall", false);
         robot.transform.position = endPos;
 
         // Tvinga ner dem och lås dem till marken
