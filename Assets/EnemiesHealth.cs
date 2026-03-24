@@ -190,6 +190,17 @@ public class EnemiesHealth : MonoBehaviour
         // LevelWeapon.levelWeapon_.levelWeapon();
         //LevelXp += WeaponsUI.WeaponsUI_.levelAmount;
 
+        if (ExplodePrefab != null)
+        {
+            Transform exp = Instantiate(ExplodePrefab, transform.position, transform.rotation);
+            Destroy(exp.gameObject, 2);
+            foreach (Rigidbody gm in exp.GetComponentsInChildren<Rigidbody>())
+            {
+                gm.AddExplosionForce(10, transform.position, 5);
+            }
+
+
+        }
         //WeaponsUI.WeaponsUI_.levelAmount += LevelXp;
         Instantiate(Bolt, transform.position, transform.rotation);
 
@@ -234,17 +245,6 @@ public class EnemiesHealth : MonoBehaviour
 
        
 
-        if (ExplodePrefab != null)
-        {
-            Transform exp = Instantiate(ExplodePrefab, transform.position, transform.rotation);
-            Destroy(exp.gameObject, 2);
-            foreach (Rigidbody gm in exp.GetComponentsInChildren<Rigidbody>())
-            {
-                gm.AddExplosionForce(10, transform.position, 5);
-            }
-
-            
-        }
         
 
 

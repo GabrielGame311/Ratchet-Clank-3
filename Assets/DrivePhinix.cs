@@ -4,7 +4,7 @@ using UnityEngine;
 public class DrivePhinix : MonoBehaviour
 {
     // Reference to the player
-    GameObject Player_;
+    public GameObject Player_;
     public Animator anime; // Animator for the doors
 
     // Determines if the object is triggered to move

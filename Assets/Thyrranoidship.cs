@@ -2,226 +2,134 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Thyrranoidship : MonoBehaviour
+public class ThyrranoidArcShip : MonoBehaviour
 {
-
+    [Header("Weapon Settings")]
     public Transform Point1;
     public Transform Point2;
-
     public GameObject BulletPrefab;
+    public float ShootForce = 70f;
 
-    public float ShootTime;
-    float StartShoot;
-  
-  
-    private bool isShooting = false;
-    public bool SePlayer;
+    [Header("Flight - Player (Flying)")]
+    public float playerOrbitRadius = 30f;   // Större cirkel för flygstrid
+    public float playerFlyHeight = 2f;      // Låg höjdskillnad eftersom båda flyger
 
-    GameObject Player;
-    private float shootingTime = 4.0f;
-    public float waitTime = 3.0f;
-    private float timer = 0.0f;
-    Animator anime;
-    public bool Shoot = false;
-    public float MoveSpeed;
-    public float PlayerDis;
-    public float ShootForce;
-    public bool IsFlying = false;
+    [Header("Flight - Rangers (Ground)")]
+    public float rangerOrbitRadius = 15f;   // Mindre cirkel för markmål
+    public float rangerFlyHeight = 10f;     // Högre upp så de inte krockar med marken
 
-    private float currentRotation = 0f;
+    [Header("Global Flight Settings")]
+    public float moveSpeed = 20f;
+    public float rotationSpeed = 3.0f;      // Sänkt för att inte vara så "ryckig"
+    public float orbitSpeedMultiplier = 0.5f; // Sänkt så den inte snurrar för snabbt
+    public float bankingAmount = 55f;
 
-    public float rotationSpeed = 50.0f;
-    public Transform[] waypoints;
-    private int currentWaypointIndex = 0;
-    int soundPlaying;
-    public float Rotation;
-    // Start is called before the first frame update
+    [Header("AI Logic")]
+    public float detectionRange = 60f;
+    public LayerMask playerLayer;
+    public LayerMask rangerLayer;
+
+    private GameObject currentTarget;
+    private bool hasTarget = false;
+    private bool targetIsPlayer = false;
+    private float orbitTimer;
+    private Animator anime;
+
     void Start()
     {
-        currentWaypointIndex = 0;
-
-        StartShoot = ShootTime;
-
-
-
         anime = GetComponentInChildren<Animator>();
+        orbitTimer = Random.Range(0f, 10f);
     }
 
-    // Update is called once per frame
     void Update()
     {
-       
-        if (SePlayer)
+        ManageTargeting();
+
+        if (hasTarget && currentTarget != null)
         {
-
-            transform.rotation = Quaternion.RotateTowards(transform.rotation, Player.transform.rotation, 3 * Time.deltaTime);
-
-            transform.LookAt(Player.transform);
-
-            float dis = Vector3.Distance(transform.position, Player.transform.position);
-
-            if (PlayerDis < dis)
-            {
-                IsFlying = false;
-                transform.position = Vector3.MoveTowards(transform.position, Player.transform.position, MoveSpeed * Time.deltaTime);
-              
-               
-            }
-            else
-            {
-                SePlayer = false;
-                
-            }
-
-            
-
-                if (!isShooting && timer >= waitTime)
-                {
-                    isShooting = true;
-                    timer = 0.0f;
-                }
-
-                // If shooting time is over, stop shooting and start waiting
-                if (isShooting && timer >= shootingTime)
-                {
-                    isShooting = false;
-                    timer = 0.0f;
-                }
-
-                // Update timer
-                timer += Time.deltaTime;
-
-                // Shoot if in shooting state
-                if (isShooting)
-                {
-                    anime.SetTrigger("Shoot");
-                }
-
-            
-           
-
+            HandleCombatFlight();
         }
         else
         {
-
-            if(Player == null)
-            {
-               // transform.Translate(Vector3.forward * MoveSpeed * Time.deltaTime);
-
-            }
-
-
-            // transform.position += Vector3.forward * MoveSpeed * Time.deltaTime;
-
-            
-
-        
+            transform.position += transform.forward * (moveSpeed * 0.4f) * Time.deltaTime;
         }
+    }
 
-     
-
-
-
-
-        if (IsFlying)
+    void ManageTargeting()
+    {
+        if (hasTarget && currentTarget != null)
         {
-
-
-            if (currentWaypointIndex < waypoints.Length)
+            float dist = Vector3.Distance(transform.position, currentTarget.transform.position);
+            if (!currentTarget.activeInHierarchy || dist > detectionRange + 15f)
             {
-                Vector3 targetPosition = waypoints[currentWaypointIndex].position;
-
-                // Calculate the direction to the current waypoint.
-                Vector3 direction = targetPosition - transform.position;
-
-                // Calculate the distance to the current waypoint.
-                float distanceToWaypoint = Vector3.Distance(transform.position, targetPosition);
-
-                
-                    // Rotate towards the waypoint.
-                    Quaternion rotation = Quaternion.LookRotation(direction);
-                    transform.rotation = Quaternion.RotateTowards(transform.rotation, rotation, rotationSpeed * Time.deltaTime);
-
-                    // Move towards the waypoint.
-                    transform.Translate(Vector3.forward * MoveSpeed * Time.deltaTime);
-                
-
-                // Check if the ship is close enough to the current waypoint.
-                if (distanceToWaypoint < 1.0f)
-                {
-                    // Move to the next waypoint.
-                    currentWaypointIndex++;
-                    if (currentWaypointIndex >= waypoints.Length)
-                    {
-                        // If we reached the end of the waypoints, start over.
-                        currentWaypointIndex = 0;
-                    }
-                }
+                hasTarget = false;
+                currentTarget = null;
             }
-
-
-
-
+            else return;
         }
 
+        // Prioritera Spelaren
+        Collider[] players = Physics.OverlapSphere(transform.position, detectionRange, playerLayer);
+        if (players.Length > 0)
+        {
+            currentTarget = players[0].gameObject;
+            hasTarget = true;
+            targetIsPlayer = true; // Kom ihåg att det är spelaren
+            return;
+        }
 
+        // Annars Rangers
+        Collider[] rangers = Physics.OverlapSphere(transform.position, detectionRange, rangerLayer);
+        if (rangers.Length > 0)
+        {
+            currentTarget = rangers[0].gameObject;
+            hasTarget = true;
+            targetIsPlayer = false; // Det är en ranger
+        }
+    }
 
+    void HandleCombatFlight()
+    {
+        // Välj värden baserat på målet
+        float currentRadius = targetIsPlayer ? playerOrbitRadius : rangerOrbitRadius;
+        float currentHeight = targetIsPlayer ? playerFlyHeight : rangerFlyHeight;
 
+        // Snurra långsammare
+        orbitTimer += Time.deltaTime * orbitSpeedMultiplier;
 
+        float x = Mathf.Cos(orbitTimer) * currentRadius;
+        float z = Mathf.Sin(orbitTimer) * currentRadius;
 
+        Vector3 targetPos = currentTarget.transform.position + new Vector3(x, currentHeight, z);
 
+        // Mjukare förflyttning
+        transform.position = Vector3.MoveTowards(transform.position, targetPos, moveSpeed * Time.deltaTime);
 
+        Vector3 dirToTarget = (currentTarget.transform.position - transform.position).normalized;
 
+        if (dirToTarget != Vector3.zero)
+        {
+            Quaternion targetRot = Quaternion.LookRotation(dirToTarget);
+            float angleDiff = Vector3.SignedAngle(transform.forward, dirToTarget, Vector3.up);
+            float bank = Mathf.Clamp(angleDiff * 3f, -bankingAmount, bankingAmount);
+
+            targetRot *= Quaternion.Euler(0, 0, -bank);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, Time.deltaTime * rotationSpeed);
+        }
+
+        if (anime) anime.SetBool("IsShooting", true);
     }
 
     public void Shooting()
     {
-
-        GameObject prefab = Instantiate(BulletPrefab, Point1.transform.position, Point1.transform.rotation);
-        GameObject prefab2 = Instantiate(BulletPrefab, Point2.transform.position, Point2.transform.rotation);
-
-
-        prefab.GetComponent<Rigidbody>().linearVelocity = Point1.transform.forward * ShootForce;
-        prefab2.GetComponent<Rigidbody>().linearVelocity = Point2.transform.forward * ShootForce;
-
-
-        Destroy(prefab, 8);
-        Destroy(prefab2, 8);
-
+        if (Point1 && Point2) { Fire(Point1); Fire(Point2); }
     }
 
-
-    private void OnTriggerStay(Collider other)
+    void Fire(Transform p)
     {
-        
-        if(other.tag == "Player")
-        {
-            Player = other.gameObject;
-            SePlayer = true;
-        }
-
-        if (other.tag == "RangerFall")
-        {
-            Player = other.gameObject;
-            SePlayer = true;
-        }
+        GameObject b = Instantiate(BulletPrefab, p.position, p.rotation);
+        if (b.GetComponent<Rigidbody>())
+            b.GetComponent<Rigidbody>().linearVelocity = p.forward * ShootForce;
+        Destroy(b, 4f);
     }
-
-
-    private void OnTriggerExit(Collider other)
-    {
-        if (other.tag == "Player")
-        {
-            SePlayer = false;
-        }
-        if (other.tag == "RangerFall")
-        {
-            SePlayer = false;
-        }
-
-
-
-    }
-
-
 }

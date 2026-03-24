@@ -25,7 +25,7 @@ public class DropShipAnime : MonoBehaviour
 
     public void Shoot()
     {
-        GetComponentInParent<Thyrranoidship>().Shooting();
+        GetComponentInParent<ThyrranoidArcShip>().Shooting();
 
     }
 }

@@ -104,7 +104,7 @@ public class EnemiesMission : MonoBehaviour
         }
 
 
-        if (GetComponent<RocketMission>() != null)
+        if (GetComponent<RocketMission>() == null)
         {
 
             MissionCompleteUI.MissionComplete.Mission = Mission;

@@ -47906,7 +47906,7 @@ Transform:
   m_GameObject: {fileID: 165929073}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: 0.89328516, z: -0, w: -0.44949037}
-  m_LocalPosition: {x: -6.838562, y: -4.1612854, z: -183.16327}
+  m_LocalPosition: {x: -6.838562, y: -2.22, z: -183.16327}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -63744,7 +63744,7 @@ MonoBehaviour:
   SetactiveEnemies: 1
   Mission: 1
   IsWin: 0
-  LoadScene: 
+  LoadScene: Thyrra_Mission
   SetactivePlayer: 1
 --- !u!114 &568196191
 MonoBehaviour:
@@ -74034,6 +74034,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5395331264624599305, guid: 34d317352a19eee4eb7bc8b4fac6572b, type: 3}
+      propertyPath: flyHeight
+      value: 12
+      objectReference: {fileID: 0}
     - target: {fileID: 5395331264624599309, guid: 34d317352a19eee4eb7bc8b4fac6572b, type: 3}
       propertyPath: m_Name
       value: DropShip
@@ -79186,7 +79190,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Enemies:
-  - {fileID: 1526435338}
   - {fileID: 977803300}
   - {fileID: 1127403786}
   IsSound: 1
@@ -87815,7 +87818,7 @@ MonoBehaviour:
   SetactiveEnemies: 1
   Mission: 3
   IsWin: 0
-  LoadScene: 
+  LoadScene: Thyrra_Mission
   SetactivePlayer: 0
 --- !u!64 &1020015860
 MeshCollider:
@@ -97020,7 +97023,7 @@ Transform:
   m_GameObject: {fileID: 1240237809}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: 0.8909948, z: -0, w: -0.4540136}
-  m_LocalPosition: {x: -2.838562, y: -4.1612854, z: -188.28339}
+  m_LocalPosition: {x: -2.838562, y: -2.22, z: -188.28339}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -101983,7 +101986,7 @@ MonoBehaviour:
   SetactiveEnemies: 0
   Mission: 2
   IsWin: 0
-  LoadScene: 
+  LoadScene: Thyrra_Mission
   SetactivePlayer: 1
 --- !u!64 &1343671364
 MeshCollider:
@@ -132513,7 +132516,7 @@ MonoBehaviour:
   SetactiveEnemies: 0
   Mission: 0
   IsWin: 0
-  LoadScene: 
+  LoadScene: Thyrra_Mission
   SetactivePlayer: 0
 --- !u!114 &1885034209
 MonoBehaviour:
