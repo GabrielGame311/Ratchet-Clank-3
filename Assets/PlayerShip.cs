@@ -50,6 +50,7 @@ public class PlayerShip : MonoBehaviour
     void Start()
     {
         startshoots = shooter;
+        Cursor.lockState = CursorLockMode.Locked;
         sound.GetComponent<AudioSource>();
         playerHolder = GameObject.FindGameObjectWithTag("Playerholder");
         player = GameObject.FindObjectOfType<RatchetController>().gameObject;
@@ -57,7 +58,7 @@ public class PlayerShip : MonoBehaviour
         {
             playerHolder.SetActive(false);
         }
-        Cursor.lockState = CursorLockMode.Locked;
+        
        // player.SetActive(false);
         playership_ = GetComponent<PlayerShip>();
         MaxHealth = CurrentHealth;

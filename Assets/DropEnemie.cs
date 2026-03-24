@@ -2,169 +2,165 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class DropEnemie : MonoBehaviour
+public class SmoothDropship : MonoBehaviour
 {
-    public Transform dropshipStart;
-    public Transform dropshipEnd;
-    public float moveSpeed = 10f;
-    public float delay = 2f;
-    public float initialEnemyDelay = 2f;
-    public float additionalEnemyDelay = 2f;
+    public enum FinalTurn { Left, Right }
 
-    private float currentDelay;
-    private float currentEnemyDelay;
-    private int currentEnemyIndex = 0;
-    private bool movingToEnd = true;
-    public GameObject[] enemies;
-    public int Count;
-    public Transform SpawnPoint;
-    public float rotationSpeed;
-    public float DelaySetActive;
-    public Animator anime;
-    public Transform parent;
-    public float jumpForce = 5f;  // Force applied to the enemy when jumping
-    public Vector3 jumpDirection = new Vector3(0, 1, 1);
-    public float scaleAnimationDuration = 1f;
-    public string DropStart;
-    public string DropEnd;
-    public List<GameObject> SpawnedEnemie;
-    private void Start()
+    [Header("Waypoints")]
+    public Transform endPoint;
+    public Transform startPoint;
+
+    [Header("R&C 3 Exit Settings")]
+    public FinalTurn finalTurnDirection = FinalTurn.Right;
+    public float finalExitDistance = 150f;
+    public float accelerationRate = 15f; // Hur snabbt den ökar farten vid exit
+    public float maxExitSpeed = 45f;     // Toppfarten när den flyr
+
+    [Header("Movement Settings")]
+    public float moveSpeed = 15f;
+    public float turnSpeed = 3f;
+    public float bankingAmount = 35f; // Lite kraftigare lutning för R&C-stil
+
+    [Header("Spawn Settings")]
+    public GameObject[] enemyPrefabs;
+    public Transform spawnPoint;
+    public float timeBetweenEnemies = 0.8f;
+
+    private enum ShipState { Incoming, Dropping, HeadingToStart, FinalExit, Finished }
+    private ShipState currentState = ShipState.Incoming;
+    private Animator anim;
+    private Vector3 currentTarget;
+    private float currentSpeed;
+
+    void Start()
     {
+        anim = GetComponentInChildren<Animator>();
+        currentSpeed = moveSpeed;
 
-     
-
-       
-
-        currentDelay = delay;
-        currentEnemyDelay = initialEnemyDelay;
-        anime = GetComponentInChildren<Animator>();
+        if (endPoint != null) currentTarget = endPoint.position;
     }
 
-    private void Update()
+    void Update()
     {
-      
-            dropshipStart = GameObject.Find(DropStart).transform;
-        
-          dropshipEnd = GameObject.Find(DropEnd).transform;
-        
-
-            if (movingToEnd)
-            {
-                // Move dropship towards the end point
-                transform.position = Vector3.MoveTowards(transform.position, dropshipEnd.position, moveSpeed * Time.deltaTime);
-                transform.LookAt(dropshipEnd.transform);
-                transform.rotation = dropshipEnd.transform.rotation;
-
-
-                // If the dropship reaches the end point, activate the enemies and start the initial delay timer
-                if (transform.position == dropshipEnd.position)
-                {
-                    anime.SetBool("Open", true);
-                   
-                    ActivateEnemies();
-
-                    currentDelay -= Time.deltaTime;
-
-                    if (currentDelay <= 0)
-                    {
-                        currentEnemyDelay = initialEnemyDelay;
-                        currentEnemyIndex = 0;
-                        anime.SetBool("Open", false);
-                       
-                        movingToEnd = false;
-                        currentDelay = delay;
-                    }
-                }
-            }
-            else
-            {
-
-
-
-
-
-                transform.position = Vector3.MoveTowards(transform.position, dropshipStart.position, moveSpeed * Time.deltaTime);
-                transform.LookAt(dropshipStart.transform);
-
-
-                if (transform.position == dropshipStart.position)
-                {
-                    Destroy(gameObject);
-                }
-
-
-            }
-        
-
-
-       
-    
-    
-    
-    }
-
-    private void OnDestroy()
-    {
-        GameObject.FindObjectOfType<SpawnTime>().DropshipsSpawned.Remove(gameObject);
-    }
-
-    private void ActivateEnemies()
-    {
-        // Wait for the initial enemy delay before activating the first enemy
-        currentEnemyDelay -= Time.deltaTime;
-
-        if (currentEnemyDelay <= 0 && currentEnemyIndex < enemies.Length)
+        if (currentState != ShipState.Dropping && currentState != ShipState.Finished)
         {
-
-            GameObject enemie = Instantiate(enemies[currentEnemyIndex], SpawnPoint.transform.position, SpawnPoint.transform.rotation);
-            enemie.transform.localScale = Vector3.zero;
-            enemie.SetActive(true);
-            SpawnedEnemie.Add(enemie);
-            GetEnemie(enemie);
-            //enemies[currentEnemyIndex].SetActive(true);
-            StartCoroutine(ScaleEnemy(enemie));
-
-            // Set enemy parent and update index for the next enemy
-            enemie.transform.parent = null;
-            currentEnemyIndex++;
-            currentEnemyDelay = additionalEnemyDelay;
+            MoveShip();
+        }
+        else if (currentState == ShipState.Dropping)
+        {
+            ApplyHoverEffect();
         }
     }
 
-    public void GetEnemie(GameObject enemy)
+    void MoveShip()
     {
-        GameObject.FindObjectOfType<SpawnTime>().DropshipsSpawned.Add(enemy);
-    }
-    private IEnumerator ScaleEnemy(GameObject enemy)
-    {
-        float elapsedTime = 0f;
-        Vector3 initialScale = Vector3.zero;
-        Vector3 finalScale = Vector3.one;
+        // Om vi är i FinalExit, öka hastigheten varje frame (Acceleration)
+        if (currentState == ShipState.FinalExit)
+        {
+            currentSpeed = Mathf.MoveTowards(currentSpeed, maxExitSpeed, accelerationRate * Time.deltaTime);
+        }
 
-        // Get the enemy's Rigidbody component to apply force
+        transform.position = Vector3.MoveTowards(transform.position, currentTarget, currentSpeed * Time.deltaTime);
+
+        Vector3 direction = (currentTarget - transform.position).normalized;
+        if (direction != Vector3.zero)
+        {
+            Quaternion targetRot = Quaternion.LookRotation(direction);
+
+            // BANKING: Räkna ut lutning
+            float angleDiff = Vector3.SignedAngle(transform.forward, direction, Vector3.up);
+
+            // I R&C lutar de mer ju snabbare de svänger
+            float targetBank = Mathf.Clamp(angleDiff * 2f, -bankingAmount, bankingAmount);
+            targetRot *= Quaternion.Euler(0, 0, -targetBank);
+
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, Time.deltaTime * turnSpeed);
+        }
+
+        if (Vector3.Distance(transform.position, currentTarget) < 2f)
+        {
+            CheckNextState();
+        }
+    }
+
+    void CheckNextState()
+    {
+        switch (currentState)
+        {
+            case ShipState.Incoming:
+                StartCoroutine(DropSequence());
+                break;
+            case ShipState.HeadingToStart:
+                SetupFinalExit();
+                break;
+            case ShipState.FinalExit:
+                currentState = ShipState.Finished;
+                Destroy(gameObject);
+                break;
+        }
+    }
+
+    void SetupFinalExit()
+    {
+        currentState = ShipState.FinalExit;
+
+        // Räkna ut en punkt snett framåt åt sidan för en "arc"-sväng
+        Vector3 sideDir = (finalTurnDirection == FinalTurn.Right) ? transform.right : -transform.right;
+        Vector3 forwardDir = transform.forward;
+
+        // Kombinera sida och framåt för en snygg kurva utåt
+        currentTarget = transform.position + (sideDir + forwardDir).normalized * finalExitDistance;
+
+        // Ge en liten visuell "ryck"-effekt vid start av exit
+        currentSpeed += 5f;
+    }
+
+    void ApplyHoverEffect()
+    {
+        // Aggressivt guppande som i R&C
+        float hover = Mathf.Sin(Time.time * 2.0f) * 0.4f;
+        transform.position = endPoint.position + new Vector3(0, hover, 0);
+
+        // Lite nervöst gungande
+        float tilt = Mathf.Sin(Time.time * 1.5f) * 3f;
+        transform.rotation = Quaternion.Slerp(transform.rotation, endPoint.rotation * Quaternion.Euler(tilt, 0, tilt), Time.deltaTime);
+    }
+
+    IEnumerator DropSequence()
+    {
+        currentState = ShipState.Dropping;
+        if (anim) anim.SetBool("Open", true);
+        yield return new WaitForSeconds(1.5f);
+
+        foreach (GameObject prefab in enemyPrefabs)
+        {
+            if (prefab != null)
+            {
+                GameObject enemy = Instantiate(prefab, spawnPoint.position, spawnPoint.rotation);
+                ApplyRangerJump(enemy);
+                yield return new WaitForSeconds(timeBetweenEnemies);
+            }
+        }
+
+        yield return new WaitForSeconds(0.8f);
+        if (anim) anim.SetBool("Open", false);
+        yield return new WaitForSeconds(1.0f);
+
+        if (startPoint != null)
+        {
+            currentTarget = startPoint.position;
+            currentState = ShipState.HeadingToStart;
+        }
+    }
+
+    void ApplyRangerJump(GameObject enemy)
+    {
         Rigidbody rb = enemy.GetComponent<Rigidbody>();
-        if (rb == null)
+        if (rb)
         {
-            // Add a Rigidbody if the enemy doesn't have one
-            rb = enemy.AddComponent<Rigidbody>();
+            // En kraftfull "skjuts" ut ur skeppet
+            Vector3 jumpDir = (transform.forward * 8 + Vector3.up * 0.5f).normalized;
+            rb.AddForce(jumpDir * 7f, ForceMode.Impulse);
         }
-
-        // Apply the jumping force in the specified direction
-        rb.AddForce(jumpDirection.normalized * jumpForce, ForceMode.Impulse);
-
-        while (elapsedTime < scaleAnimationDuration)
-        {
-            // Lerp the scale over time
-            enemy.transform.localScale = Vector3.Lerp(initialScale, finalScale, elapsedTime / scaleAnimationDuration);
-            elapsedTime += Time.deltaTime;
-            yield return null;
-        }
-
-        // Ensure the final scale is set exactly to (1, 1, 1)
-        enemy.transform.localScale = finalScale;
-
-        // Set parent to null after the scaling is finished
-        enemy.transform.parent = null;
     }
-
 }
