@@ -172,17 +172,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4f8cad86b5ea3e643b8677b49c51c038, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  dropStartName: 
-  dropEndName: 
+  endPoint: {fileID: 0}
+  startPoint: {fileID: 0}
+  finalTurnDirection: 1
+  finalExitDistance: 150
+  accelerationRate: 15
+  maxExitSpeed: 45
   moveSpeed: 20
-  stayDuration: 5
+  turnSpeed: 3
+  bankingAmount: 35
   enemyPrefabs: []
   spawnPoint: {fileID: 8009848273865231362}
-  initialEnemyDelay: 1
   timeBetweenEnemies: 1.5
-  jumpForce: 10
-  jumpDirection: {x: 0, y: 10, z: 10}
-  scaleDuration: 0.5
 --- !u!82 &4560015121239801616
 AudioSource:
   m_ObjectHideFlags: 0
@@ -194,7 +195,7 @@ AudioSource:
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 0}
-  m_Resource: {fileID: 8300000, guid: 85ed41ff0697f52419be8b08687b1cf4, type: 3}
+  m_Resource: {fileID: 8300000, guid: bf0fd976db7f1024ab8f12d8ab7df31e, type: 3}
   m_PlayOnAwake: 1
   m_Volume: 1
   m_Pitch: 1
@@ -204,7 +205,7 @@ AudioSource:
   SpatializePostEffects: 0
   Priority: 128
   DopplerLevel: 1
-  MinDistance: 1
+  MinDistance: 10
   MaxDistance: 500
   Pan2D: 0
   rolloffMode: 1

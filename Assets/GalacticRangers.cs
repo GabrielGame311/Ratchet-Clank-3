@@ -67,6 +67,7 @@ public class GalacticRangers : MonoBehaviour
     public bool RangersModeActive = true;
 
     public CharacterController Controller;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -284,76 +285,80 @@ public class GalacticRangers : MonoBehaviour
 
 
                 if (isMoving)
-                {
-                    if (currentPoint < targetPoint.Length)
+                { 
+                    if(enemie == null)
                     {
 
-                        // Check for obstacles ahead
-
-
-                        if (ShootingPatrolPoint == false)
+                        if (currentPoint < targetPoint.Length)
                         {
 
-                            // Set running animation
-                            HeadAnime.SetBool("Run", true);
-                            FootAnime.SetBool("Run", true);
-                            HeadAnime.SetBool("ShootPos", false);
-                            FootAnime.SetBool("ShootPos", false);
-                            rb.isKinematic = false;
-                            ContinueMove = false;
-                            IsShooting = false;
+                            // Check for obstacles ahead
 
 
-                            if (!IsObstacleAhead(out alternativeDirection))
+                            if (ShootingPatrolPoint == false)
                             {
-                                Vector3 target = targetPoint[currentPoint].position;
 
-                                // direction mot waypoint
-                                Vector3 direction = (target - transform.position).normalized;
-                                // kombinera rörelse
-                                Vector3 move = new Vector3(direction.x * MoveSpeed, _directionY, direction.z * MoveSpeed);
+                                // Set running animation
+                                HeadAnime.SetBool("Run", true);
+                                FootAnime.SetBool("Run", true);
+                                HeadAnime.SetBool("ShootPos", false);
+                                FootAnime.SetBool("ShootPos", false);
+                                rb.isKinematic = false;
+                                ContinueMove = false;
+                                IsShooting = false;
 
-                                // flytta med CharacterController
-                                Controller.Move(move * Time.deltaTime);
 
-                                transform.LookAt(targetPoint[currentPoint]);
-                                HeadControll.transform.LookAt(targetPoint[currentPoint]);
-
-                                // Check if we reached the target point
-                                distanceToTarget = Vector3.Distance(transform.position, targetPoint[currentPoint].position);
-                                if (distanceToTarget <= stoppingDistance)
+                                if (!IsObstacleAhead(out alternativeDirection))
                                 {
-                                    if (ShootingPatrolPoint == false)
-                                    {
-                                        isMoving = false;
-                                        currentPoint++;
-                                    }
+                                    Vector3 target = targetPoint[currentPoint].position;
 
-                                    if (Crouching)
-                                    {
-                                        HeadAnime.SetBool("Crouch", true);
-                                    }
+                                    // direction mot waypoint
+                                    Vector3 direction = (target - transform.position).normalized;
+                                    // kombinera rörelse
+                                    Vector3 move = new Vector3(direction.x * MoveSpeed, _directionY, direction.z * MoveSpeed);
 
-                                    if (currentPoint < targetPoint.Length)
+                                    // flytta med CharacterController
+                                    Controller.Move(move * Time.deltaTime);
+
+                                    transform.LookAt(targetPoint[currentPoint]);
+                                    HeadControll.transform.LookAt(targetPoint[currentPoint]);
+
+                                    // Check if we reached the target point
+                                    distanceToTarget = Vector3.Distance(transform.position, targetPoint[currentPoint].position);
+                                    if (distanceToTarget <= stoppingDistance)
                                     {
-                                        isMoving = false; // Move to the next point
+                                        if (ShootingPatrolPoint == false)
+                                        {
+                                            isMoving = false;
+                                            currentPoint++;
+                                        }
+
+                                        if (Crouching)
+                                        {
+                                            HeadAnime.SetBool("Crouch", true);
+                                        }
+
+                                        if (currentPoint < targetPoint.Length)
+                                        {
+                                            isMoving = false; // Move to the next point
+                                        }
                                     }
                                 }
+                                else if (alternativeDirection != Vector3.zero)
+                                {
+                                    // Obstacle detected, move around the obstacle by adjusting direction
+                                    transform.position += alternativeDirection * MoveSpeed * Time.deltaTime;
+                                }
+                                else
+                                {
+                                    // No alternative path available, stop moving
+                                    HeadAnime.SetBool("Run", false);
+                                    FootAnime.SetBool("Run", false);
+                                }
                             }
-                            else if (alternativeDirection != Vector3.zero)
-                            {
-                                // Obstacle detected, move around the obstacle by adjusting direction
-                                transform.position += alternativeDirection * MoveSpeed * Time.deltaTime;
-                            }
-                            else
-                            {
-                                // No alternative path available, stop moving
-                                HeadAnime.SetBool("Run", false);
-                                FootAnime.SetBool("Run", false);
-                            }
+
+
                         }
-
-
                     }
                 }
                 else
