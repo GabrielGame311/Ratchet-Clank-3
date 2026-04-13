@@ -7927,7 +7927,7 @@ GameObject:
   - component: {fileID: 2195106677656735174}
   m_Layer: 3
   m_Name: Player  (1)
-  m_TagString: Player
+  m_TagString: Untagged
   m_Icon: {fileID: -964228994112308473, guid: 0000000000000000d000000000000000, type: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -23012,7 +23012,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5543905689527651196}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.021314532, y: 0.09573067, z: -0.002050351, w: 0.995177}
+  m_LocalRotation: {x: 0.014961122, y: 0.7150898, z: -0.015311986, w: 0.6987048}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -23094,7 +23094,7 @@ Transform:
   m_GameObject: {fileID: 5543905689837884224}
   serializedVersion: 2
   m_LocalRotation: {x: 0.000000013065067, y: 0.58991575, z: -0.0000000025957487, w: 0.8074648}
-  m_LocalPosition: {x: -33.230846, y: 9.503011, z: -3.9018226}
+  m_LocalPosition: {x: -9.392782, y: 9.503157, z: 32.16731}
   m_LocalScale: {x: 3.1362894, y: 3.1362903, z: 3.1362906}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -23672,7 +23672,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5543905690698983588}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.014849205, y: 0.095741965, z: 0.0014284085, w: 0.9952945}
+  m_LocalRotation: {x: -0.010429166, y: 0.7151741, z: 0.0106737185, w: 0.6987871}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -23891,7 +23891,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5543905690906127841}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.0032092137, y: 0.0957521, z: -0.00030871786, w: 0.9954001}
+  m_LocalRotation: {x: 0.0022495575, y: 0.71525, z: -0.0023023281, w: 0.6988613}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -25244,10 +25244,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxDistance: 10
   SightTransform3D: {fileID: 0}
+  isEnemyVisible: 0
   enemyTransform: {fileID: 0}
   TargetLayer:
     serializedVersion: 2
     m_Bits: 16640
+  verticalOffset: 1.5
 --- !u!1 &6094987560247988168
 GameObject:
   m_ObjectHideFlags: 0
@@ -27153,8 +27155,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6826329527935379794}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.0024092435, y: 0.6645185, z: -0.002142461, w: 0.7472649}
-  m_LocalPosition: {x: -33.230846, y: 9.503011, z: -3.9018226}
+  m_LocalRotation: {x: 0.0004582702, y: 0.9898085, z: -0.0031860922, w: 0.14236863}
+  m_LocalPosition: {x: -7.5132794, y: 9.216794, z: 25.768887}
   m_LocalScale: {x: 0.65509707, y: 0.6550972, z: 0.6550972}
   m_ConstrainProportionsScale: 0
   m_Children: []

@@ -19,14 +19,32 @@ public class RedNinja : MonoBehaviour
     public float FromPlayerDistance;
 
     GameObject Player;
+    
+
+
 
     public bool SePlayer = false;
+
+
+    //Patrol
+    public float PatrolTime;
+    public float Idletime;
+    float startIdleTime;
+    public float WalkSpeed;
+    float startPatrol;
+    public float detectionDistance = 2f;
+    public bool Ispatroling = true;
+
+    //--------------
 
     float minDistanceFromFirstEnemy = 4;
 
     // Start is called before the first frame update
     void Start()
     {
+
+        startPatrol = PatrolTime;
+        startIdleTime = Idletime;
         Player = GameObject.FindGameObjectWithTag("Player");
         anime = GetComponentInChildren<Animator>();
         
@@ -72,6 +90,69 @@ public class RedNinja : MonoBehaviour
         {
 
             SePlayer = false;
+            if (Ispatroling)
+            {
+                anime.SetBool("Walk", true);
+
+
+
+                if (0 <= PatrolTime)
+                {
+                    PatrolTime -= Time.deltaTime;
+
+                    RaycastHit hit;
+                    // Vi skjuter en stråle från ninjans position framåt
+                    if (Physics.Raycast(transform.position + Vector3.up, transform.forward, out hit, detectionDistance))
+                    {
+                        // Om vi ser något med en "Wall" tag eller bara vad som helst som inte är spelaren
+                        if (!hit.collider.CompareTag("Player"))
+                        {
+                            StopAndTurn();
+                            return;
+                        }
+                    }
+
+                    // 2. Gå framåt
+                    transform.Translate(Vector3.forward * WalkSpeed * Time.deltaTime);
+
+                }
+
+
+                if (PatrolTime <= 0)
+                {
+                    Ispatroling = false;
+
+
+
+
+                }
+
+            }
+            else
+            {
+                anime.SetBool("Walk", false);
+
+
+                if (0 <= Idletime)
+                {
+                    Idletime -= Time.deltaTime;
+
+
+
+
+                }
+
+                if (Idletime <= 0)
+                {
+
+                    float randomRotation = Random.Range(90, 270);
+                    transform.Rotate(0, randomRotation, 0);
+                    Ispatroling = true;
+                    PatrolTime = startPatrol;
+                    Idletime = startIdleTime;
+                }
+
+            }
         }
         else
         {
@@ -103,7 +184,7 @@ public class RedNinja : MonoBehaviour
         {
             if (SePlayer)
             {
-
+                Ispatroling = false;
                 if(DiscNinja_ == false)
                 {
                     transform.position = Vector3.MoveTowards(transform.position, Player.transform.position, MoveSpeed * Time.deltaTime);
@@ -139,20 +220,33 @@ public class RedNinja : MonoBehaviour
             {
 
                 anime.SetBool("Run", false);
+                
 
             }
 
         }
 
        
-
+       
 
 
        
 
     }
 
+    void OnDrawGizmos()
+    {
+        Gizmos.color = Color.red;
+        Gizmos.DrawRay(transform.position + Vector3.up, transform.forward * detectionDistance);
+    }
+    void StopAndTurn()
+    {
+        Ispatroling = false;
+        Idletime = 1f; // Kort paus vid krock
 
+        // Vänd dig bort från hindret direkt
+        transform.Rotate(0, 180, 0);
+    }
 
     void TakeDamages()
     {

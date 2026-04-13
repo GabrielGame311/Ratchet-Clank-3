@@ -12,6 +12,9 @@ public class Spawn : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+
+        Player = GameObject.FindWithTag("Player");
+
         GameObject.FindObjectOfType<CharacterController>().enabled = false;
         Player.transform.position = transform.position;
         GameObject.FindObjectOfType<CharacterController>().enabled = true;
