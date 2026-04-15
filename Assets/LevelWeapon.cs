@@ -55,16 +55,20 @@ public class LevelWeapon : MonoBehaviour
 
     IEnumerator wait()
     {
-        yield return new WaitForSeconds(3);
+        Time.timeScale = 0;
+
+        yield return new WaitForSecondsRealtime(3);
         //Level_Slider.fillAmount += WeaponsUI.WeaponsUI_.levelAmount;
+        Time.timeScale = 1;
         upgrade.SetActive(false);
+        
     }
 
 
     public void levelWeapon()
     {
        
-            Level_Slider.fillAmount += WeaponsUI.WeaponsUI_.levelAmount;
+           // Level_Slider.fillAmount += WeaponsUI.WeaponsUI_.levelAmount;
         
 
 

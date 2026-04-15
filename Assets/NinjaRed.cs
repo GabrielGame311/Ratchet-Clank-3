@@ -22,4 +22,14 @@ public class NinjaRed : MonoBehaviour
     {
         redninja_.Shooting();
     }
+
+     
+    public void Run()
+    {
+        redninja_.Isrunning = true;
+    }
+    public void RunFalse()
+    {
+        redninja_.Isrunning = false;
+    }
 }

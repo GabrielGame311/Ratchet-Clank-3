@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class RedNinja : MonoBehaviour
 {
+
+    public bool Isrunning = false;
     public bool DiscNinja_;
     public float MoveSpeed;
 
@@ -88,7 +90,7 @@ public class RedNinja : MonoBehaviour
 
         if(FromPlayerDistance < mindis)
         {
-
+            //Ispatroling = true;
             SePlayer = false;
             if (Ispatroling)
             {
@@ -158,6 +160,8 @@ public class RedNinja : MonoBehaviour
         {
             
             SePlayer = true;
+            anime.SetBool("Walk", false);
+            Ispatroling = false;
         }
 
         float DistanceAttack = Vector3.Distance(transform.position, Player.transform.position);
@@ -187,8 +191,11 @@ public class RedNinja : MonoBehaviour
                 Ispatroling = false;
                 if(DiscNinja_ == false)
                 {
-                    transform.position = Vector3.MoveTowards(transform.position, Player.transform.position, MoveSpeed * Time.deltaTime);
-
+                    
+                    if(Isrunning)
+                    {
+                        transform.position = Vector3.MoveTowards(transform.position, Player.transform.position, MoveSpeed * Time.deltaTime);
+                    }
 
                     anime.SetBool("Run", true);
                 }
@@ -218,7 +225,7 @@ public class RedNinja : MonoBehaviour
             }
             else
             {
-
+                Isrunning = false;
                 anime.SetBool("Run", false);
                 
 

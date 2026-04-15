@@ -141,7 +141,7 @@ public class EnemiesHealth : MonoBehaviour
         }
        
 
-        if(GetComponent<BloodFly>() != null)
+        if (GetComponent<BloodFly>() != null)
         {
             GetComponent<BloodFly>().enabled = true;
         }
@@ -187,8 +187,18 @@ public class EnemiesHealth : MonoBehaviour
 
     private void OnDestroy()
     {
-        // LevelWeapon.levelWeapon_.levelWeapon();
-        //LevelXp += WeaponsUI.WeaponsUI_.levelAmount;
+
+        
+
+       // LevelWeapon.levelWeapon_.levelWeapon();
+        if(GameObject.FindObjectOfType<WeaponsUI>().gameObject.activeSelf == true)
+        {
+            //WeaponsUI.WeaponsUI_.levelAmount += LevelXp;
+            GameObject.FindObjectOfType<WeaponsUI>().levelAmount += LevelXp;
+        }
+
+        
+        Debug.Log("Destroy!");
 
         if (ExplodePrefab != null)
         {
