@@ -30,7 +30,13 @@ public class Box : MonoBehaviour
     private void OnDestroy()
     {
         Instantiate(Bolt, spawn.transform.position, transform.rotation);
-        Instantiate(Cracked, transform.position, transform.rotation);
+       Transform gb = Instantiate(Cracked, transform.position, transform.rotation);
+
+
+        
+       
+        Destroy(gb.gameObject, 2);
+        
     }
 
     public void Break(int damage)
