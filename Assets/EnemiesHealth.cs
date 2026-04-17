@@ -26,6 +26,12 @@ public class EnemiesHealth : MonoBehaviour
     public Color damageColor = Color.red;         // Färg för skada (röd)
     public Color startColor = Color.white;        // Ursprunglig färg
     public Animator animes;
+
+
+  
+
+    public float ExplodeTime;
+    
     private void Start()
     {
     
@@ -157,7 +163,7 @@ public class EnemiesHealth : MonoBehaviour
            
         
 
-        Destroy(gameObject, 0.2f);
+        Destroy(gameObject, ExplodeTime);
 
 
        
@@ -203,12 +209,14 @@ public class EnemiesHealth : MonoBehaviour
         if (ExplodePrefab != null)
         {
             Transform exp = Instantiate(ExplodePrefab, transform.position, transform.rotation);
-            Destroy(exp.gameObject, 2);
+            Destroy(exp.gameObject, 4);
             foreach (Rigidbody gm in exp.GetComponentsInChildren<Rigidbody>())
             {
                 gm.AddExplosionForce(10, transform.position, 5);
-            }
 
+               
+            }
+           
 
         }
         //WeaponsUI.WeaponsUI_.levelAmount += LevelXp;

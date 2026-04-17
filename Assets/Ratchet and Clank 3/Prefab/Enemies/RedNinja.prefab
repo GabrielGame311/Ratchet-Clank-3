@@ -59,13 +59,14 @@ MonoBehaviour:
   destroy: 0
   Bolt: {fileID: 7871827025308162823, guid: fb4742308d80c5e479e9ba8d2b600c08, type: 3}
   knockbackForce: 2
-  ExplodePrefab: {fileID: 0}
+  ExplodePrefab: {fileID: 3712249466179629080, guid: c339656064d34874aa0f72894a07d26c, type: 3}
   SoundDamage: {fileID: 0}
   BossHealth: 0
   LevelXp: 0.3
   damageColor: {r: 1, g: 0, b: 0, a: 1}
   startColor: {r: 1, g: 1, b: 1, a: 1}
   animes: {fileID: 0}
+  ExplodeTime: 2
 --- !u!136 &1520671076401931387
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -101,6 +102,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b73f16e985bfd804fa13020f36fe83b8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Isrunning: 0
   DiscNinja_: 0
   MoveSpeed: 6
   DamageTime: 3

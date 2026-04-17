@@ -482,7 +482,9 @@ MonoBehaviour:
   animes:
   - {fileID: 1830896528438174069}
   - {fileID: 8584176326940098061}
-  PlayerDistance: 25
+  DetectionRange: 15
+  StopDistance: 7
+  ChaseSpeed: 8
   ShootTime: 5
   ShootForce: 5
   WalkSpeed: 0.5
@@ -557,15 +559,16 @@ MonoBehaviour:
   anime: {fileID: 8584176326940098061}
   clipsound: {fileID: 0}
   destroy: 0
-  Bolt: {fileID: 0}
+  Bolt: {fileID: 7871827025308162823, guid: fb4742308d80c5e479e9ba8d2b600c08, type: 3}
   knockbackForce: 2
-  ExplodePrefab: {fileID: 0}
+  ExplodePrefab: {fileID: 5373241363494932489, guid: 942e7c6b40aaabd4a9c0723f29311ee3, type: 3}
   SoundDamage: {fileID: 0}
   BossHealth: 0
   LevelXp: 0.5
   damageColor: {r: 1, g: 0, b: 0, a: 1}
   startColor: {r: 1, g: 1, b: 1, a: 1}
   animes: {fileID: 0}
+  ExplodeTime: 0.2
 --- !u!1 &1982121712780331055
 GameObject:
   m_ObjectHideFlags: 0
