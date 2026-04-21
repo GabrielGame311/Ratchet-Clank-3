@@ -194,16 +194,22 @@ public class EnemiesHealth : MonoBehaviour
     private void OnDestroy()
     {
 
-        
 
-       // LevelWeapon.levelWeapon_.levelWeapon();
-        if(GameObject.FindObjectOfType<WeaponsUI>().gameObject.activeSelf == true)
+        // LevelWeapon.levelWeapon_.levelWeapon();
+
+        if (GameObject.FindObjectOfType<WeaponsUI>() != null)
         {
-            //WeaponsUI.WeaponsUI_.levelAmount += LevelXp;
-            GameObject.FindObjectOfType<WeaponsUI>().levelAmount += LevelXp;
+            if (GameObject.FindObjectOfType<WeaponsUI>().gameObject.activeSelf == true)
+            {
+                //WeaponsUI.WeaponsUI_.levelAmount += LevelXp;
+                GameObject.FindObjectOfType<WeaponsUI>().levelAmount += LevelXp;
+            }
         }
 
-        
+      
+
+
+
         Debug.Log("Destroy!");
 
         if (ExplodePrefab != null)
@@ -219,6 +225,9 @@ public class EnemiesHealth : MonoBehaviour
            
 
         }
+
+       
+
         //WeaponsUI.WeaponsUI_.levelAmount += LevelXp;
         Instantiate(Bolt, transform.position, transform.rotation);
 
