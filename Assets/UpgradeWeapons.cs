@@ -2,15 +2,20 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+
 public class UpgradeWeapons : MonoBehaviour
 {
     public Transform[] Weapons;
     public int WeaponSelect = 0;
 
+    public GameObject whitescene;
+
+
+
     // Start is called before the first frame update
     void Start()
     {
-        
+       
     }
 
     // Update is called once per frame
@@ -28,15 +33,38 @@ public class UpgradeWeapons : MonoBehaviour
             if (i == WeaponSelect)
             {
                 weapon.gameObject.SetActive(true);
+               
 
             }
             else
             {
                 weapon.gameObject.SetActive(false);
+                
+
 
             }
 
             i++;
         }
+
+        
+            StartCoroutine(wait());
+        
     }
+
+
+    IEnumerator wait()
+    {
+
+       
+        yield return new WaitForSecondsRealtime(1);
+
+        whitescene.SetActive(true);
+        yield return new WaitForSecondsRealtime(1);
+        whitescene.SetActive(false);
+
+       // StopCoroutine(wait());
+
+    }
+
 }
