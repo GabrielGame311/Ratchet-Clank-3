@@ -10,12 +10,13 @@ public class UpgradeWeapons : MonoBehaviour
 
     public GameObject whitescene;
 
-
+    public GameObject Blue;
+    public GameObject Red;
 
     // Start is called before the first frame update
     void Start()
     {
-       
+        StartCoroutine(wait());
     }
 
     // Update is called once per frame
@@ -48,7 +49,7 @@ public class UpgradeWeapons : MonoBehaviour
         }
 
         
-            StartCoroutine(wait());
+            
         
     }
 
@@ -61,9 +62,14 @@ public class UpgradeWeapons : MonoBehaviour
 
         whitescene.SetActive(true);
         yield return new WaitForSecondsRealtime(1);
+        Blue.SetActive(false);
+        Red.SetActive(true);
         whitescene.SetActive(false);
 
-       // StopCoroutine(wait());
+        yield return new WaitForSecondsRealtime(2);
+        Blue.SetActive(true);
+        Red.SetActive(false);
+        // StopCoroutine(wait());
 
     }
 
