@@ -15,10 +15,23 @@ public class Bolts : MonoBehaviour
     float starttime;
     public static Bolts Bolt;
 
+    public float BonusUITime = 30;
+    float StartTimeBonus;
+    public float EndBonusTime = 8;
+    float StartEndBonusTime;
+    public int scoreMultiplier = 1;
+    public Animator animeBonus;
+    public AudioClip soundfx;
+    public bool IsBonus = false;
+    AudioSource sound;
+    private bool hasPlayedSound = false;
+    public TMP_Text Bonus_Text;
     void Start()
     {
         //bolt = PlayerPrefs.GetInt("Bolt", 0);
-
+        StartEndBonusTime = EndBonusTime;
+        sound = GetComponent<AudioSource>();
+        StartTimeBonus = BonusUITime;
         Bolt = GetComponent<Bolts>();
         //bolt = 0;
 
@@ -36,20 +49,63 @@ public class Bolts : MonoBehaviour
         if (BoltCount > 0)
         {
             CountTime -= Time.deltaTime;
+           
             BoltsCounting_Text.text = "+" + BoltCount.ToString();
         }
 
         if (CountTime <= 0)
         {
+            
             StartCoroutine(AddBoltsOverTime(BoltCount, 1));
             CountTime = starttime;
-            bolt += BoltCount;
+           // bolt += BoltCount * scoreMultiplier;
             BoltCount = 0;
             BoltsCounting_Text.text = "";
         }
 
+        if(IsBonus)
+        {
+
+            animeBonus.gameObject.SetActive(true);
+            Bonus_Text.text = "X" + scoreMultiplier.ToString();
+            if(BonusUITime < 0)
+            {
+                
+                animeBonus.SetTrigger("Closed");
+
+               
+
+                if (EndBonusTime < 0)
+                {
+
+                    BonusUITime = StartTimeBonus;
+                    EndBonusTime = StartEndBonusTime;
+                    scoreMultiplier = 1;
+                    IsBonus = false;
+                    animeBonus.gameObject.SetActive(false);
+                   
+
+                }
+                else
+                {
+                    EndBonusTime -= Time.deltaTime;
+                }
+            }
+            else
+            {
+                BonusUITime -= Time.deltaTime;
+            }
+
+
+        }
 
     }
+
+    public void Playsound()
+    {
+        sound.PlayOneShot(soundfx);
+    }
+
 
     IEnumerator AddBoltsOverTime(int boltCount, float duration)
     {

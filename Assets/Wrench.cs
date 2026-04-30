@@ -218,6 +218,10 @@ public class Wrench : MonoBehaviour
         {
             if (other.TryGetComponent(out AmmoCrate ammo)) ammo.Break(damage);
         }
+        if (other.tag == "BoltCrate")
+        {
+            Destroy(other.gameObject);
+        }
     }
 
     void SpawnEffect()

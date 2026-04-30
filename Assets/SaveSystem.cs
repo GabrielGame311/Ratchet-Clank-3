@@ -22,7 +22,7 @@ public static class SaveSystem
             SavedMap = LoadingScene.instance.LoadMap,
             CurrentMap = LoadingScene.instance.MapID,
             LoadGameCount = LoadMapName.Instance?.LoadGames_.Count ?? 0,
-            Bolt_ = GameObject.FindObjectOfType<Bolts>().bolt,
+            //Bolt_ = GameObject.FindObjectOfType<Bolts>().bolt,
           //  WeaponLvl = GameObject.FindObjectOfType<WeaponsUI>().Level,
             health = Player.Player_.maxHealth
         };

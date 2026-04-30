@@ -80,22 +80,24 @@ public class Menu : MonoBehaviour
 
     public void Resume()
     {
-        Time.timeScale = 1;
+       // Time.timeScale = 1;
        
         MainMenu.SetActive(false);
-        cine.enabled = true;
+        //cine.enabled = true;
         IsMenu = false;
-        Cursor.lockState = CursorLockMode.Locked;
+        //Cursor.lockState = CursorLockMode.Locked;
+        MenuMouseLocked.instance.Locked();
     }
 
     public void Pause()
     {
-        Time.timeScale = 0;
+       // Time.timeScale = 0;
         
         MainMenu.SetActive(true);
-        cine.enabled = false;
+        //cine.enabled = false;
         IsMenu = true;
-        Cursor.lockState = CursorLockMode.None;
+        // Cursor.lockState = CursorLockMode.None;
+        MenuMouseLocked.instance.Unlocked();
     }
 
 

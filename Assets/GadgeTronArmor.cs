@@ -111,7 +111,7 @@ public class GadgeTronArmor : MonoBehaviour
 
         // Target position is this armor object's position
         point.transform.position = new Vector3(transform.position.x, player.transform.position.y, transform.position.z);
-        yield return new WaitForSeconds(0);
+        yield return new WaitForSecondsRealtime(0);
         // Start "Run" animation
         anime2.SetBool("Run", true);
 
@@ -128,7 +128,7 @@ public class GadgeTronArmor : MonoBehaviour
                 player.transform.rotation = Quaternion.Slerp(player.transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
                 
             }
-
+            
             // Move player toward the target
             playerController.Move(direction * moveSpeedToPoint * Time.deltaTime);
 
@@ -141,10 +141,11 @@ public class GadgeTronArmor : MonoBehaviour
         
         // Stop "Run" animation before activating "Gadgetron"
         anime2.SetBool("Run", false);
-        yield return new WaitForSeconds(0.2f); // Small pause
+        yield return new WaitForSecondsRealtime(0.2f); // Small pause
         sound.PlayOneShot(soundFx);
 
         anime.SetBool("Gadgetron", true);
+        Time.timeScale = 0;
         isGadgeTron = true;
         
     }
@@ -159,8 +160,14 @@ public class GadgeTronArmor : MonoBehaviour
     public void DisableGadgetronArmor()
     {
         GameObject.FindObjectOfType<ArmorUI>().DisableArmorUI();
+       
     }
 
+
+    public void PlayerAnimeon()
+    {
+        Time.timeScale = 1;
+    }
 
     public void GadgeTron()
     {
@@ -172,7 +179,7 @@ public class GadgeTronArmor : MonoBehaviour
 
     public void GadgeTronExit()
     {
-        
+        Time.timeScale = 1;
         AllGameData.Instance.EnablePlayerDo();
         anime.SetBool("Gadgetron", false);
         sound.PlayOneShot(soundFx);
@@ -187,6 +194,7 @@ public class GadgeTronArmor : MonoBehaviour
 
     public void ChangeArmor()
     {
+        
         GameObject.FindObjectOfType<GadgeTronArmorUI>().Armor++;
         AllGameData.Instance.EnablePlayerDo();
         ArmorAnime.Play();
@@ -211,7 +219,8 @@ public class GadgeTronArmor : MonoBehaviour
     public void CancelAnime()
     {
         AllGameData.Instance.EnablePlayerDo();
-       // cam.enabled = false;
+       
+        // cam.enabled = false;
         if (playerMovement != null) playerMovement.enabled = true;
     }
 

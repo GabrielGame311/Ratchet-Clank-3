@@ -65,45 +65,48 @@ public class QuickSelect : MonoBehaviour
         {
             if (IsSelect)
             {
-                Time.timeScale = 1;
+                //Time.timeScale = 1;
                 
+                MenuMouseLocked.instance.Locked();
                 QuickSelects.SetActive(false);
                 if (GameObject.FindObjectOfType<WeaponAmmos>() != null)
                 {
                     GameObject.FindObjectOfType<WeaponAmmos>().enabled = true;
                 }
 
-                cine.enabled = true;
+               // cine.enabled = true;
                 IsSelect = false;
-                GameObject.FindObjectOfType<ThirdPersonCamera>().enabled = true;
+               // GameObject.FindObjectOfType<ThirdPersonCamera>().enabled = true;
                 if (!GameObject.FindObjectOfType<GadgeTronArmor>().isGadgeTron)
                 {
-                    
-                    
-                    Cursor.lockState = CursorLockMode.Locked;
+
+
+                    //Cursor.lockState = CursorLockMode.Locked;
+                   
                 }
                 
             }
             else
             {
-
-                cine.enabled = false;
+                MenuMouseLocked.instance.Unlocked();
+               // cine.enabled = false;
                 if (GameObject.FindObjectOfType<WeaponAmmos>() != null)
                 {
                     GameObject.FindObjectOfType<WeaponAmmos>().enabled = false;
                 }
                 Cursor.lockState = CursorLockMode.None;
                 QuickSelects.SetActive(true);
-                Time.timeScale = 0;
+               // Time.timeScale = 0;
                 IsSelect = true;
-                GameObject.FindObjectOfType<ThirdPersonCamera>().enabled = false;
+               // GameObject.FindObjectOfType<ThirdPersonCamera>().enabled = false;
 
 
                 if (!GameObject.FindObjectOfType<GadgeTronArmor>().isGadgeTron)
                 {
 
 
-                    Cursor.lockState = CursorLockMode.Locked;
+                    // Cursor.lockState = CursorLockMode.Locked;
+
                 }
             }
         }

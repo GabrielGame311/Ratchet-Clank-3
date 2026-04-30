@@ -64,7 +64,10 @@ public class ParticleTorret : MonoBehaviour
             other.GetComponent<HealthItem>().Break(damage);
             Destroy(gameObject);
         }
-
+        if (other.tag == "BoltCrate")
+        {
+            Destroy(other.gameObject);
+        }
     }
 
 

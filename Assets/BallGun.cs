@@ -46,7 +46,10 @@ public class BallGun : MonoBehaviour
             other.collider.GetComponent<AmmoCrate>().Break(Damage);
             Destroy(gameObject);
         }
-
+        if (other.collider.tag == "BoltCrate")
+        {
+            Destroy(other.gameObject);
+        }
         Destroy(gameObject);
     }
 

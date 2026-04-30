@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Animations;
 
 public class Torret : MonoBehaviour
 {
@@ -11,7 +12,8 @@ public class Torret : MonoBehaviour
     public Animator anime;
 
     public Transform spawn;
-   
+    public Transform spawn2;
+
     public float speed;
     public bool SeTheEnemie = false;
 
@@ -26,9 +28,10 @@ public class Torret : MonoBehaviour
     public float Distance;
     private int i = 0;
 
-
+    public int CountingShoot = 0;
     public float TimeShoot = 1;
     float StartShoot;
+    bool isSpawned = false;
 
     // Start is called before the first frame update
     void Start()
@@ -36,7 +39,7 @@ public class Torret : MonoBehaviour
         StartShoot = TimeShoot;
         torrets = GetComponent<Torret>();
         sound = GetComponent<AudioSource>();
-
+        anime = GetComponent<Animator>();
         sound.PlayOneShot(spawnsound);
        
 
@@ -86,7 +89,7 @@ public class Torret : MonoBehaviour
 
         if (SeTheEnemie)
         {
-
+            
             TimeShoot -= Time.deltaTime;
 
 
@@ -98,7 +101,8 @@ public class Torret : MonoBehaviour
             //spawn.transform.LookAt(enemie.transform);
             Turret.transform.LookAt(enemie.transform);
             shoot = true;
-            anime.SetBool("Shoot", true);
+            StartCoroutine(ShootAndDisable());
+
 
            
            
@@ -107,16 +111,58 @@ public class Torret : MonoBehaviour
         {
             anime.SetBool("Shoot", false);
             shoot = false;
+           
+            anime.enabled = true;
         }
       
     }
 
+    IEnumerator ShootAndDisable()
+    {
+        anime.SetBool("Shoot", true);
+
+        // Vänta till nästa frame så Animatorn hinner starta
+        yield return new WaitForSeconds(02f);
+
+        // Nu kan du stänga av den
+        anime.enabled = false;
+    }
+
     public void Shooting()
     {
-        ParticleSystem prefab = Instantiate(particle, spawn.transform.position, spawn.transform.rotation);
-        prefab.gameObject.GetComponent<Rigidbody>().linearVelocity = -spawn.transform.forward * speed;
-        Destroy(prefab.gameObject, 20);
-        
+
+        if(isSpawned)
+        {
+            if (spawn != null && spawn2 != null)
+            {
+                if (CountingShoot == 0)
+                {
+                    ParticleSystem prefab = Instantiate(particle, spawn.transform.position, spawn.transform.rotation);
+                    prefab.gameObject.GetComponent<Rigidbody>().linearVelocity = spawn.transform.forward * speed;
+                    Destroy(prefab.gameObject, 20);
+                    CountingShoot++;
+                }
+                else if (CountingShoot == 1)
+                {
+                    ParticleSystem prefab2 = Instantiate(particle, spawn2.transform.position, spawn.transform.rotation);
+                    prefab2.gameObject.GetComponent<Rigidbody>().linearVelocity = spawn.transform.forward * speed;
+                    Destroy(prefab2.gameObject, 20);
+                    CountingShoot--;
+                }
+            }
+            else if (spawn != null)
+            {
+                ParticleSystem prefab = Instantiate(particle, spawn.transform.position, spawn.transform.rotation);
+                prefab.gameObject.GetComponent<Rigidbody>().linearVelocity = spawn.transform.forward * speed;
+                Destroy(prefab.gameObject, 20);
+
+            }
+
+
+        }
+
+
+
 
     }
 
@@ -170,6 +216,8 @@ public class Torret : MonoBehaviour
     private void OnCollisionEnter(Collision collision)
     {
         anime.SetTrigger("Spawn");
+        isSpawned = true;
+        transform.rotation = Quaternion.identity;
         GetComponent<Rigidbody>().useGravity = false;
         GetComponent<Rigidbody>().isKinematic = true;
 

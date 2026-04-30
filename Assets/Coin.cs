@@ -71,7 +71,7 @@ public class Coin : MonoBehaviour
                 Bolts.Bolt.CountTime = 2;
 
                 sound.PlayOneShot(soundeffects);
-                Bolts.Bolt.BoltCount += boltCount;
+                Bolts.Bolt.BoltCount += boltCount * Bolts.Bolt.scoreMultiplier; 
 
                 Destroy(gameObject);
 

@@ -83,8 +83,18 @@ public class GunShooter : MonoBehaviour
                     if (Input.GetKeyDown(KeyCode.Mouse0))
                     {
 
+                        //Isshoot = true;
+                        //shoot();
+                    }
+
+                    if(Input.GetKey(KeyCode.Mouse0))
+                    {
                         Isshoot = true;
                         shoot();
+                    }
+                    else
+                    {
+                        Isshoot = false;
                     }
                 }
             }

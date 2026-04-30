@@ -58938,19 +58938,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5543905689527651199, guid: a7882c718d905024ea97f4ac8bb3d061, type: 3}
       propertyPath: m_LocalRotation.w
-      value: -0.4504585
+      value: 0.4504585
       objectReference: {fileID: 0}
     - target: {fileID: 5543905689527651199, guid: a7882c718d905024ea97f4ac8bb3d061, type: 3}
       propertyPath: m_LocalRotation.x
-      value: -0.009647851
+      value: 0.009647853
       objectReference: {fileID: 0}
     - target: {fileID: 5543905689527651199, guid: a7882c718d905024ea97f4ac8bb3d061, type: 3}
       propertyPath: m_LocalRotation.y
-      value: 0.8925406
+      value: -0.89254063
       objectReference: {fileID: 0}
     - target: {fileID: 5543905689527651199, guid: a7882c718d905024ea97f4ac8bb3d061, type: 3}
       propertyPath: m_LocalRotation.z
-      value: -0.019116327
+      value: 0.01911633
       objectReference: {fileID: 0}
     - target: {fileID: 5543905689837884227, guid: a7882c718d905024ea97f4ac8bb3d061, type: 3}
       propertyPath: m_LocalPosition.x
@@ -175110,6 +175110,7 @@ MonoBehaviour:
   damageColor: {r: 1, g: 0, b: 0, a: 1}
   startColor: {r: 1, g: 1, b: 1, a: 1}
   animes: {fileID: 0}
+  ExplodeTime: 0
 --- !u!65 &919132148842473041
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -307573,6 +307574,7 @@ MonoBehaviour:
   damageColor: {r: 1, g: 0, b: 0, a: 1}
   startColor: {r: 1, g: 1, b: 1, a: 1}
   animes: {fileID: 0}
+  ExplodeTime: 0
 --- !u!1 &3829652343780194366
 GameObject:
   m_ObjectHideFlags: 0

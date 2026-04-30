@@ -10,7 +10,7 @@ public class HealthItem : MonoBehaviour
 
     public GameObject healthparticle;
     public GameObject crackedobj;
-    
+    public GameObject ParticleFollow;
 
     public GameObject spawn;
     // Start is called before the first frame update
@@ -26,6 +26,7 @@ public class HealthItem : MonoBehaviour
 
     }
 
+   
 
     public void Break(int damage)
     {
@@ -34,6 +35,8 @@ public class HealthItem : MonoBehaviour
 
         if (health <= 0)
         {
+            ParticleFollow.transform.parent = null;
+
             Destroy(gameObject);
            // Instantiate(Cracked, transform.position, transform.rotation);
             Instantiate(healthparticle, spawn.transform.position, transform.rotation);

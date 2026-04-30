@@ -95,7 +95,8 @@ public class TorretGun : MonoBehaviour
         {
             var balls = GameObject.Instantiate(Torretv5, ballpos.transform.position, Quaternion.identity);
             balls.GetComponent<Rigidbody>().AddForce(ballpos.transform.forward * BulletSpeed);
-            
+           
+            balls.transform.rotation = Quaternion.identity;
             balls.GetComponent<Ball>().torret = Torretv5;
 
 

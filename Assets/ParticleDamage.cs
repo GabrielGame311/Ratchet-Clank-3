@@ -40,6 +40,10 @@ public class ParticleDamage : MonoBehaviour
         {
             Destroy(other.gameObject);
         }
+        if (other.tag == "BoltCrate")
+        {
+            Destroy(other.gameObject);
+        }
 
     }
 

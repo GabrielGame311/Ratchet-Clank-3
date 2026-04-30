@@ -43,10 +43,18 @@ public class ObjectDamage : MonoBehaviour
         {
             Destroy(other.gameObject);
         }
+        if (other.tag == "BoltCrate")
+        {
+            Destroy(other.gameObject);
+        }
         if (other.tag == "Player")
         {
 
             other.GetComponent<Player>().TakeDamage(Damage);
+        }
+        if (other.tag == "BoltCrate")
+        {
+            Destroy(other.gameObject);
         }
     }
 

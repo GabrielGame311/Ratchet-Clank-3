@@ -71,9 +71,12 @@ public class ParticleShootgun : MonoBehaviour
                 other.GetComponent<HealthItem>().Break(Damage);
                // Destroy(gameObject);
             }
-        
 
-       
+        if (other.tag == "BoltCrate")
+        {
+            Destroy(other.gameObject);
+        }
+
     }
 
 
