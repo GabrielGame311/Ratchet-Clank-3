@@ -8,7 +8,7 @@ public class BonusBoltCrate : MonoBehaviour
 
 
 
-
+    public GameObject Effect;
 
     int box = 1;
 
@@ -29,6 +29,8 @@ public class BonusBoltCrate : MonoBehaviour
 
     private void OnDestroy()
     {
+        GameObject pl = Instantiate(Effect, transform.position, transform.rotation);
+        Destroy(pl, 3);
         Bolts boltsScript = GameObject.FindObjectOfType<Bolts>();
 
         if (boltsScript != null)
@@ -39,6 +41,8 @@ public class BonusBoltCrate : MonoBehaviour
             // Valfritt: Om du vill behålla din gamla bool också
             boltsScript.IsBonus = true;
         }
+
+       
     }
 
 
