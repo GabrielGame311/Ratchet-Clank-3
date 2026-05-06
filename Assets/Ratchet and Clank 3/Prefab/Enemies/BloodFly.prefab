@@ -27,6 +27,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1160929980418768767}
+  serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0.8562858, z: -0, w: 0.5165024}
   m_LocalPosition: {x: -493.88, y: 316.12, z: -573.36}
   m_LocalScale: {x: 1, y: 1, z: 1}
@@ -34,7 +35,6 @@ Transform:
   m_Children:
   - {fileID: 1699768936980414557}
   m_Father: {fileID: 0}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: -117.804, z: 0}
 --- !u!114 &1160929980418768753
 MonoBehaviour:
@@ -64,6 +64,7 @@ MonoBehaviour:
   damageColor: {r: 1, g: 0, b: 0, a: 1}
   startColor: {r: 1, g: 1, b: 1, a: 1}
   animes: {fileID: 1160929981531645832}
+  ExplodeTime: 2
 --- !u!135 &1160929980418768752
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -72,9 +73,17 @@ SphereCollider:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1160929980418768767}
   m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
   m_IsTrigger: 0
+  m_ProvidesContacts: 0
   m_Enabled: 1
-  serializedVersion: 2
+  serializedVersion: 3
   m_Radius: 0.7181182
   m_Center: {x: 0, y: 0.2681182, z: 0}
 --- !u!114 &1160929980418768755
@@ -111,10 +120,21 @@ Rigidbody:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1160929980418768767}
-  serializedVersion: 2
+  serializedVersion: 5
   m_Mass: 1
-  m_Drag: 0
-  m_AngularDrag: 0.05
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
   m_UseGravity: 0
   m_IsKinematic: 0
   m_Interpolate: 0
@@ -125,6 +145,7 @@ PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Modification:
+    serializedVersion: 3
     m_TransformParent: {fileID: 1160929980418768754}
     m_Modifications:
     - target: {fileID: -8856582647533846912, guid: 6d61a41504a19d24cbba74fac24e6598, type: 3}
@@ -396,6 +417,12 @@ PrefabInstance:
       value: 8
       objectReference: {fileID: 0}
     m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 6d61a41504a19d24cbba74fac24e6598, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1160929981531645832}
   m_SourcePrefab: {fileID: 100100000, guid: 6d61a41504a19d24cbba74fac24e6598, type: 3}
 --- !u!4 &1699768936980414557 stripped
 Transform:
@@ -409,7 +436,7 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
 --- !u!95 &1160929981531645832
 Animator:
-  serializedVersion: 4
+  serializedVersion: 7
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -423,7 +450,9 @@ Animator:
   m_ApplyRootMotion: 0
   m_LinearVelocityBlending: 0
   m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
   m_WarningMessage: 
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorControllerStateOnDisable: 0
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
