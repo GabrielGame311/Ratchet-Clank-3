@@ -21,7 +21,7 @@ public class Water : MonoBehaviour
         {
 
             //waterscreen.SetActive(true);
-
+            
             isTrigger = true;
 
 

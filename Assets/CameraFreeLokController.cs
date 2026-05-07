@@ -16,8 +16,7 @@ public class CameraFreeLokController : MonoBehaviour
    
     private bool wasFalling = false;
     public RatchetController playerController;
-
-
+   
 
     private float lastPlayerY; // Håller koll på spelarens Y-position från föregående frame
     private bool wasJumping = false; // Håller koll på om spelaren hoppade tidigare
@@ -42,7 +41,7 @@ public class CameraFreeLokController : MonoBehaviour
         lastPlayerY = player.position.y; // Spara startvärdet
     }
 
-    void Update()
+    void LateUpdate()
     {
         if (player == null || playerController == null) return;
 
@@ -50,41 +49,23 @@ public class CameraFreeLokController : MonoBehaviour
 
         bool isJumping = playerController.IsJump;
         bool isGlide = playerController.ISHelikopter;
-        bool isFallingOrSliding = player.position.y < lastPlayerY; // Spelaren rör sig neråt
+        // Kolla om vi faller med en liten säkerhetsmarginal
+        bool isFalling = player.position.y < (lastPlayerY - 0.001f);
 
-        // Om spelaren är på marken, återställ wasJumping
-        if (isGrounded)
-        {
-            wasJumping = false;
-        }
+        if (isGrounded) wasJumping = false;
+        if (isJumping) wasJumping = true;
 
-        // Uppdatera targetY endast om:
-        // - Spelaren är på marken
-        // - Spelaren glider
-        // - Spelaren faller men har INTE hoppat nyligen
-        if (isGrounded || isGlide || (!wasJumping && isFallingOrSliding))
+        // Logiken för när kameran SKA följa med i höjdled
+        if (isGrounded || isGlide || (!wasJumping && isFalling))
         {
+            // Vi använder en mjuk övergång till spelarens höjd
             targetY = Mathf.Lerp(targetY, player.position.y, Time.deltaTime * ySmoothSpeed);
-           
         }
-        // Uppdatera kamerans position utan att ändra targetY under hopp
-        targetPosition = new Vector3(player.position.x, targetY, player.position.z);
+        // Om vi hoppar (wasJumping == true) rör vi inte targetY, 
+        // så kameran stannar på den höjd vi startade hoppet från.
 
-        
-            transform.position = targetPosition;
-        
-        // Spara spelarens Y-position för nästa frame
+        transform.position = new Vector3(player.position.x, targetY, player.position.z);
         lastPlayerY = player.position.y;
-
-
-       
-
-      
-        // Om spelaren hoppar, sätt wasJumping till true
-        if (isJumping)
-        {
-            wasJumping = true;
-        }
     }
 
 

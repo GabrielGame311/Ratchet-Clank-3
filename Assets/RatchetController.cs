@@ -556,6 +556,8 @@ public class RatchetController : MonoBehaviour
         {
             isClimbing = true;
         }
+
+       
     }
 
     void OnTriggerExit(Collider other)
@@ -565,6 +567,7 @@ public class RatchetController : MonoBehaviour
             isClimbing = false;
             gravity = true;
         }
+       
     }
 
     IEnumerator waitboots()
