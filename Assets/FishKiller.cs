@@ -11,10 +11,13 @@ public class FishKiller : MonoBehaviour
     public float Impuls;
     public float rotate;
     Rigidbody rb;
+    public AudioClip Soundfx;
+    AudioSource sound;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        sound = GetComponent<AudioSource>();
         rb = GetComponent<Rigidbody>();
         anime = GetComponentInChildren<Animator>();
         StartCoroutine(wait());
@@ -48,6 +51,7 @@ public class FishKiller : MonoBehaviour
         yield return new WaitForSeconds(0);
 
         anime.SetTrigger("Eat");
+        sound.PlayOneShot(Soundfx);
         GameObject.FindObjectOfType<Player>().TakeDamage(250);
         GameObject.FindObjectOfType<Player>().GetComponent<CharacterController>().enabled = false;
         yield return new WaitForSeconds(1);

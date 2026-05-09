@@ -27,8 +27,9 @@ public class EnemiesHealth : MonoBehaviour
     public Color startColor = Color.white;        // Ursprunglig färg
     public Animator animes;
 
-
-  
+    public bool DamageExplode = false;
+    public float ChangeColorTime = 0.2f;
+    public bool damagish = false;
 
     public float ExplodeTime;
     
@@ -62,12 +63,45 @@ public class EnemiesHealth : MonoBehaviour
 
     }
 
+
+   
+
     private void Update()
     {
 
 
+        if(damagish)
+        {
+            ChangeColorTime -= Time.deltaTime;
+            if (ChangeColorTime < 0)
+            {
+                damagish = false;
+                ChangeColorTime = 0.2f;
+                foreach (Renderer renderer in MaterialRed)
+                {
+                    foreach (Material mat in renderer.materials)
+                    {
+                        mat.color = startColor;  // Återställ till startfärgen
+                    }
+                }
+               
 
-
+                
+            }
+            else
+            {
+               
+                foreach (Renderer renderer in MaterialRed)
+                {
+                    foreach (Material mat in renderer.materials)
+                    {
+                        mat.color = damageColor;  // Sätter materialets färg till röd
+                    }
+                }
+            }
+            
+        }
+        
        
 
     }
@@ -85,7 +119,7 @@ public class EnemiesHealth : MonoBehaviour
 
         // Väntar under en viss tid
         yield return new WaitForSeconds(colorChangeDuration);
-
+       
         // Återställer färgen till ursprungsfärgen för alla material
         foreach (Renderer renderer in MaterialRed)
         {
@@ -94,6 +128,8 @@ public class EnemiesHealth : MonoBehaviour
                 mat.color = startColor;  // Återställ till startfärgen
             }
         }
+
+        
     }
 
 
@@ -102,10 +138,25 @@ public class EnemiesHealth : MonoBehaviour
         health -= damage;
 
 
+        damagish = true;
+        //StartCoroutine(ChangeColorTemporarily());
 
-        StartCoroutine(ChangeColorTemporarily());
+        if (DamageExplode)
+        {
+            if (ExplodePrefab != null)
+            {
+                Transform exp = Instantiate(ExplodePrefab, transform.position, transform.rotation);
+                Destroy(exp.gameObject, 4);
+                foreach (Rigidbody gm in exp.GetComponentsInChildren<Rigidbody>())
+                {
+                    gm.AddExplosionForce(10, transform.position, 5);
 
+                    DamageExplode = false;
+                    ExplodePrefab = null;
+                }
 
+            }
+        }
 
 
 
@@ -127,7 +178,7 @@ public class EnemiesHealth : MonoBehaviour
 
         }
         animes.SetTrigger("DamageRed");
-
+       
     }
 
 
@@ -212,19 +263,25 @@ public class EnemiesHealth : MonoBehaviour
 
         Debug.Log("Destroy!");
 
-        if (ExplodePrefab != null)
+
+        if(!DamageExplode)
         {
-            Transform exp = Instantiate(ExplodePrefab, transform.position, transform.rotation);
-            Destroy(exp.gameObject, 4);
-            foreach (Rigidbody gm in exp.GetComponentsInChildren<Rigidbody>())
+            if (ExplodePrefab != null)
             {
-                gm.AddExplosionForce(10, transform.position, 5);
+                Transform exp = Instantiate(ExplodePrefab, transform.position, transform.rotation);
+                Destroy(exp.gameObject, 4);
+                foreach (Rigidbody gm in exp.GetComponentsInChildren<Rigidbody>())
+                {
+                    gm.AddExplosionForce(10, transform.position, 5);
 
-               
+
+                }
+
+
             }
-           
-
         }
+
+       
 
        
 
