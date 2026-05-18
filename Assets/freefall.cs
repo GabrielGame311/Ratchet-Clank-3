@@ -114,7 +114,7 @@ public class freefall : MonoBehaviour
             {
                 isHelicoptering = true;
                 if (HelikopterController.Instance != null)
-                    HelikopterController.Instance.StartHelikopter();
+                    HelikopterController.Instance.StartHelikopter(isHelicoptering);
 
                 anim.SetBool("FreeFall", false);
                 

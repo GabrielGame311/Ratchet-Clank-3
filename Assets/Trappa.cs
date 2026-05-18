@@ -12,7 +12,8 @@ public class Trappa : MonoBehaviour
     private List<GameObject> trappaList = new List<GameObject>(); // Renamed for clarity
     private Transform player;
     CharacterController controller;
-
+    
+    
     void Start()
     {
         // Initialize components
@@ -26,50 +27,30 @@ public class Trappa : MonoBehaviour
 
     void Update()
     {
-        if (isTrappa)
-        {
-            if (Input.GetKey(KeyCode.Space))
-            {
-                // Set climbing animation
-                anime.SetBool("Trappa", true);
-
-                // Move player up the ladder
-                player.transform.position += Vector3.up * Time.deltaTime * speed;
-
-                // Check if the player has reached the top of the ladder
-                if (ladderTopY > 0 && player.transform.position.y >= ladderTopY)
-                {
-                    ExitLadder();
-                }
-            }
-            else
-            {
-                // Stop climbing animation if Space is not pressed
-                anime.SetBool("Trappa", false);
-            }
-        }
+       
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Trappa"))
+        if (other.CompareTag("Trappa") && RatchetController.RatchetController_.climbCooldown <= 0 && RatchetController.RatchetController_._directionY <= 0.5f)
         {
-            isTrappa = true;
-            trappaList.Add(other.gameObject);
-            controller.enabled = false;
-           
-            
-            
+          RatchetController.RatchetController_.isClimbing = true;
+            RatchetController.RatchetController_._directionY = 0;
+            RatchetController.RatchetController_.isGliding = false;
+            RatchetController.RatchetController_.anime.SetBool("Run", false);
+            //RatchetController.RatchetController_.transform.forward = -other.transform.forward;
         }
+
     }
 
-    private void OnTriggerExit(Collider other)
+    void OnTriggerStay(Collider other)
     {
-        if (other.CompareTag("Trappa"))
-        {
-            ExitLadder();
-        }
+        if (other.CompareTag("Trappa") && RatchetController.RatchetController_.climbCooldown <= 0 && RatchetController.RatchetController_._directionY <= 0)
+            RatchetController.RatchetController_.isClimbing = true;
+            RatchetController.RatchetController_.anime.SetBool("Run", false);
     }
+
+    void OnTriggerExit(Collider other) { if (other.CompareTag("Trappa")) RatchetController.RatchetController_.isClimbing = false; }
 
     private void ExitLadder()
     {

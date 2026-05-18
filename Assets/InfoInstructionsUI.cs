@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using System.Reflection;
 
 public class InfoInstructionsUI : MonoBehaviour
 {
@@ -12,10 +13,17 @@ public class InfoInstructionsUI : MonoBehaviour
     public int ItsGame;
     public KeyCode Key_;
     public float TimeCount;
+    public bool Istrigger = false;
+    public AudioSource sound;
+
+    public Animator anime;
+    bool isplaying = false;
     // Start is called before the first frame update
     void Start()
     {
+        //anime = GetComponentInChildren<Animator>();
         instance = this;
+        sound = GetComponent<AudioSource>();
     }
 
     // Update is called once per frame
@@ -25,36 +33,90 @@ public class InfoInstructionsUI : MonoBehaviour
         {
             if (Input.GetKeyDown(Key_))
             {
-                HideInstruction();
+                //HideInstruction();
 
 
             }
         }
+        if (sound.isPlaying)
+        {
+            Instruction.SetActive(true);
+            if (ItsGame == 1)
+            {
+                GameThyrra_UI.Instance.GamePanel.SetActive(false);
+            }
+            
+        }
+        else 
+        {
+            sound.clip = null;
+            if(Istrigger) 
+            {
+                  
+                        anime.SetTrigger("Open");
+                        StartCoroutine(wait2());  
+                           
+                    
+                   Istrigger = false;
+            }
+            
+          
+            if (ItsGame == 1)
+            {
+                GameThyrra_UI.Instance.GamePanel.SetActive(true);
+            }
+        }
 
-        
+       
     }
+
+
+
+        IEnumerator wait2()
+        {
+            yield return new WaitForSeconds(0.5f);
+            Instruction.SetActive(false);
+            isplaying = false;
+        }
 
     public void SetInstruction(string text)
     {
-        text_.text = text;
-        Instruction.SetActive(true);
 
-        StartCoroutine(wait());
-        if(ItsGame == 1)
+
+
+        text_.text = text;
+
+        if(sound.clip != null)
         {
-            GameThyrra_UI.Instance.GamePanel.SetActive(false);
+            sound.Play();
+
         }
+        else
+        {
+            StartCoroutine(wait());
+        }
+
+      
+
+       
+
+
+
+
+
+           
+       
 
     }
 
     IEnumerator wait()
     {
 
-
-        yield return new WaitForSeconds(TimeCount);
-
-
-        HideInstruction();
+        Instruction.SetActive(true);
+        yield return new WaitForSeconds(8);
+        anime.SetTrigger("Open");
+        yield return new WaitForSeconds(0.5f);
+       HideInstruction();
 
     }
 
@@ -64,7 +126,7 @@ public class InfoInstructionsUI : MonoBehaviour
     public void HideInstruction()
     {
 
-
+        
         Instruction.SetActive(false);
 
         if (ItsGame == 1)

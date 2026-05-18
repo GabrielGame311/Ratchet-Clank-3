@@ -61,10 +61,14 @@ public class CameraFreeLokController : MonoBehaviour
             // Vi använder en mjuk övergång till spelarens höjd
             targetY = Mathf.Lerp(targetY, player.position.y, Time.deltaTime * ySmoothSpeed);
         }
-        // Om vi hoppar (wasJumping == true) rör vi inte targetY, 
-        // så kameran stannar på den höjd vi startade hoppet från.
+        else if(RatchetController.RatchetController_.isClimbing)
+        {
+            targetY = Mathf.Lerp(targetY, player.position.y, Time.deltaTime * ySmoothSpeed);
+        }
+            // Om vi hoppar (wasJumping == true) rör vi inte targetY, 
+            // så kameran stannar på den höjd vi startade hoppet från.
 
-        transform.position = new Vector3(player.position.x, targetY, player.position.z);
+            transform.position = new Vector3(player.position.x, targetY, player.position.z);
         lastPlayerY = player.position.y;
     }
 

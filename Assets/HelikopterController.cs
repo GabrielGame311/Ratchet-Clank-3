@@ -25,10 +25,10 @@ public class HelikopterController : MonoBehaviour
     }
 
 
-    public void StartHelikopter()
+    public void StartHelikopter(bool ishelikopter)
     {
-        anime.SetBool("Start", true);
-        skinanime.SetBool("Fly", true);
+        anime.SetBool("Start", ishelikopter);
+        skinanime.SetBool("Fly", ishelikopter);
     }
 
     public void CancelHelikopter()
