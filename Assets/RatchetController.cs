@@ -45,13 +45,24 @@ public class RatchetController : MonoBehaviour
     public float climbCooldown = 0f;
     public float climbHorizontalSpeed = 3f;
 
+
+    //JUMP
+
+    float JumpHorizontalSpeed;
+    bool IsJumping = false;
+    float ySpeed;
+    float jumpButtonGracePeriod;
+    float? lastGroundedTime;
+    float? jumpButtonPressedTime;
+    float orginalStepOffset;
+
     void Start()
     {
         if (!cameraTransform) cameraTransform = Camera.main.transform;
         RatchetController_ = this;
         MyController = GetComponent<CharacterController>();
         Cursor.lockState = CursorLockMode.Locked;
-
+        
         // Försök hitta Cinemachine automatiskt om den inte är satt i inspektorn
         if (cine == null) cine = GameObject.FindObjectOfType<CinemachineFreeLook>();
     }
@@ -70,7 +81,10 @@ public class RatchetController : MonoBehaviour
 
         if (CanMove)
         {
-            
+
+
+           
+
             // Input hantering
             x = Input.GetAxisRaw("Horizontal");
             z = Input.GetAxisRaw("Vertical");
@@ -89,17 +103,43 @@ public class RatchetController : MonoBehaviour
             }
 
             // Hopp-indata (använder även IsJump för att synka med dina andra skript)
-            
-            
-            
+
+           
+
 
             MyController.Move(new Vector3(0, _directionY, 0) * Time.deltaTime);
             HandleBoots();
             HandleHelicopter();
             HandleStandardJump();
+
+            if (MyController.isGrounded)
+            {
+                lastGroundedTime = Time.time;
+                MyController.stepOffset = orginalStepOffset;
+
+                // Sätt bools för markläge
+                anime.SetBool("IsGrounded", true);
+                anime.SetBool("IsJumping", false);
+                anime.SetBool("IsFalling", false);
+            }
+            else
+            {
+                MyController.stepOffset = 0;
+                anime.SetBool("IsGrounded", false);
+
+                // Om karaktären rör sig nedåt i luften faller den
+                if (_directionY < -1f)
+                {
+                    anime.SetBool("IsJumping", false);
+                    anime.SetBool("IsFalling", true);
+                    anime.SetBool("IsDoubleJump", false);
+                }
+            }
         }
     }
 
+
+    
     void HandleClimbingMovement()
     {
         _directionY = 0;
@@ -111,7 +151,7 @@ public class RatchetController : MonoBehaviour
             isClimbing = false;
             climbCooldown = 0.3f;
             _directionY = JumpSpeed;
-            anime.SetTrigger("Jump");
+            anime.SetBool("IsJumping", true);
             return;
         }
 
@@ -145,23 +185,31 @@ public class RatchetController : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Space) && !isClimbing)
         {
-            if (MyController.isGrounded)
+            if (MyController.isGrounded || (lastGroundedTime != null && Time.time - lastGroundedTime.Value <= jumpButtonGracePeriod))
             {
                 IsJump = true;
                 _directionY = JumpSpeed;
-                anime.SetTrigger("Jump");
+                anime.SetBool("IsJumping", true);
+                anime.SetBool("IsDoubleJump", false);
+                // anime.SetBool("IsFalling", false);
+                jumpButtonPressedTime = Time.time;
+
                 doublejump = true;
                 MyController.Move(Vector3.up * 0.1f);
             }
             else if (doublejump)
             {
                 _directionY = JumpSpeed * doublejumpMultiple;
-                anime.SetTrigger("DoubleJump");
+                // anime.SetTrigger("DoubleJump");
+                anime.SetBool("IsDoubleJump", true);
+                // anime.SetBool("IsJumping", true);
+                // anime.SetBool("IsFalling", false);
                 doublejump = false;
             }
         }
+        ySpeed = _directionY;
 
-       
+
     }
 
     void ApplyMovementAndGravity(Vector3 moveInput)

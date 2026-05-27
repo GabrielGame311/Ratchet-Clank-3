@@ -24,7 +24,8 @@ public class NableNative : MonoBehaviour
 
     public Animator anime;
     public float PlayerDistance;
-
+    public AudioClip[] SoundFx;
+    public int SoundInt;
     public float PatrolTime;
 
     private bool patrollingRight = true;
@@ -205,6 +206,10 @@ public class NableNative : MonoBehaviour
                                         // Mark finns! Spring mot spelaren
                                         transform.position = Vector3.MoveTowards(transform.position, Player_.transform.position, RunSpeed * Time.deltaTime);
                                         anime.SetBool("Run", true);
+                                        // Rotera fortfarande mot spelaren så den ser arg ut vid kanten
+                                        Vector3 direction = (Player_.transform.position - transform.position).normalized;
+                                        Quaternion lookRotation = Quaternion.LookRotation(new Vector3(direction.x, 0, direction.z));
+                                        transform.rotation = Quaternion.RotateTowards(transform.rotation, lookRotation, RotateSpeed * Time.deltaTime);
                                     }
                                     else
                                     {
@@ -213,16 +218,13 @@ public class NableNative : MonoBehaviour
                                         anime.SetBool("Walking", true);
 
                                         // Backa långsamt bort från kanten
-                                        transform.position = Vector3.MoveTowards(transform.position, transform.position - transform.forward, WalkSpeed * Time.deltaTime);
+                                       // transform.position = Vector3.MoveTowards(transform.position, transform.position - transform.forward, WalkSpeed * Time.deltaTime);
 
                                         // Valfritt: Få den att se sig omkring (Looking animation)
                                         // anime.SetTrigger("Looking"); 
                                     }
 
-                                    // Rotera fortfarande mot spelaren så den ser arg ut vid kanten
-                                    Vector3 direction = (Player_.transform.position - transform.position).normalized;
-                                    Quaternion lookRotation = Quaternion.LookRotation(new Vector3(direction.x, 0, direction.z));
-                                    transform.rotation = Quaternion.RotateTowards(transform.rotation, lookRotation, RotateSpeed * Time.deltaTime);
+                                    
                                 }
 
                                
@@ -293,10 +295,13 @@ public class NableNative : MonoBehaviour
                 {
                     if (IsGroundAhead())
                     {
+                        
 
+                       
                         // Mark finns! Spring mot spelaren
                         transform.position = Vector3.MoveTowards(transform.position, Player_.transform.position, RunSpeed * Time.deltaTime);
                         anime.SetBool("Run", true);
+                        
                     }
                     else
                     {
@@ -309,12 +314,16 @@ public class NableNative : MonoBehaviour
 
                         // Valfritt: Få den att se sig omkring (Looking animation)
                         // anime.SetTrigger("Looking"); 
+                        
                     }
 
-                    // Rotera fortfarande mot spelaren så den ser arg ut vid kanten
-                    Vector3 direction = (Player_.transform.position - transform.position).normalized;
-                    Quaternion lookRotation = Quaternion.LookRotation(new Vector3(direction.x, 0, direction.z));
-                    transform.rotation = Quaternion.RotateTowards(transform.rotation, lookRotation, RotateSpeed * Time.deltaTime);
+
+                        // Rotera fortfarande mot spelaren så den ser arg ut vid kanten
+                        Vector3 direction = (Player_.transform.position - transform.position).normalized;
+                        Quaternion lookRotation = Quaternion.LookRotation(new Vector3(direction.x, 0, direction.z));
+                        transform.rotation = Quaternion.RotateTowards(transform.rotation, lookRotation, RotateSpeed * Time.deltaTime);
+                    
+
                 }
 
 
