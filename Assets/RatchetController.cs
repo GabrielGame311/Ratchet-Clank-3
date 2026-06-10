@@ -297,13 +297,17 @@ public class RatchetController : MonoBehaviour
     // --- TRIGGERS (Viktigt för Trappa.cs) ---
     void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Trappas") && climbCooldown <= 0 && _directionY <= 0.5f)
+        if (other.tag == "Trappas" && climbCooldown <= 0 && _directionY <= 0.5f)
         {
             //isClimbing = true;
             //_directionY = 0;
            // transform.forward = -other.transform.forward;
         }
+
+        
     }
+
+    
 
     // Dummy metoder för att undvika fler fel
     public void moves(InputAction.CallbackContext cn) { }

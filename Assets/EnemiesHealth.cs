@@ -59,7 +59,7 @@ public class EnemiesHealth : MonoBehaviour
         sound = GetComponent<AudioSource>();
 
 
-        animes = animes.GetComponent<Animator>();
+       
 
     }
 
@@ -137,7 +137,7 @@ public class EnemiesHealth : MonoBehaviour
     {
         health -= damage;
 
-
+        
         damagish = true;
         //StartCoroutine(ChangeColorTemporarily());
 
@@ -178,7 +178,7 @@ public class EnemiesHealth : MonoBehaviour
 
         }
         animes.SetTrigger("DamageRed");
-       
+
     }
 
 
@@ -288,48 +288,67 @@ public class EnemiesHealth : MonoBehaviour
         //WeaponsUI.WeaponsUI_.levelAmount += LevelXp;
         Instantiate(Bolt, transform.position, transform.rotation);
 
-        if (EnemiesMission.instance.gameObject.activeSelf == true)
+
+        if(EnemiesMission.instance != null)
         {
-            EnemiesMission.instance.EnemiesList.Remove(gameObject);
+
+            if (EnemiesMission.instance.gameObject.activeSelf == true)
+            {
+                EnemiesMission.instance.EnemiesList.Remove(gameObject);
+            }
         }
 
-        if (RocketMission.RocketMission_.gameObject.activeSelf == true)
+        if (RocketMission.RocketMission_ != null)
         {
-            RocketMission.RocketMission_.DropShip.Remove(gameObject);
+
+            if (RocketMission.RocketMission_.gameObject.activeSelf == true)
+            {
+                RocketMission.RocketMission_.DropShip.Remove(gameObject);
+            }
+            if (RocketMission.RocketMission_.gameObject.activeSelf == true)
+            {
+                RocketMission.RocketMission_.Enemies.Remove(gameObject);
+            }
+            if (RocketMission.RocketMission_.gameObject.activeSelf == true)
+            {
+                RocketMission.RocketMission_.Rockets.Remove(gameObject);
+            }
         }
-        if (RocketMission.RocketMission_.gameObject.activeSelf == true)
-        {
-            RocketMission.RocketMission_.Enemies.Remove(gameObject);
-        }
-        if (RocketMission.RocketMission_.gameObject.activeSelf == true)
-        {
-            RocketMission.RocketMission_.Rockets.Remove(gameObject);
-        }
 
 
 
 
+
+        // 1. Ge XP till vapnet om UI:t finns
         WeaponsUI ui = FindObjectOfType<WeaponsUI>();
         if (ui != null)
         {
             ui.levelAmount += LevelXp;
         }
 
-        if (GameObject.FindObjectOfType<SpawnTime>().DropshipsSpawned != null)
+        // 2. Sök efter SpawnTime-skriptet EN gång och spara det i en variabel
+        SpawnTime spawnTime = FindObjectOfType<SpawnTime>();
+
+        // 3. Gör en null-check: Finns SpawnTime i scenen just nu?
+        if (spawnTime != null)
         {
-            GameObject.FindObjectOfType<SpawnTime>().DropshipsSpawned.Remove(gameObject);
+            // Om det finns, kontrollera och ta bort från listorna säkert
+            if (spawnTime.DropshipsSpawned != null)
+            {
+                spawnTime.DropshipsSpawned.Remove(gameObject);
+            }
+
+            if (spawnTime.EnemiesSpawned != null)
+            {
+                spawnTime.EnemiesSpawned.Remove(gameObject);
+            }
         }
-        if(GameObject.FindObjectOfType<SpawnTime>().EnemiesSpawned != null)
-        {
-            GameObject.FindObjectOfType<SpawnTime>().EnemiesSpawned.Remove(gameObject);
-        }
 
-        
-        
 
-       
 
-        
+
+
+
 
 
         MonoBehaviour[] scripts = GetComponents<MonoBehaviour>();

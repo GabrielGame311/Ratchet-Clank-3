@@ -62,7 +62,7 @@ public class GalacticRangers : MonoBehaviour
     float StartPatrolTime;
 
     private bool returning = false;
-
+    public static GalacticRangers instance;
 
     public bool RangersModeActive = true;
 
@@ -71,6 +71,7 @@ public class GalacticRangers : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        instance = this;
         StartPatrolTime = PatrolIdleTime;
         Controller = GetComponent<CharacterController>();
         rb = GetComponent<Rigidbody>();
@@ -396,7 +397,6 @@ public class GalacticRangers : MonoBehaviour
            
 
         }
-      
 
 
 
@@ -411,6 +411,13 @@ public class GalacticRangers : MonoBehaviour
 
 
 
+
+        if (target == null)
+        {
+            return;
+        }
+
+        // Din gamla kod fortsätter här under precis som vanligt:
         Vector3 targetPosition = target.position;
         Vector3 directionToTarget = targetPosition - transform.position;
         float distanceToTarget1 = directionToTarget.magnitude;
@@ -443,17 +450,17 @@ public class GalacticRangers : MonoBehaviour
 
 
         //if (!hasBeenAdded && MissionSound.MissionSound_.i == 1)
-       // {
-            // Execute the code only once
-            // ...
+        // {
+        // Execute the code only once
+        // ...
 
-            // Set the flag to true to indicate that the integer has been added
-           // if (targetPoint.Length > 0)
-           // {
-               // hasBeenAdded = true;
-               // isMoving = true;
-           // }
-       // }
+        // Set the flag to true to indicate that the integer has been added
+        // if (targetPoint.Length > 0)
+        // {
+        // hasBeenAdded = true;
+        // isMoving = true;
+        // }
+        // }
 
 
 

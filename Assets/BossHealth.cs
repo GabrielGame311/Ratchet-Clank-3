@@ -25,28 +25,34 @@ public class BossHealth : MonoBehaviour
     void Update()
     {
 
-        if(EnemiesHealth.EnemieHealth_.BossHealth)
+
+        if(EnemiesHealth.EnemieHealth_ != null)
         {
+            if (EnemiesHealth.EnemieHealth_.BossHealth)
+            {
 
-            Boss.SetActive(true);
-            CurrentHealth = EnemiesHealth.EnemieHealth_.health;
-            maxHealth = EnemiesHealth.EnemieHealth_.maxHealth;
-            HealthSlider.fillAmount = CurrentHealth / maxHealth;
+                Boss.SetActive(true);
+                CurrentHealth = EnemiesHealth.EnemieHealth_.health;
+                maxHealth = EnemiesHealth.EnemieHealth_.maxHealth;
+                HealthSlider.fillAmount = CurrentHealth / maxHealth;
 
+            }
+            else
+            {
+                Boss.SetActive(false);
+            }
+
+            if (CurrentHealth < 600)
+            {
+
+            }
+
+            if (CurrentHealth < 1)
+            {
+                Boss.SetActive(false);
+            }
         }
-        else
-        {
-            Boss.SetActive(false);
-        }
 
-        if(CurrentHealth < 600)
-        {
-
-        }
-
-        if(CurrentHealth < 1)
-        {
-            Boss.SetActive(false);
-        }
+      
     }
 }
