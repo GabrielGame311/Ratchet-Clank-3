@@ -18,6 +18,8 @@ public class TriggerInstructions : MonoBehaviour
     public float TimeTrigger;
     public bool StartInstruction = false;
     public bool isTrigger = false;
+    public bool IsDestoryable = true;
+    public MonoBehaviour DontDestroyScript;
     int startCurrent;
     void Start()
     {
@@ -81,7 +83,11 @@ public class TriggerInstructions : MonoBehaviour
                 {
                    StartInstruction = true;
                    InfoInstructionsUI.instance.Istrigger = true;
-                   Destroy(this);
+                    if (IsDestoryable)
+                    {
+                        Destroy(this);
+                    }
+                      
                 }
             }
         }
@@ -105,8 +111,13 @@ public class TriggerInstructions : MonoBehaviour
                 }
 
                 //StartInstruction = true;
-                Destroy(this);
-                Destroy(gameObject, TimeTrigger);
+
+                if(IsDestoryable)
+                {
+                    Destroy(this);
+                    
+                }
+                Destroy(GetComponent<TriggerInstructions>(), TimeTrigger);
             }
         }
 

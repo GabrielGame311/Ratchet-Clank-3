@@ -1047,11 +1047,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 5140501480939856232, guid: 0fb82c160e41a9743996b13d91e77083, type: 3}
   m_PrefabInstance: {fileID: 103363082}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &103363084 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 5140501480939856235, guid: 0fb82c160e41a9743996b13d91e77083, type: 3}
-  m_PrefabInstance: {fileID: 103363082}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &103793771
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1253,11 +1248,6 @@ PrefabInstance:
 --- !u!4 &121259845 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5140501480939856232, guid: 0fb82c160e41a9743996b13d91e77083, type: 3}
-  m_PrefabInstance: {fileID: 121259844}
-  m_PrefabAsset: {fileID: 0}
---- !u!1 &121259846 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 5140501480939856235, guid: 0fb82c160e41a9743996b13d91e77083, type: 3}
   m_PrefabInstance: {fileID: 121259844}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &122631083 stripped
@@ -1808,11 +1798,6 @@ PrefabInstance:
 --- !u!4 &203191571 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3973078248528916364, guid: ccd4372035063d04cbb52c4cbf69d34b, type: 3}
-  m_PrefabInstance: {fileID: 203191570}
-  m_PrefabAsset: {fileID: 0}
---- !u!1 &203191572 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 3973078248528916368, guid: ccd4372035063d04cbb52c4cbf69d34b, type: 3}
   m_PrefabInstance: {fileID: 203191570}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &209945003
@@ -2973,11 +2958,6 @@ PrefabInstance:
 --- !u!4 &331732265 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5140501480939856232, guid: 0fb82c160e41a9743996b13d91e77083, type: 3}
-  m_PrefabInstance: {fileID: 331732264}
-  m_PrefabAsset: {fileID: 0}
---- !u!1 &331732266 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 5140501480939856235, guid: 0fb82c160e41a9743996b13d91e77083, type: 3}
   m_PrefabInstance: {fileID: 331732264}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &333716698 stripped
@@ -4642,11 +4622,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 5140501480939856232, guid: 0fb82c160e41a9743996b13d91e77083, type: 3}
   m_PrefabInstance: {fileID: 512256554}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &512256556 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 5140501480939856235, guid: 0fb82c160e41a9743996b13d91e77083, type: 3}
-  m_PrefabInstance: {fileID: 512256554}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &512475362
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -5346,6 +5321,10 @@ MonoBehaviour:
   damageColor: {r: 1, g: 0, b: 0, a: 1}
   startColor: {r: 1, g: 1, b: 1, a: 1}
   animes: {fileID: 0}
+  DamageExplode: 0
+  ChangeColorTime: 0.2
+  damagish: 0
+  ExplodeTime: 0
 --- !u!114 &578392279
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5358,27 +5337,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4f8cad86b5ea3e643b8677b49c51c038, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  dropshipStart: {fileID: 918988041}
-  dropshipEnd: {fileID: 1930135632}
+  endPoint: {fileID: 0}
+  startPoint: {fileID: 0}
+  finalTurnDirection: 1
+  finalExitDistance: 150
+  accelerationRate: 15
+  maxExitSpeed: 45
   moveSpeed: 20
-  delay: 3
-  initialEnemyDelay: 1
-  additionalEnemyDelay: 1
-  enemies:
-  - {fileID: 103363084}
-  - {fileID: 331732266}
-  Count: 0
-  SpawnPoint: {fileID: 0}
-  rotationSpeed: 1
-  DelaySetActive: 0
-  anime: {fileID: 0}
-  parent: {fileID: 743799474}
-  jumpForce: 5
-  jumpDirection: {x: 0, y: 1, z: 1}
-  scaleAnimationDuration: 1
-  DropStart: 
-  DropEnd: 
-  SpawnedEnemie: []
+  turnSpeed: 3
+  bankingAmount: 35
+  enemyPrefabs: []
+  spawnPoint: {fileID: 0}
+  timeBetweenEnemies: 0.8
 --- !u!1 &581519325
 GameObject:
   m_ObjectHideFlags: 0
@@ -6090,6 +6060,10 @@ MonoBehaviour:
   damageColor: {r: 1, g: 0, b: 0, a: 1}
   startColor: {r: 1, g: 1, b: 1, a: 1}
   animes: {fileID: 0}
+  DamageExplode: 0
+  ChangeColorTime: 0.2
+  damagish: 0
+  ExplodeTime: 0
 --- !u!114 &677933096
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6102,28 +6076,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4f8cad86b5ea3e643b8677b49c51c038, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  dropshipStart: {fileID: 561451274}
-  dropshipEnd: {fileID: 109623110}
+  endPoint: {fileID: 0}
+  startPoint: {fileID: 0}
+  finalTurnDirection: 1
+  finalExitDistance: 150
+  accelerationRate: 15
+  maxExitSpeed: 45
   moveSpeed: 20
-  delay: 3
-  initialEnemyDelay: 1
-  additionalEnemyDelay: 1
-  enemies:
-  - {fileID: 512256556}
-  - {fileID: 121259846}
-  - {fileID: 958306421}
-  Count: 0
-  SpawnPoint: {fileID: 0}
-  rotationSpeed: 1
-  DelaySetActive: 0
-  anime: {fileID: 0}
-  parent: {fileID: 740623860}
-  jumpForce: 5
-  jumpDirection: {x: 0, y: 1, z: 1}
-  scaleAnimationDuration: 1
-  DropStart: 
-  DropEnd: 
-  SpawnedEnemie: []
+  turnSpeed: 3
+  bankingAmount: 35
+  enemyPrefabs: []
+  spawnPoint: {fileID: 0}
+  timeBetweenEnemies: 0.8
 --- !u!1001 &678015138
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -8712,7 +8676,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 910698113}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7755d986a201a3847b6f60e9a4f1c5ec, type: 3}
   m_Name: 
@@ -8720,6 +8684,7 @@ MonoBehaviour:
   Enemies: []
   EnemiesCount: 0
   NumberMusic: 0
+  IS: 0
   EnemiesList:
   - {fileID: 1932638961}
   - {fileID: 1108176606}
@@ -9301,11 +9266,6 @@ PrefabInstance:
 --- !u!4 &958306420 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5140501480939856232, guid: 0fb82c160e41a9743996b13d91e77083, type: 3}
-  m_PrefabInstance: {fileID: 958306419}
-  m_PrefabAsset: {fileID: 0}
---- !u!1 &958306421 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 5140501480939856235, guid: 0fb82c160e41a9743996b13d91e77083, type: 3}
   m_PrefabInstance: {fileID: 958306419}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &960891645
@@ -10220,11 +10180,6 @@ PrefabInstance:
 --- !u!4 &1038739086 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3973078248528916364, guid: ccd4372035063d04cbb52c4cbf69d34b, type: 3}
-  m_PrefabInstance: {fileID: 1038739085}
-  m_PrefabAsset: {fileID: 0}
---- !u!1 &1038739087 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 3973078248528916368, guid: ccd4372035063d04cbb52c4cbf69d34b, type: 3}
   m_PrefabInstance: {fileID: 1038739085}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &1044606898 stripped
@@ -13180,6 +13135,7 @@ MonoBehaviour:
   Enemies: []
   EnemiesCount: 0
   NumberMusic: 6
+  IS: 0
   EnemiesList: []
   SetactiveEnemies: 0
   Mission: 3
@@ -14750,11 +14706,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 3973078248528916364, guid: ccd4372035063d04cbb52c4cbf69d34b, type: 3}
   m_PrefabInstance: {fileID: 1464834241}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &1464834243 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 3973078248528916368, guid: ccd4372035063d04cbb52c4cbf69d34b, type: 3}
-  m_PrefabInstance: {fileID: 1464834241}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1467006476 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5244401421537017219, guid: b06b060d9e0e1dc449ec0a513d3a52f8, type: 3}
@@ -14929,6 +14880,10 @@ MonoBehaviour:
   damageColor: {r: 1, g: 0, b: 0, a: 1}
   startColor: {r: 1, g: 1, b: 1, a: 1}
   animes: {fileID: 0}
+  DamageExplode: 0
+  ChangeColorTime: 0.2
+  damagish: 0
+  ExplodeTime: 0
 --- !u!114 &1472263422
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -14941,28 +14896,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4f8cad86b5ea3e643b8677b49c51c038, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  dropshipStart: {fileID: 701985727}
-  dropshipEnd: {fileID: 1026983326}
+  endPoint: {fileID: 0}
+  startPoint: {fileID: 0}
+  finalTurnDirection: 1
+  finalExitDistance: 150
+  accelerationRate: 15
+  maxExitSpeed: 45
   moveSpeed: 20
-  delay: 3
-  initialEnemyDelay: 1
-  additionalEnemyDelay: 1
-  enemies:
-  - {fileID: 203191572}
-  - {fileID: 1464834243}
-  - {fileID: 1038739087}
-  Count: 0
-  SpawnPoint: {fileID: 0}
-  rotationSpeed: 1
-  DelaySetActive: 0
-  anime: {fileID: 0}
-  parent: {fileID: 740623860}
-  jumpForce: 5
-  jumpDirection: {x: 0, y: 1, z: 1}
-  scaleAnimationDuration: 1
-  DropStart: 
-  DropEnd: 
-  SpawnedEnemie: []
+  turnSpeed: 3
+  bankingAmount: 35
+  enemyPrefabs: []
+  spawnPoint: {fileID: 0}
+  timeBetweenEnemies: 0.8
 --- !u!1001 &1479166853
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -17829,6 +17774,7 @@ MonoBehaviour:
   Enemies: []
   EnemiesCount: 0
   NumberMusic: 16
+  IS: 0
   EnemiesList: []
   SetactiveEnemies: 0
   Mission: 2
@@ -18641,39 +18587,39 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 9135542911201331560, guid: b45dfe4d109e4334b8a6f44ad3fadfe9, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 7.7173443
+      value: 0.000049352646
       objectReference: {fileID: 0}
     - target: {fileID: 9135542911201331560, guid: b45dfe4d109e4334b8a6f44ad3fadfe9, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -63.245026
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 9135542911201331560, guid: b45dfe4d109e4334b8a6f44ad3fadfe9, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 94.77374
+      value: -10.870022
       objectReference: {fileID: 0}
     - target: {fileID: 9135542911201331560, guid: b45dfe4d109e4334b8a6f44ad3fadfe9, type: 3}
       propertyPath: m_LocalRotation.w
-      value: 0.8360782
+      value: 0.9878952
       objectReference: {fileID: 0}
     - target: {fileID: 9135542911201331560, guid: b45dfe4d109e4334b8a6f44ad3fadfe9, type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0.002695576
+      value: 0.1551233
       objectReference: {fileID: 0}
     - target: {fileID: 9135542911201331560, guid: b45dfe4d109e4334b8a6f44ad3fadfe9, type: 3}
       propertyPath: m_LocalRotation.y
-      value: -0.5486008
+      value: 0.00000049440723
       objectReference: {fileID: 0}
     - target: {fileID: 9135542911201331560, guid: b45dfe4d109e4334b8a6f44ad3fadfe9, type: 3}
       propertyPath: m_LocalRotation.z
-      value: 0.0017687284
+      value: -0.000000067553245
       objectReference: {fileID: 0}
     - target: {fileID: 9135542911201331565, guid: b45dfe4d109e4334b8a6f44ad3fadfe9, type: 3}
       propertyPath: field of view
-      value: 40
+      value: 62.03001
       objectReference: {fileID: 0}
     - target: {fileID: 9135542911201331565, guid: b45dfe4d109e4334b8a6f44ad3fadfe9, type: 3}
       propertyPath: m_FocalLength
-      value: 1.3737388
+      value: 0.8316463
       objectReference: {fileID: 0}
     - target: {fileID: 9135542911201331565, guid: b45dfe4d109e4334b8a6f44ad3fadfe9, type: 3}
       propertyPath: m_GateFitMode
@@ -19241,7 +19187,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5543905689837884227, guid: a7882c718d905024ea97f4ac8bb3d061, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 9.503011
+      value: 9.475105
       objectReference: {fileID: 0}
     - target: {fileID: 5543905689837884227, guid: a7882c718d905024ea97f4ac8bb3d061, type: 3}
       propertyPath: m_LocalPosition.z
@@ -19333,19 +19279,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5543905690698983591, guid: a7882c718d905024ea97f4ac8bb3d061, type: 3}
       propertyPath: m_LocalRotation.w
-      value: -0.033008516
+      value: -0.033008613
       objectReference: {fileID: 0}
     - target: {fileID: 5543905690698983591, guid: a7882c718d905024ea97f4ac8bb3d061, type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0.0004924764
+      value: 0.0004862096
       objectReference: {fileID: 0}
     - target: {fileID: 5543905690698983591, guid: a7882c718d905024ea97f4ac8bb3d061, type: 3}
       propertyPath: m_LocalRotation.y
-      value: 0.99934375
+      value: 0.9993466
       objectReference: {fileID: 0}
     - target: {fileID: 5543905690698983591, guid: a7882c718d905024ea97f4ac8bb3d061, type: 3}
       propertyPath: m_LocalRotation.z
-      value: 0.014909692
+      value: 0.014719962
       objectReference: {fileID: 0}
     - target: {fileID: 5543905690726935174, guid: a7882c718d905024ea97f4ac8bb3d061, type: 3}
       propertyPath: m_FollowOffset.y
@@ -19369,19 +19315,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5543905690906127840, guid: a7882c718d905024ea97f4ac8bb3d061, type: 3}
       propertyPath: m_LocalRotation.w
-      value: -0.033012018
+      value: -0.03301201
       objectReference: {fileID: 0}
     - target: {fileID: 5543905690906127840, guid: a7882c718d905024ea97f4ac8bb3d061, type: 3}
       propertyPath: m_LocalRotation.x
-      value: -0.00010642723
+      value: -0.000109586035
       objectReference: {fileID: 0}
     - target: {fileID: 5543905690906127840, guid: a7882c718d905024ea97f4ac8bb3d061, type: 3}
       propertyPath: m_LocalRotation.y
-      value: 0.9994498
+      value: 0.9994495
       objectReference: {fileID: 0}
     - target: {fileID: 5543905690906127840, guid: a7882c718d905024ea97f4ac8bb3d061, type: 3}
       propertyPath: m_LocalRotation.z
-      value: -0.003222313
+      value: -0.0033179473
       objectReference: {fileID: 0}
     - target: {fileID: 5543905691045778987, guid: a7882c718d905024ea97f4ac8bb3d061, type: 3}
       propertyPath: m_FollowOffset.y
@@ -20920,27 +20866,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4f8cad86b5ea3e643b8677b49c51c038, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  dropshipStart: {fileID: 840673611}
-  dropshipEnd: {fileID: 335016642}
+  endPoint: {fileID: 0}
+  startPoint: {fileID: 0}
+  finalTurnDirection: 1
+  finalExitDistance: 150
+  accelerationRate: 15
+  maxExitSpeed: 45
   moveSpeed: 20
-  delay: 2
-  initialEnemyDelay: 1
-  additionalEnemyDelay: 1
-  enemies:
-  - {fileID: 1691850716441904860}
-  - {fileID: 1691850717401052411}
-  Count: 0
-  SpawnPoint: {fileID: 0}
-  rotationSpeed: 1
-  DelaySetActive: 0
-  anime: {fileID: 0}
-  parent: {fileID: 2120953531}
-  jumpForce: 5
-  jumpDirection: {x: 0, y: 1, z: 1}
-  scaleAnimationDuration: 1
-  DropStart: 
-  DropEnd: 
-  SpawnedEnemie: []
+  turnSpeed: 3
+  bankingAmount: 35
+  enemyPrefabs: []
+  spawnPoint: {fileID: 0}
+  timeBetweenEnemies: 0.8
 --- !u!1 &1691850715854955709
 GameObject:
   m_ObjectHideFlags: 0
@@ -20988,6 +20925,10 @@ MonoBehaviour:
   damageColor: {r: 1, g: 0, b: 0, a: 1}
   startColor: {r: 1, g: 1, b: 1, a: 1}
   animes: {fileID: 0}
+  DamageExplode: 0
+  ChangeColorTime: 0.2
+  damagish: 0
+  ExplodeTime: 0
 --- !u!65 &1691850715854955711
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -21383,11 +21324,6 @@ PrefabInstance:
 --- !u!4 &1691850716441904859 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3973078248528916364, guid: ccd4372035063d04cbb52c4cbf69d34b, type: 3}
-  m_PrefabInstance: {fileID: 1691850716441904858}
-  m_PrefabAsset: {fileID: 0}
---- !u!1 &1691850716441904860 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 3973078248528916368, guid: ccd4372035063d04cbb52c4cbf69d34b, type: 3}
   m_PrefabInstance: {fileID: 1691850716441904858}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &1691850716539181190
@@ -22188,11 +22124,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 3973078248528916364, guid: ccd4372035063d04cbb52c4cbf69d34b, type: 3}
   m_PrefabInstance: {fileID: 1691850717401052409}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &1691850717401052411 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 3973078248528916368, guid: ccd4372035063d04cbb52c4cbf69d34b, type: 3}
-  m_PrefabInstance: {fileID: 1691850717401052409}
-  m_PrefabAsset: {fileID: 0}
 --- !u!23 &5953105495238359584
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -22305,7 +22236,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!65 &5953105495238359599
 BoxCollider:
   m_ObjectHideFlags: 0

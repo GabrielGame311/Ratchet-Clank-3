@@ -56,7 +56,7 @@ public class GalacticRangerGame : MonoBehaviour
     private bool idleShouldWalk = false;
     private Vector3 idleTargetPos;
     private Coroutine idleCoroutine;
-
+    public Transform ThrowToPoint;
     // Räknare för att hålla koll på hur många gånger han sprungit klart
     private int completedRunsCount = 0;
 
@@ -381,11 +381,15 @@ public class GalacticRangerGame : MonoBehaviour
         if (Granade != null && Point != null)
         {
             GameObject prefab = Instantiate(Granade, Point.position, Point.rotation);
-            Vector3 launchVelocity = Point.forward * ForceBall + Vector3.up * (ForceBall * 0.4f);
-            if (prefab.GetComponent<Rigidbody>() != null)
+            Rigidbody rb = prefab.GetComponent<Rigidbody>();
+
+            if (rb != null)
             {
-                prefab.GetComponent<Rigidbody>().linearVelocity = launchVelocity;
-                prefab.GetComponent<Rigidbody>().useGravity = true;
+                // 1. STÄNG AV tyngdkraften helt så den aldrig sjunker mot marken
+                //rb.useGravity = false;
+
+                // 2. Skjut den spikrakt framåt i extremt hög fart
+                rb.linearVelocity = Point.forward * ForceBall;
             }
         }
     }

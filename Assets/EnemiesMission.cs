@@ -11,7 +11,7 @@ public class EnemiesMission : MonoBehaviour
     public EnemiesHealth[] Enemies;
     public int EnemiesCount;
     public int NumberMusic;
-    bool IS = false;
+    public bool IS = false;
     public List<GameObject> EnemiesList = new List<GameObject>();
     public static EnemiesMission instance;
     float loadsceneTime = 10;
@@ -21,7 +21,7 @@ public class EnemiesMission : MonoBehaviour
     GameObject player;
     bool isfalse = true;
     public string LoadScene;
-
+    private bool hasProcessedEnemies = false;
     public bool SetactivePlayer = false;
 
     // Start is called before the first frame update
@@ -29,22 +29,10 @@ public class EnemiesMission : MonoBehaviour
     {
         instance = GetComponent<EnemiesMission>();
 
-        Enemies = FindObjectsOfType<EnemiesHealth>();
+        
         player = GameObject.FindGameObjectWithTag("Player");
 
-        if(gameObject.activeSelf == true)
-        {
-            foreach (EnemiesHealth enemy in Enemies)
-            {
-                EnemiesList.Add(enemy.gameObject);
-
-
-                if (SetactiveEnemies)
-                {
-                    enemy.gameObject.SetActive(false);
-                }
-            }
-        }
+       
 
       
 
@@ -56,11 +44,44 @@ public class EnemiesMission : MonoBehaviour
 
     }
 
-   
+  
+    private void OnEnable()
+    {
+        hasProcessedEnemies = false;
+    }
 
     // Update is called once per frame
     void Update()
     {
+
+
+        if (gameObject.activeSelf && !hasProcessedEnemies)
+        {
+            Enemies = FindObjectsOfType<EnemiesHealth>();
+           
+            // Om EnemiesList är en vanlig List, rensa den först för säkerhets skull
+            EnemiesList.Clear();
+           
+            for (int i = 0; i < Enemies.Length; i++)
+            {
+                if (Enemies[i] != null)
+                {
+                    // Nu kan du använda .Add() säkert utan att det blir dubbletter
+                    
+                    EnemiesList.Add(Enemies[i].gameObject);
+
+                    if (SetactiveEnemies)
+                    {
+                        Enemies[i].gameObject.SetActive(false);
+                    }
+                    
+                }
+            }
+
+            // Sätt flaggan till true så att loopen INTE körs nästa bildruta (frame)
+           // hasProcessedEnemies = true;
+        }
+
 
         if (IsWin)
         {
@@ -117,7 +138,7 @@ public class EnemiesMission : MonoBehaviour
 
             if (IS == false)
             {
-                if (EnemiesCount == 0)
+                if (EnemiesList.Count <= 0)
                 {
                     Bolts.Bolt.BoltCount += MissionCompleteUI.MissionComplete.Bolts[MissionCompleteUI.MissionComplete.Mission];
                     GetComponent<MissionSound>().i = NumberMusic;

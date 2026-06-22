@@ -117,23 +117,23 @@ public class EnemieActive : MonoBehaviour
                 MissionSound.MissionSound_.i++;
                 //MissionSound.MissionSound_.i = EnemieIndex;
                 MissionSound.MissionSound_.Mission4(MissionSound.MissionSound_.i);
-                Is4Enemies = false;
+                
             }
             else if (Enemies[EnemieIndex].GetComponentsInChildren<EnemiesHealth>().Length < 1)
             {
                 MissionSound.MissionSound_.i++;
                 //MissionSound.MissionSound_.i = EnemieIndex;
                 MissionSound.MissionSound_.Mission4(MissionSound.MissionSound_.i);
-                Is4Enemies = false;
+                
             }
             else if (Enemies[EnemieIndex].GetComponentsInChildren<EnemiesHealth>().Length < 0)
             {
                 MissionSound.MissionSound_.i++;
                 //MissionSound.MissionSound_.i = EnemieIndex;
                 MissionSound.MissionSound_.Mission4(MissionSound.MissionSound_.i);
-                Is4Enemies = false;
+                
             }
-
+            Is4Enemies = false;
 
 
         }

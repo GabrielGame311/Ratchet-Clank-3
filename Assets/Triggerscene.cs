@@ -9,6 +9,9 @@ public class Triggerscene : MonoBehaviour
 
     GameObject player;
     public GameObject Freefall;
+
+    public GameObject RangerShip;
+    public Transform SpawnPoint;
     // Start is called before the first frame update
     void Start()
     {
@@ -25,6 +28,8 @@ public class Triggerscene : MonoBehaviour
     {
         if(other.tag == "Player")
         {
+            Freefall.SetActive(true);
+            RangerShip.transform.position = SpawnPoint.transform.position;
             player = other.gameObject;
             playable.stopped += OnDirectorStopped;
             player.GetComponent<CharacterController>().enabled = false;

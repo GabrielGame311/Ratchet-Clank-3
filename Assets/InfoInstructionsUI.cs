@@ -63,7 +63,7 @@ public class InfoInstructionsUI : MonoBehaviour
           
             if (ItsGame == 1)
             {
-                GameThyrra_UI.Instance.GamePanel.SetActive(true);
+                //GameThyrra_UI.Instance.GamePanel.SetActive(true);
             }
         }
 

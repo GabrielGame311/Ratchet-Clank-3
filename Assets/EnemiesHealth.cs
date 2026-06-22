@@ -289,6 +289,8 @@ public class EnemiesHealth : MonoBehaviour
         Instantiate(Bolt, transform.position, transform.rotation);
 
 
+       
+
         if(EnemiesMission.instance != null)
         {
 

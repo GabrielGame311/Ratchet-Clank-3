@@ -26,7 +26,7 @@ public class ThyrraGame : MonoBehaviour
     public ThyrraGame NextThyrraGame;
 
     public List<string> KeycodeRooling;
-
+    bool Isenabled = false;
 
     private void Start()
     {
@@ -52,7 +52,7 @@ public class ThyrraGame : MonoBehaviour
             if(Input.GetKeyDown(KeyCode.E))
             {
                 anime.SetTrigger("Talk");
-
+                
                 IsTrigger = false;
                
 
@@ -146,21 +146,40 @@ public class ThyrraGame : MonoBehaviour
             }
 
         }
+
+
+        if(Isenabled)
+        {
+            if (!InfoInstructionsUI.instance.Instruction.activeSelf)
+            {
+                GameObject.FindObjectOfType<GameThyrra_UI>().GamePanel.SetActive(true);
+            }
+        }
     }
 
     IEnumerator WaitToDialog()
     {
+        
         yield return new WaitForSeconds(0.3f);
 
         StartDialog();
+
+        
+
+        
 
         yield return new WaitForSeconds(1);
         dialogCam.transform.parent = null;
         PlayerMoving = true;
 
         yield return new WaitForSeconds(2);
+        GetComponent<TriggerInstructions>().enabled = true;
 
-        GameThyrraUI.SetActive(true);
+        yield return new WaitForSeconds(2);
+        Isenabled = true;
+       
+
+        
 
     }
 
@@ -178,7 +197,7 @@ public class ThyrraGame : MonoBehaviour
         Player_.GetComponent<CharacterController>().enabled = true;
         GetComponent<BoxCollider>().enabled = false;
         IsMovingEnemy = true;
-
+        GameThyrraUI.gameObject.SetActive(false);
 
     }
 

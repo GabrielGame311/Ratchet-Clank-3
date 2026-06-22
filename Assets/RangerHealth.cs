@@ -8,23 +8,68 @@ public class RangerHealth : MonoBehaviour
     public float Health;
     public float MaxHealth;
     public GameObject CrackedRanger;
-
+    public float verticalAngle = 0f;
     public bool Explode = false;
-  
+    public float RangerDistance;
     public float ExplodeTime;
-    
+    GameObject Player_;
+    public Animator animeHead;
+    public Animator animeFoot;
+    public MonoBehaviour[] ScriptsDisabled;
+    bool YesSir = false;
     // Start is called before the first frame update
     void Start()
     {
+
+        Player_ = GameObject.FindGameObjectWithTag("Player");
         MaxHealth = Health;
     }
 
     // Update is called once per frame
     void Update()
     {
-        
+        RaycastHit hit;
 
-        if(Explode)
+        Vector3 rayDirection = Quaternion.AngleAxis(verticalAngle, transform.right) * transform.forward;
+
+        // Vi kastar strålen med den nya riktningen (rayDirection)
+        if (Physics.Raycast(transform.position, rayDirection, out hit, RangerDistance))
+        {
+            // Flyttade Debug.DrawRay hit så den använder den faktiska riktningen
+            Debug.DrawRay(transform.position, rayDirection * RangerDistance, Color.red);
+
+
+            if(!YesSir)
+            {
+
+                if (hit.collider.gameObject == Player_)
+                {
+                    foreach (MonoBehaviour pl in ScriptsDisabled)
+                    {
+                        pl.enabled = false;
+                    }
+                    animeHead.SetTrigger("Sir");
+                    animeFoot.SetTrigger("Sir");
+                    animeHead.SetBool("Walk", false);
+                    animeFoot.SetBool("Walk", false);
+                    StartCoroutine(wait());
+                    YesSir = true;
+                }
+                
+                
+            }
+
+        }
+        else
+        {
+            // Tips: Rita strålen som grön när den INTE träffar något, så ser du i Scene-vyn var den pekar!
+            Debug.DrawRay(transform.position, rayDirection * RangerDistance, Color.green);
+        }
+
+
+
+
+        if (Explode)
         {
 
 
@@ -35,6 +80,25 @@ public class RangerHealth : MonoBehaviour
             
 
         }
+    }
+
+    private void OnDrawGizmos()
+    {
+        
+    }
+
+    IEnumerator wait()
+    {
+        yield return new WaitForSeconds(4);
+
+        foreach (MonoBehaviour pl in ScriptsDisabled)
+        {
+            pl.enabled = true;
+        }
+
+        yield return new WaitForSeconds(2);
+
+        YesSir = false;
     }
 
     private void OnDestroy()

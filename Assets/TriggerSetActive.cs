@@ -7,6 +7,9 @@ public class TriggerSetActive : MonoBehaviour
     public GameObject Enemie;
 
     public GameObject SceneActive;
+
+    public MonoBehaviour[] ScriptsEnabled;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -25,6 +28,13 @@ public class TriggerSetActive : MonoBehaviour
         {
             SceneActive.SetActive(true);
             
+        }
+        if(other.tag == "Player")
+        {
+            foreach(MonoBehaviour pl in ScriptsEnabled)
+            {
+                pl.enabled = true;
+            }
         }
     }
 
