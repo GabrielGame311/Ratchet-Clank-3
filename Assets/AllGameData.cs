@@ -22,14 +22,23 @@ public class AllGameData : MonoBehaviour
     public Sprite[] ImageMap;
     
     public int Armor;
-
+    AllGameData[] data;
     public int CurrentSaveSlot = 0;
     public bool IsSave = false;
-
+    public bool IsPlayer = false;
     void Start()
     {
 
+        if(!IsPlayer)
+        {
+            data = FindObjectsOfType<AllGameData>();
 
+
+            foreach (AllGameData pl in data)
+            {
+                Armor = pl.Armor;
+            }
+        }
 
         Instance = this;
 

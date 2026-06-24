@@ -7894,6 +7894,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Ratchet
       objectReference: {fileID: 0}
+    - target: {fileID: 8844199840512323734, guid: 4b13ba23cb5625c4fbdf98ddd95a827e, type: 3}
+      propertyPath: Armor
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -12350,6 +12354,8 @@ PlayableDirector:
     value: {fileID: 277324950}
   - key: {fileID: 8444960030499475063, guid: 8dca655c5811ad14295841d3d6f1e1c5, type: 2}
     value: {fileID: 1635631689}
+  - key: {fileID: -6121092443882058701, guid: 8dca655c5811ad14295841d3d6f1e1c5, type: 2}
+    value: {fileID: 1846706862}
   m_ExposedReferences:
     m_References: []
 --- !u!64 &607722034
@@ -17930,13 +17936,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 964700346}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.17937733, y: -0.5320357, z: 0.11648899, w: 0.81926316}
-  m_LocalPosition: {x: 2.564, y: 2.769, z: 1.081}
+  m_LocalRotation: {x: 0.18540515, y: -0.48702627, z: 0.10663421, w: 0.8467937}
+  m_LocalPosition: {x: 2.67, y: 2.53, z: 1}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 597101900}
-  m_LocalEulerAnglesHint: {x: 24.7, y: -66, z: 0}
+  m_LocalEulerAnglesHint: {x: 24.7, y: -59.81, z: 0}
 --- !u!95 &964700348
 Animator:
   serializedVersion: 7
@@ -18044,7 +18050,7 @@ Camera:
     height: 1
   near clip plane: 0.3
   far clip plane: 1000
-  field of view: 34.2
+  field of view: 33.2
   orthographic: 0
   orthographic size: 5
   m_Depth: 0
@@ -28628,7 +28634,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1846706860}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.09011595, y: -0.65652233, z: 0.07944791, w: 0.74467826}
+  m_LocalRotation: {x: 0.09011594, y: -0.6565223, z: 0.0794479, w: 0.7446782}
   m_LocalPosition: {x: 3.15, y: 2.32, z: 3.06}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -29348,6 +29354,10 @@ PrefabInstance:
     - target: {fileID: 3097322723580359713, guid: a7882c718d905024ea97f4ac8bb3d061, type: 3}
       propertyPath: groundCheckDistance
       value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3353526399271479375, guid: a7882c718d905024ea97f4ac8bb3d061, type: 3}
+      propertyPath: Armor
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3957815001026341203, guid: a7882c718d905024ea97f4ac8bb3d061, type: 3}
       propertyPath: cameraTarget

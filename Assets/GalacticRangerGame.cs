@@ -63,6 +63,10 @@ public class GalacticRangerGame : MonoBehaviour
     void Start()
     {
         instance = GetComponent<GalacticRangers>();
+
+
+        
+
         controller = GetComponent<CharacterController>();
     }
 
