@@ -123,6 +123,7 @@ MonoBehaviour:
   Armor: 0
   CurrentSaveSlot: 0
   IsSave: 0
+  IsPlayer: 0
 --- !u!1001 &638438370278251578
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -280,7 +281,32 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: b40eeb10d820fba4f838687cd030e451, type: 3}
       insertIndex: -1
       addedObject: {fileID: 6790500318693272316}
+    - targetCorrespondingSourceObject: {fileID: 8370183543643421296, guid: b40eeb10d820fba4f838687cd030e451, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4823068007813370358}
   m_SourcePrefab: {fileID: 100100000, guid: b40eeb10d820fba4f838687cd030e451, type: 3}
+--- !u!1 &177042180322556325 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8370183543643421296, guid: b40eeb10d820fba4f838687cd030e451, type: 3}
+  m_PrefabInstance: {fileID: 8528735195980710869}
+  m_PrefabAsset: {fileID: 0}
+--- !u!111 &4823068007813370358
+Animation:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 177042180322556325}
+  m_Enabled: 1
+  serializedVersion: 4
+  m_Animation: {fileID: 7400000, guid: 65601b6f097c1284eb148fa30df0b261, type: 2}
+  m_Animations:
+  - {fileID: 7400000, guid: 65601b6f097c1284eb148fa30df0b261, type: 2}
+  m_WrapMode: 0
+  m_PlayAutomatically: 1
+  m_AnimatePhysics: 0
+  m_UpdateMode: 0
+  m_CullingType: 0
 --- !u!4 &2044610212879412398 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7639175200203698043, guid: b40eeb10d820fba4f838687cd030e451, type: 3}
