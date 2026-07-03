@@ -116,7 +116,7 @@ public class RatchetController : MonoBehaviour
             {
                 lastGroundedTime = Time.time;
                 MyController.stepOffset = orginalStepOffset;
-
+                CanMove = true;
                 // Sätt bools för markläge
                 anime.SetBool("IsGrounded", true);
                 anime.SetBool("IsJumping", false);
