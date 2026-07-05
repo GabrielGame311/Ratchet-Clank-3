@@ -38,7 +38,7 @@ public class freefall : MonoBehaviour
     public CinemachineFreeLook Cinecam;
 
    
-
+    
     // Lägg till dessa i toppen av ditt freefall-skript
     [Header("Landing Settings")]
     public float helicopterDistance = 5f; // Avståndet till marken när helikoptern startar
@@ -81,9 +81,11 @@ public class freefall : MonoBehaviour
         if (controller.isGrounded && ItsFalling)
         {
             StopFalling();
+            RatchetController.RatchetController_.CanMove = true;
         }
 
-       
+
+        // Skjut en Raycast spikrakt nedåt från Ratchets position
        
 
 
@@ -120,6 +122,7 @@ public class freefall : MonoBehaviour
                 
                 anim.SetBool("IsHelicopter", true);
             }
+            
             Glide();
         }
         else
@@ -181,10 +184,12 @@ public class freefall : MonoBehaviour
         IsMoving = false;
         ratchet.Gravity = GravityStart;
         ratchet.enabled = true;
+        //RatchetController.RatchetController_.CanMove = true;
        // ratchet.CanMove = true;
         
        
         anim.SetBool("FreeFall", false);
+
     }
     // Hanterar vad som händer när vi INTE faller
     void HandleNormalState()

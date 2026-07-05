@@ -24,7 +24,7 @@ public class Freefalltrigger2 : MonoBehaviour
         {
             // Starta fallet!
             freefall fallScript = other.GetComponent<freefall>();
-            other.GetComponent<RatchetController>().CanMove = true;
+            //other.GetComponent<RatchetController>().CanMove = true;
             //fallScript.ItsFalling = false;
            // fallScript.Glide();
             //fallScript.RunFalse(); // Startar ljudet också

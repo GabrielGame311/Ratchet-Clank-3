@@ -65,7 +65,7 @@ public class GalacticRangers : MonoBehaviour
     public static GalacticRangers instance;
 
     public bool RangersModeActive = true;
-
+    public bool ISGravity = true;
     public CharacterController Controller;
 
     // Start is called before the first frame update
@@ -393,8 +393,12 @@ public class GalacticRangers : MonoBehaviour
         }
         else
         {
-            _directionY -= Gravity * Time.deltaTime;
+            
            
+            if(ISGravity)
+            {
+                _directionY -= Gravity * Time.deltaTime;
+            }
 
         }
 

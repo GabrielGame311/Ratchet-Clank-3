@@ -247,6 +247,20 @@ public class RatchetController : MonoBehaviour
         HelikopterController.Instance.StartHelikopter(ISHelikopter);
     }
 
+    public void HandleHelicopter2()
+    {
+        if (!MyController.isGrounded && !Input.GetKey(KeyCode.Space) && _directionY < 0 && !isClimbing)
+        {
+            ISHelikopter = true;
+            _directionY = Mathf.Lerp(_directionY, -glideDescentSpeed, Time.deltaTime * glideSmoothness);
+        }
+        else
+        {
+            ISHelikopter = false;
+        }
+        HelikopterController.Instance.StartHelikopter(ISHelikopter);
+    }
+
     void HandleBoots()
     {
         // 1. Känner av dubbelklick på Shift
