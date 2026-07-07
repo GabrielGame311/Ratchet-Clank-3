@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Splines;
+
 
 public class GalacticRangers : MonoBehaviour
 {
@@ -67,7 +69,11 @@ public class GalacticRangers : MonoBehaviour
     public bool RangersModeActive = true;
     public bool ISGravity = true;
     public CharacterController Controller;
+    public float raycastYOffset;
 
+
+    public SplineContainer splineContainer;
+    private float splineProgress = 0f;
     // Start is called before the first frame update
     void Start()
     {
@@ -144,6 +150,7 @@ public class GalacticRangers : MonoBehaviour
             if (isGrounded)
             {
                 rb.isKinematic = true;
+                _directionY = -1f;
             }
             else
             {
@@ -207,62 +214,113 @@ public class GalacticRangers : MonoBehaviour
 
 
                 }
-
                 if (ShootingPatrolPoint)
                 {
-
                     if (isMoving)
                     {
                         distanceToTarget = Vector3.Distance(transform.position, targetPoint[currentPoint].position);
 
                         if (distanceToTarget <= stoppingDistance)
                         {
-                            isMoving = false; // Stanna n�r vi n�r m�let
+                            // === FIX 1: STOPPA ALL RÖRELSE OCH ANIMATION VID WAYPOINT ===
+                            HeadAnime.SetBool("Run", false);
+                            FootAnime.SetBool("Run", false);
+                            rb.isKinematic = true;
 
-                            if (!returning)
+                            // Nollställ eventuell rörelse i kontrollern så han inte glider
+                            Vector3 stopMove = new Vector3(0, _directionY, 0);
+                            Controller.Move(stopMove * Time.deltaTime);
+
+                            // Mjuk rotation till waypointens exakta riktning
+                            Quaternion targetRotation = targetPoint[currentPoint].rotation;
+                            transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, RotateSpeed * Time.deltaTime);
+
+                            if (HeadControll != null)
                             {
-                                // Om vi inte �r p� v�g tillbaka, g� till n�sta punkt (punkt 0)
-                                currentPoint = 0;
-                                returning = true; // Vi har nu g�tt till punkt 0 och �r redo att g� tillbaka
+                                HeadControll.transform.rotation = Quaternion.RotateTowards(HeadControll.transform.rotation, targetRotation, RotateSpeed * Time.deltaTime);
                             }
-                            else
+
+                            // Kontrollera om kroppen har roterat klart
+                            if (Quaternion.Angle(transform.rotation, targetRotation) < 1f)
                             {
-                                // Om vi redan �r p� punkt 0, g� tillbaka till startpunkten (punkt 1)
-                                currentPoint = 1;
-                                returning = false; // Nu �r vi tillbaka till startpunkten
+                                isMoving = false; // Vänta på nästa patrullering i idle-läge
+
+                                if (!returning)
+                                {
+                                    currentPoint = 0;
+                                    returning = true;
+                                }
+                                else
+                                {
+                                    currentPoint = 1;
+                                    returning = false;
+                                }
                             }
-
-
-
-
-
-
                         }
                         else
                         {
+                            // 1. GRAVITATION
+                            if (Controller.isGrounded)
+                            {
+                                _directionY = -1f;
+                            }
+                            else
+                            {
+                                _directionY -= 9f * Time.deltaTime;
+                            }
 
-                            transform.position = Vector3.MoveTowards(transform.position, targetPoint[currentPoint].position, MoveSpeed * Time.deltaTime);
-                            // transform.LookAt(targetPoint[currentPoint]);
-                            Vector3 direction2 = (targetPoint[currentPoint].transform.position - transform.position).normalized;
+                            // =========================================================================
+                            // SPLINE-SYSTEM (Springer direkt längs den utritade kurvan)
+                            // =========================================================================
+                            if (splineContainer != null)
+                            {
+                                // Öka framsteget på splinen baserat på MoveSpeed och splinens totala längd
+                                float totalLength = splineContainer.CalculateLength();
+                                splineProgress += (MoveSpeed / totalLength) * Time.deltaTime;
+                                splineProgress = Mathf.Clamp01(splineProgress); // Stoppar vid 1f (slutet)
 
-                            // Ber�kna m�lrotationen med riktningen mot spelaren
-                            Quaternion lookRotation2 = Quaternion.LookRotation(direction2);
+                                // Hämta den exakta positionen på splinen just nu
+                                Vector3 targetPositionOnSpline = splineContainer.EvaluatePosition(splineProgress);
 
-                            // Roterar objektet l�ngsamt mot spelaren med RotateTowards
-                            transform.rotation = Quaternion.RotateTowards(transform.rotation, lookRotation2, RotateSpeed * Time.deltaTime);
-                            //HeadControll.transform.LookAt(targetPoint[currentPoint]);
-                            Vector3 direction = (targetPoint[currentPoint].transform.position - HeadControll.transform.position).normalized;
+                                // Beräkna riktningen från där han står till nästa punkt på splinen
+                                Vector3 moveDirection = (targetPositionOnSpline - transform.position);
+                                moveDirection.y = 0; // Ignorera höjdskillnader i rörelsen
 
-                            // Ber�kna m�lrotationen med riktningen mot spelaren
-                            Quaternion lookRotation = Quaternion.LookRotation(direction);
+                                // Spara avståndet innan vi normaliserar
+                                float distanceToPoint = moveDirection.magnitude;
+                                moveDirection = moveDirection.normalized;
 
-                            // Roterar objektet l�ngsamt mot spelaren med RotateTowards
-                            HeadControll.transform.rotation = Quaternion.RotateTowards(HeadControll.transform.rotation, lookRotation, RotateSpeed * Time.deltaTime);
-                            // Check if we reached the target point
+                                // 2. Rotera kroppen mjukt längs splinens kurva
+                                if (moveDirection != Vector3.zero)
+                                {
+                                    Quaternion lookRotation2 = Quaternion.LookRotation(moveDirection);
+                                    transform.rotation = Quaternion.RotateTowards(transform.rotation, lookRotation2, RotateSpeed * Time.deltaTime);
+                                }
 
+                                // 3. Flytta karaktären spikrakt längs linjen
+                                Vector3 moveVelocity = new Vector3(moveDirection.x * MoveSpeed, _directionY, moveDirection.z * MoveSpeed);
+                                Controller.Move(moveVelocity * Time.deltaTime);
 
+                                // Om han är framme vid slutet av splinen, byt till nästa waypoint
+                                if (splineProgress >= 1f || (distanceToPoint < 0.5f && splineProgress > 0.9f))
+                                {
+                                    // Här lägger du din vanliga kod för när han byter waypoint, t.ex:
+                                    // currentPoint++;
+                                    // splineProgress = 0f; // Nollställ inför nästa spline
+                                }
+                            }
+                            // =========================================================================
 
-                            // Set running animation
+                            // 4. Håll huvudet fokuserat på slutpointen
+                            Vector3 targetPos = targetPoint[currentPoint].position;
+                            Vector3 headDirection = (targetPos - HeadControll.transform.position).normalized;
+                            if (headDirection != Vector3.zero && HeadControll != null)
+                            {
+                                Quaternion lookRotation = Quaternion.LookRotation(headDirection);
+                                HeadControll.transform.rotation = Quaternion.RotateTowards(HeadControll.transform.rotation, lookRotation, RotateSpeed * Time.deltaTime);
+                            }
+
+                            // 5. Animationer
                             HeadAnime.SetBool("Run", true);
                             FootAnime.SetBool("Run", true);
                             HeadAnime.SetBool("ShootPos", false);
@@ -271,35 +329,22 @@ public class GalacticRangers : MonoBehaviour
                             ContinueMove = false;
                             IsShooting = false;
                         }
-
                     }
-
-
-
                 }
             }
 
 
             if (targetPoint != null)
             {
-
-
-
                 if (isMoving)
-                { 
-                    if(enemie == null)
+                {
+                    if (enemie == null)
                     {
-
                         if (currentPoint < targetPoint.Length)
                         {
-
-                            // Check for obstacles ahead
-
-
                             if (ShootingPatrolPoint == false)
                             {
-
-                                // Set running animation
+                                // Sätt animationer
                                 HeadAnime.SetBool("Run", true);
                                 FootAnime.SetBool("Run", true);
                                 HeadAnime.SetBool("ShootPos", false);
@@ -308,79 +353,77 @@ public class GalacticRangers : MonoBehaviour
                                 ContinueMove = false;
                                 IsShooting = false;
 
+                                Vector3 target = targetPoint[currentPoint].position;
+                                // Standardriktning rakt mot waypointen
+                                Vector3 direction = (target - transform.position).normalized;
 
-                                if (!IsObstacleAhead(out alternativeDirection))
+                                // === FIX 1: UNDVIK HINDER UTAN ATT KLIPPA IGENOM ===
+                                // Om ett hinder är i vägen, justera 'direction'-vektorn istället för att flytta transformen direkt
+                                if (IsObstacleAhead(out alternativeDirection) && alternativeDirection != Vector3.zero)
                                 {
-                                    Vector3 target = targetPoint[currentPoint].position;
+                                    // Vi lägger till alternativ riktning så han svänger runt hindret
+                                    direction = (direction + alternativeDirection * 2f).normalized;
+                                }
 
-                                    // direction mot waypoint
-                                    Vector3 direction = (target - transform.position).normalized;
-                                    // kombinera rörelse
-                                    Vector3 move = new Vector3(direction.x * MoveSpeed, _directionY, direction.z * MoveSpeed);
+                                // Räkna ut slutgiltig rörelse och flytta ENBART med CharacterController
+                                Vector3 move = new Vector3(direction.x * MoveSpeed, _directionY, direction.z * MoveSpeed);
+                                Controller.Move(move * Time.deltaTime);
 
-                                    // flytta med CharacterController
-                                    Controller.Move(move * Time.deltaTime);
+                                // Rotera mjukt mot rörelseriktningen under färden
+                                if (new Vector3(direction.x, 0, direction.z) != Vector3.zero)
+                                {
+                                    Quaternion targetRot = Quaternion.LookRotation(new Vector3(direction.x, 0, direction.z));
+                                    transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, Time.deltaTime * 8f);
+                                }
 
-                                    transform.LookAt(targetPoint[currentPoint]);
-                                    HeadControll.transform.LookAt(targetPoint[currentPoint]);
-
-                                    // Check if we reached the target point
-                                    distanceToTarget = Vector3.Distance(transform.position, targetPoint[currentPoint].position);
-                                    if (distanceToTarget <= stoppingDistance)
+                                // Kolla om vi har nått fram till waypointen
+                                distanceToTarget = Vector3.Distance(transform.position, targetPoint[currentPoint].position);
+                                if (distanceToTarget <= stoppingDistance)
+                                {
+                                    // === FIX 2: ROTERA EXAKT SOM WAYPOINTENS BLÅA PIL ===
+                                    // När vi är framme kopierar vi waypointens exakta rotation
+                                    transform.rotation = targetPoint[currentPoint].rotation;
+                                    if (HeadControll != null)
                                     {
-                                        if (ShootingPatrolPoint == false)
-                                        {
-                                            isMoving = false;
-                                            currentPoint++;
-                                        }
+                                        HeadControll.transform.rotation = targetPoint[currentPoint].rotation;
+                                    }
 
-                                        if (Crouching)
-                                        {
-                                            HeadAnime.SetBool("Crouch", true);
-                                        }
+                                    if (ShootingPatrolPoint == false)
+                                    {
+                                        isMoving = false;
+                                        currentPoint++;
+                                    }
 
-                                        if (currentPoint < targetPoint.Length)
-                                        {
-                                            isMoving = false; // Move to the next point
-                                        }
+                                    if (Crouching)
+                                    {
+                                        HeadAnime.SetBool("Crouch", true);
+                                    }
+
+                                    if (currentPoint < targetPoint.Length)
+                                    {
+                                        isMoving = false;
                                     }
                                 }
-                                else if (alternativeDirection != Vector3.zero)
-                                {
-                                    // Obstacle detected, move around the obstacle by adjusting direction
-                                    transform.position += alternativeDirection * MoveSpeed * Time.deltaTime;
-                                }
-                                else
-                                {
-                                    // No alternative path available, stop moving
-                                    HeadAnime.SetBool("Run", false);
-                                    FootAnime.SetBool("Run", false);
-                                }
                             }
-
-
                         }
                     }
                 }
                 else
                 {
-                    // Stop running animation if not moving
+                    // Stoppa animationer om vi står stilla
                     HeadAnime.SetBool("Run", false);
                     FootAnime.SetBool("Run", false);
                     rb.isKinematic = true;
 
                     if (ShootingPatrolPoint)
                     {
-
                         PatrolIdleTime -= Time.deltaTime;
                         if (PatrolIdleTime <= 0)
                         {
                             PatrolIdleTime = StartPatrolTime;
-                            isMoving = true; // Starta r�relse igen
-
+                            isMoving = true;
                         }
                     }
-
                 }
             }
         }

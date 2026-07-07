@@ -254,7 +254,9 @@ MonoBehaviour:
   ShootingPatrolPoint: 0
   PatrolIdleTime: 0
   RangersModeActive: 1
+  ISGravity: 1
   Controller: {fileID: 6443301131787814089}
+  raycastYOffset: 0.2
 --- !u!136 &1486857019903000985
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -411,6 +413,7 @@ MonoBehaviour:
   Health: 10
   MaxHealth: 0
   CrackedRanger: {fileID: 7572659952356967133, guid: f77846b9f7abe0d429265dea8ca59b95, type: 3}
+  verticalAngle: 0
   Explode: 0
   RangerDistance: 5
   ExplodeTime: 0

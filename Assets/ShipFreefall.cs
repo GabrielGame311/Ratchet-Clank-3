@@ -1,8 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
-
+// Importera Unitys Spline-system
+using UnityEngine.Splines;
 
 public class ShipFreefall : MonoBehaviour
 {
@@ -19,16 +19,22 @@ public class ShipFreefall : MonoBehaviour
     public float slowDownDistance = 3f;
     public LayerMask groundLayer;
     public float slowDownDuration = 1.5f;
+
+    [Header("Landing Targets (Dra in dina LandingPoints här)")]
+    public Transform[] landingPoints;
+
     Animator anime;
     CharacterController controller;
     RatchetController playercontroller;
     public AudioSource Sound;
+
     void Start()
     {
         anime = GameObject.FindGameObjectWithTag("Ratchet").GetComponent<Animator>();
         player = GameObject.FindGameObjectWithTag("Player");
         playerholder = player;
         player.GetComponent<RatchetController>().cine.m_XAxis.Value = 95;
+
         // Ignorera kollisioner mellan robotar direkt
         for (int i = 0; i < robots.Length; i++)
         {
@@ -75,7 +81,8 @@ public class ShipFreefall : MonoBehaviour
 
     IEnumerator MoveToDoorAndJump(GameObject character, bool isRobot, int robotIndex)
     {
-        while (Vector3.Distance(new Vector3(0, 0, player.transform.position.z), new Vector3(0, 0, doorPosition.position.z)) > 0.3f)
+        // FIX: Varje karaktär mäter sitt EGET avstånd till dörren (character istället för player)
+        while (Vector3.Distance(new Vector3(0, 0, character.transform.position.z), new Vector3(0, 0, doorPosition.position.z)) > 0.3f)
         {
             Vector3 direction = character.transform.forward * speed;
             direction.y = -9.81f;
@@ -172,89 +179,153 @@ public class ShipFreefall : MonoBehaviour
         ranger.FootAnime.SetBool("FreeFall", true);
 
         CharacterController cc = robot.GetComponentInChildren<CharacterController>();
+        if (cc != null) cc.enabled = true;
 
-        // Beräkna fasta formationsplatser (Offsets) runt spelaren
-        float sideSign = (robotIndex % 2 == 0) ? 1f : -1f;
-        float multiplier = (robotIndex / 2) + 1;
+        Vector3 initialWorldPos = robot.transform.position;
+        float localFallTimer = 0f;
 
-        // Formationsavstånd: t.ex. 2.5 enheter åt sidan, 2.0 enheter bakom spelaren
-        Vector3 formationOffset = new Vector3(sideSign * multiplier * 2.5f, 0f, -multiplier * 2.0f);
+        Transform targetLandingPoint = null;
+        if (landingPoints != null && landingPoints.Length > 0)
+        {
+            targetLandingPoint = landingPoints[robotIndex % landingPoints.Length];
+        }
 
-        // Mjuk övergång i början från hoppet till formationen
-        float formationLerpTime = 0f;
+        bool aligningWithTarget = false;
 
         while (falling)
         {
-            formationLerpTime += Time.deltaTime;
+            localFallTimer += Time.deltaTime;
 
-            // Hitta den exakta globala målpositionen baserat på var spelaren befinner sig just nu
-            Vector3 targetWorldPos = player.transform.position + player.transform.TransformDirection(formationOffset);
+            float targetX = robot.transform.position.x;
+            float targetZ = robot.transform.position.z;
 
-            // Beräkna hur mycket roboten måste röra sig horisontellt (X och Z) för att hålla sin plats i formationen
-            Vector3 nextHorizontalPos = Vector3.Lerp(robot.transform.position, targetWorldPos, formationLerpTime * 2f);
+            float lookAheadDistance = 50f;
+            RaycastHit airHit;
 
-            // Hantera rörelsen via CharacterController eller direkt transform
-            Vector3 moveDirection = new Vector3(nextHorizontalPos.x - robot.transform.position.x, -fallSpeed * Time.deltaTime, nextHorizontalPos.z - robot.transform.position.z);
-
-            if (cc != null && cc.enabled)
+            if (Physics.Raycast(robot.transform.position, Vector3.down, out airHit, lookAheadDistance, groundLayer))
             {
-                // Om vi använder cc.Move skickar vi med den beräknade rörelsen per bildruta
-                cc.Move(new Vector3(moveDirection.x, moveDirection.y, moveDirection.z));
+                aligningWithTarget = true;
+            }
+
+            if (aligningWithTarget && targetLandingPoint != null)
+            {
+                float flySmoothSpeed = 1f;
+                targetX = Mathf.Lerp(robot.transform.position.x, targetLandingPoint.position.x, Time.deltaTime * flySmoothSpeed);
+                targetZ = Mathf.Lerp(robot.transform.position.z, targetLandingPoint.position.z, Time.deltaTime * flySmoothSpeed);
+                robot.transform.rotation = Quaternion.Slerp(robot.transform.rotation, targetLandingPoint.rotation, Time.deltaTime * flySmoothSpeed);
             }
             else
             {
-                robot.transform.position = new Vector3(nextHorizontalPos.x, robot.transform.position.y - (fallSpeed * Time.deltaTime), nextHorizontalPos.z);
+                float waveSpeed = 1.5f;
+                float waveAmountX = 1.5f;
+                float waveAmountZ = 1.0f;
+
+                float timeOffset = localFallTimer * waveSpeed + (robotIndex * 1.5f);
+                float hoverX = Mathf.Sin(timeOffset) * waveAmountX;
+                float hoverZ = Mathf.Cos(timeOffset * 0.7f) * waveAmountZ;
+
+                targetX = initialWorldPos.x + hoverX;
+                targetZ = initialWorldPos.z + hoverZ;
+
+                robot.transform.rotation = Quaternion.LookRotation(Vector3.forward);
             }
 
-            // Raycast kollar marken under robotens koordinater
-            RaycastHit hit;
-            Vector3 rayOrigin = robot.transform.position;
+            float deltaX = targetX - robot.transform.position.x;
+            float deltaZ = targetZ - robot.transform.position.z;
+            float deltaY = -fallSpeed * Time.deltaTime;
 
-            if (Physics.Raycast(rayOrigin, Vector3.down, out hit, slowDownDistance, groundLayer))
+            Vector3 moveDirection = new Vector3(deltaX, deltaY, deltaZ);
+
+            if (cc != null && cc.enabled)
             {
-                falling = false;
-                if (cc != null) cc.enabled = false;
+                cc.Move(moveDirection);
 
-                StartCoroutine(SlowDownAndStop(robot, hit.point.y));
+                // FIX: Kräver att roboten har fallit i minst 0.2 sekunder innan isGrounded får aktiveras.
+                // Detta förhindrar att den triggas av skeppets golv precis när den hoppar ut!
+                if (cc.isGrounded && localFallTimer > 0.2f)
+                {
+                    falling = false;
+                    StartCoroutine(SlowDownAndStop(robot, targetLandingPoint));
+                    yield break;
+                }
+            }
+            else
+            {
+                robot.transform.position += moveDirection;
             }
 
             yield return null;
         }
     }
 
-    IEnumerator SlowDownAndStop(GameObject robot, float groundHeight)
+    IEnumerator SlowDownAndStop(GameObject robot, Transform landingTarget)
     {
-
-        float elapsedTime = 0f;
-        Vector3 startPos = robot.transform.position;
-        Vector3 endPos = new Vector3(startPos.x, groundHeight, startPos.z);
-
         var ranger = robot.GetComponent<GalacticRangers>();
-        if (ranger.GetComponent<CharacterController>().isGrounded)
-        {
 
-            ranger.RangersModeActive = true;
-            ranger.HeadAnime.SetBool("FreeFall", false);
-            ranger.FootAnime.SetBool("FreeFall", false);
-            robot.transform.position = endPos;
-        }
-        else
-        {
-            
+        ranger.HeadAnime.SetBool("FreeFall", false);
+        ranger.FootAnime.SetBool("FreeFall", false);
 
-            while (elapsedTime < slowDownDuration)
+        if (landingTarget != null)
+        {
+            robot.transform.rotation = landingTarget.rotation;
+
+            // =========================================================================
+            // SPLINE-INTEGRERING (Kolla om landningspunkten har en SplineContainer)
+            // =========================================================================
+            SplineContainer spline = landingTarget.GetComponent<SplineContainer>();
+
+            if (spline != null)
             {
-                robot.transform.position = Vector3.Lerp(startPos, endPos, elapsedTime / slowDownDuration);
-                elapsedTime += Time.deltaTime;
-                yield return null;
+                StartCoroutine(FollowSplineAfterLanding(robot, spline, ranger));
+                yield break;
             }
         }
 
+        yield return new WaitForSeconds(0.05f);
+        ranger.RangersModeActive = true;
+        ranger.enabled = true;
+    }
+
+    IEnumerator FollowSplineAfterLanding(GameObject robot, SplineContainer spline, GalacticRangers ranger)
+    {
+        ranger.HeadAnime.SetBool("Run", true);
+        ranger.FootAnime.SetBool("Run", true);
 
         CharacterController cc = robot.GetComponentInChildren<CharacterController>();
-        if (cc != null) cc.enabled = true;
-       
 
+        float splineProgress = 0f;
+        float runSpeedOnSpline = 0.1f;
+
+        while (splineProgress < 1f)
+        {
+            splineProgress += Time.deltaTime * runSpeedOnSpline;
+
+            Vector3 targetPosition = spline.EvaluatePosition(splineProgress);
+            Vector3 targetTangent = spline.EvaluateTangent(splineProgress);
+
+            if (targetTangent != Vector3.zero)
+            {
+                robot.transform.rotation = Quaternion.LookRotation(targetTangent);
+            }
+
+            if (cc != null && cc.enabled)
+            {
+                Vector3 moveDelta = targetPosition - robot.transform.position;
+                moveDelta.y -= 9.81f * Time.deltaTime;
+                cc.Move(moveDelta);
+            }
+            else
+            {
+                robot.transform.position = targetPosition;
+            }
+
+            yield return null;
+        }
+
+        ranger.HeadAnime.SetBool("Run", false);
+        ranger.FootAnime.SetBool("Run", false);
+
+        ranger.RangersModeActive = true;
         ranger.enabled = true;
     }
 }
