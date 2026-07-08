@@ -220,7 +220,7 @@ MonoBehaviour:
   FootAnime: {fileID: 1486857019968374390}
   targetPoint: []
   SoundShootFX: {fileID: 8300000, guid: 004f83cc1fac59b4789b50f10e1a3631, type: 3}
-  stoppingDistance: 0
+  stoppingDistance: 0.2
   isMoving: 0
   enemie: {fileID: 0}
   shootPoint: {fileID: 6182868428528511838}
@@ -238,7 +238,7 @@ MonoBehaviour:
   target: {fileID: 0}
   maxDistance: 2
   movementSpeed: 5
-  WalkSpeed: 0
+  WalkSpeed: 2
   PatrolTime: 0
   patrols: 0
   WalkPoint: []
@@ -257,6 +257,9 @@ MonoBehaviour:
   ISGravity: 1
   Controller: {fileID: 6443301131787814089}
   raycastYOffset: 0.2
+  splineContainer: {fileID: 0}
+  MAX_SPLINE_WAIT_TIME: 10
+  IsFreefall: 0
 --- !u!136 &1486857019903000985
 CapsuleCollider:
   m_ObjectHideFlags: 0

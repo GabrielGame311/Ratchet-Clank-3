@@ -78,11 +78,7 @@ public class freefall : MonoBehaviour
 
         HandleRootMotion();
 
-        if (controller.isGrounded && ItsFalling)
-        {
-            StopFalling();
-            RatchetController.RatchetController_.CanMove = true;
-        }
+        
 
 
         // Skjut en Raycast spikrakt nedåt från Ratchets position
@@ -122,24 +118,38 @@ public class freefall : MonoBehaviour
                 
                 anim.SetBool("IsHelicopter", true);
             }
-            
+           
             Glide();
         }
         else
         {
-            // VANLIGT SNABBT FALL (Ratchet faller med huvudet först)
+            // VANLIGT SNABBT FALL
             isHelicoptering = false;
             anim.SetBool("FreeFall", true);
 
-            // Rörelse i World Space (Gör att kameran INTE roterar)
-            Vector3 moveDir = new Vector3(vInput, 0, -hInput).normalized;
+            // 1. Hämta kamerans riktning (utan lutning upp/ner för att undvika konstig rörelse)
+            Vector3 camForward = Camera.main.transform.forward;
+            Vector3 camRight = Camera.main.transform.right;
+
+            camForward.y = 0; // Vi vill bara styra i XZ-planet
+            camRight.y = 0;
+            camForward.Normalize();
+            camRight.Normalize();
+
+            // 2. Beräkna rörelseriktning baserat på kamerans vy
+            // hInput/vInput matchas mot kamerans axlar
+            Vector3 moveDir = (camForward * vInput + camRight * hInput).normalized;
+
+            // 3. Kombinera fallhastighet (neråt) + styrt fall (åt sidan)
             Vector3 fallVelocity = (Vector3.down * falldawnSpeed) + (moveDir * MoveSpeed);
 
-            // Ändra alla rader där du har controller.Move till detta:
             if (controller != null && controller.enabled)
             {
                 controller.Move(fallVelocity * Time.deltaTime);
             }
+
+            // 4. Se till att Ratchet roterar åt det håll han faller
+            
         }
     }
 
@@ -148,7 +158,8 @@ public class freefall : MonoBehaviour
         // 1. Rörelse i sidled (World Space)
         // Vi använder hInput/vInput direkt så vi inte behöver hämta dem igen
         Vector3 moveDir = new Vector3(hInput, 0, vInput).normalized;
-
+        vCam.enabled = false;
+       
         // 2. Hastigheter (R&C 3 värden)
         float glideDescentSpeed = 4f; // Saktar ner fallet ordentligt
         float glideSideSpeed = MoveSpeed * 0.7f; // Lite segare styrning i sidled
@@ -158,7 +169,11 @@ public class freefall : MonoBehaviour
 
         // 4. Utför förflyttningen
         controller.Move(finalVelocity * Time.deltaTime);
-
+        if (controller.isGrounded && ItsFalling)
+        {
+            StopFalling();
+            RatchetController.RatchetController_.CanMove = true;
+        }
         // VIKTIGT: Vi roterar INTE Ratchet här. 
         // Om du vill att han ska luta lite, rotera bara grafiken/modellen, inte hela spelar-objektet.
     }
@@ -175,8 +190,7 @@ public class freefall : MonoBehaviour
                                             // Du kan använda en Invoke eller Coroutine för att stänga av skaket efter 0.2 sekunder
             }
         }
-
-        Cinecam.enabled = false;
+     
         isHelicoptering = false;
         vCam.enabled = false;
         CamFreefall.SetActive(false);

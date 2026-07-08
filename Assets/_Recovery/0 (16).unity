@@ -528,61 +528,41 @@ MonoBehaviour:
       TangentIn:
         x: -0
         y: -0
-        z: -1.4730422
+        z: -1.5288179
       TangentOut:
         x: 0
         y: 0
-        z: 0.71359575
+        z: 0.7965124
       Rotation:
         value:
-          x: -0.04432446
-          y: -0.31664556
-          z: -0.000110253925
-          w: 0.9475077
+          x: 0.00082590006
+          y: -0.30975592
+          z: 0.014342603
+          w: 0.9507076
     - Position:
-        x: -46.288788
-        y: 2.220993
-        z: 6.4660034
+        x: -46.171783
+        y: 1.92099
+        z: 6.8260193
       TangentIn:
         x: -0
         y: -0
-        z: -0.422554
+        z: -0.2614858
       TangentOut:
         x: 0
         y: 0
-        z: 0.2660055
+        z: 0.2614858
       Rotation:
         value:
-          x: 0.063228264
-          y: 0.41544437
-          z: -0.02901234
-          w: 0.9069544
-    - Position:
-        x: -45.44519
-        y: 1.9216156
-        z: 6.4289246
-      TangentIn:
-        x: -0
-        y: -0
-        z: -0.0895912
-      TangentOut:
-        x: 0
-        y: 0
-        z: 0.0895912
-      Rotation:
-        value:
-          x: 0.11721694
-          y: 0.7120067
-          z: -0.12248225
-          w: 0.68139905
+          x: 0.000005402432
+          y: 0.08617711
+          z: 0.00006245666
+          w: 0.9962799
     m_MetaData:
     - Mode: 0
       Tension: 0.5
     - Mode: 0
       Tension: 0.5
     - Mode: 4
-      Tension: 0.5
-    - Mode: 0
       Tension: 0.5
     - Mode: 0
       Tension: 0.5
@@ -9900,7 +9880,7 @@ Transform:
   m_GameObject: {fileID: 350054511}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: 0.8178677, z: -0, w: 0.5754064}
-  m_LocalPosition: {x: -474.857, y: 82.72, z: -372.962}
+  m_LocalPosition: {x: -476.5, y: 82.72, z: -372.16}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -11396,7 +11376,7 @@ Transform:
   m_GameObject: {fileID: 484983951}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: 0.70509, z: -0, w: 0.7091178}
-  m_LocalPosition: {x: -475.346, y: 82.72, z: -377.997}
+  m_LocalPosition: {x: -476.95, y: 82.72, z: -377.86}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -14323,14 +14303,14 @@ PrefabInstance:
     - target: {fileID: 1486857019903000984, guid: 0b1cc3bb7a23f994eac2d8481cfb3c13, type: 3}
       propertyPath: splineContainer
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 31395802}
     - target: {fileID: 1486857019903000984, guid: 0b1cc3bb7a23f994eac2d8481cfb3c13, type: 3}
       propertyPath: IsMovingShooting
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1486857019903000984, guid: 0b1cc3bb7a23f994eac2d8481cfb3c13, type: 3}
       propertyPath: stoppingDistance
-      value: 0
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 1486857019903000984, guid: 0b1cc3bb7a23f994eac2d8481cfb3c13, type: 3}
       propertyPath: wallLayer.m_Bits
@@ -14340,10 +14320,6 @@ PrefabInstance:
       propertyPath: ShootingPatrolPoint
       value: 1
       objectReference: {fileID: 0}
-    - target: {fileID: 1486857019903000984, guid: 0b1cc3bb7a23f994eac2d8481cfb3c13, type: 3}
-      propertyPath: targetSplineContainer
-      value: 
-      objectReference: {fileID: 31395802}
     - target: {fileID: 1486857019903000984, guid: 0b1cc3bb7a23f994eac2d8481cfb3c13, type: 3}
       propertyPath: targetPoint.Array.size
       value: 1
@@ -32769,56 +32745,36 @@ MonoBehaviour:
       TangentIn:
         x: -0
         y: -0
-        z: -0.9962299
+        z: -1.0559012
       TangentOut:
         x: 0
         y: 0
-        z: 0.3414682
+        z: 0.39325288
       Rotation:
         value:
-          x: 0.04921412
-          y: 0.9177089
-          z: 0.14412875
-          w: -0.36689946
+          x: -0.0051853196
+          y: 0.9364886
+          z: -0.004461957
+          w: -0.3506311
     - Position:
-        x: -46.40677
-        y: 2.3509903
-        z: 0.33029175
-      TangentIn:
-        x: -0
-        y: -0
-        z: -0.26254803
-      TangentOut:
-        x: 0
-        y: 0
-        z: 0.22085609
-      Rotation:
-        value:
-          x: 0.01431971
-          y: 0.93711966
-          z: -0.049712434
-          w: 0.34515277
-    - Position:
-        x: -45.770782
+        x: -46.36078
         y: 1.92099
-        z: 0.12530518
+        z: 0.045288086
       TangentIn:
         x: -0
         y: -0
-        z: -0.07946058
+        z: -0.1325765
       TangentOut:
         x: 0
         y: 0
-        z: 0.07946058
+        z: 0.1325765
       Rotation:
         value:
-          x: 0.22221011
-          y: 0.7613206
-          z: -0.18612134
-          w: 0.5799763
+          x: -0.000103317114
+          y: 0.9951331
+          z: -0.000010230646
+          w: 0.09853986
     m_MetaData:
-    - Mode: 0
-      Tension: 0.5
     - Mode: 0
       Tension: 0.5
     - Mode: 0
@@ -36162,19 +36118,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5543905689527651199, guid: a7882c718d905024ea97f4ac8bb3d061, type: 3}
       propertyPath: m_LocalRotation.w
-      value: -0.8379627
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5543905689527651199, guid: a7882c718d905024ea97f4ac8bb3d061, type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0.00081251864
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5543905689527651199, guid: a7882c718d905024ea97f4ac8bb3d061, type: 3}
       propertyPath: m_LocalRotation.y
-      value: 0.5457268
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5543905689527651199, guid: a7882c718d905024ea97f4ac8bb3d061, type: 3}
       propertyPath: m_LocalRotation.z
-      value: 0.00052914576
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5543905689837884224, guid: a7882c718d905024ea97f4ac8bb3d061, type: 3}
       propertyPath: m_IsActive
@@ -37015,10 +36971,6 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 1486857019903000984, guid: 0b1cc3bb7a23f994eac2d8481cfb3c13, type: 3}
-      propertyPath: target
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 1486857019903000984, guid: 0b1cc3bb7a23f994eac2d8481cfb3c13, type: 3}
       propertyPath: m_Enabled
       value: 1
       objectReference: {fileID: 0}
@@ -37033,14 +36985,14 @@ PrefabInstance:
     - target: {fileID: 1486857019903000984, guid: 0b1cc3bb7a23f994eac2d8481cfb3c13, type: 3}
       propertyPath: splineContainer
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 1743011783}
     - target: {fileID: 1486857019903000984, guid: 0b1cc3bb7a23f994eac2d8481cfb3c13, type: 3}
       propertyPath: IsMovingShooting
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1486857019903000984, guid: 0b1cc3bb7a23f994eac2d8481cfb3c13, type: 3}
       propertyPath: stoppingDistance
-      value: 0
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 1486857019903000984, guid: 0b1cc3bb7a23f994eac2d8481cfb3c13, type: 3}
       propertyPath: wallLayer.m_Bits
@@ -37050,10 +37002,6 @@ PrefabInstance:
       propertyPath: ShootingPatrolPoint
       value: 1
       objectReference: {fileID: 0}
-    - target: {fileID: 1486857019903000984, guid: 0b1cc3bb7a23f994eac2d8481cfb3c13, type: 3}
-      propertyPath: targetSplineContainer
-      value: 
-      objectReference: {fileID: 1743011783}
     - target: {fileID: 1486857019903000984, guid: 0b1cc3bb7a23f994eac2d8481cfb3c13, type: 3}
       propertyPath: targetPoint.Array.size
       value: 1
@@ -39290,7 +39238,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &2118352271
 Transform:
   m_ObjectHideFlags: 0
