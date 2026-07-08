@@ -1,7 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Numerics;
 using UnityEngine;
 using UnityEngine.Splines;
+using Quaternion = UnityEngine.Quaternion;
+using Vector3 = UnityEngine.Vector3;
 
 
 public class GalacticRangers : MonoBehaviour
@@ -167,9 +170,10 @@ public class GalacticRangers : MonoBehaviour
             {
 
                 ShootTime -= Time.deltaTime;
-                shootPoint.transform.LookAt(enemie.transform);
+                Vector3 shootSpot = enemie.transform.position + Vector3.up * 0.5f;
+                shootPoint.transform.LookAt(shootSpot);
                 // HeadControll.transform.LookAt(enemie.transform);
-                Vector3 direction = (enemie.transform.position - HeadControll.transform.position).normalized;
+                Vector3 direction = (shootSpot - HeadControll.transform.position).normalized;
 
                 // Ber�kna m�lrotationen med riktningen mot spelaren
                 Quaternion lookRotation = Quaternion.LookRotation(direction);
