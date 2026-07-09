@@ -35990,8 +35990,16 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3353526399271479375, guid: a7882c718d905024ea97f4ac8bb3d061, type: 3}
       propertyPath: Armor
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3353526399271479375, guid: a7882c718d905024ea97f4ac8bb3d061, type: 3}
+      propertyPath: 'meshMaterial_Armor1.Array.data[4]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 7e99763519fa7ff4d836e314174502e3, type: 2}
+    - target: {fileID: 3353526399271479375, guid: a7882c718d905024ea97f4ac8bb3d061, type: 3}
+      propertyPath: 'meshMaterial_Armor2.Array.data[4]'
+      value: 
+      objectReference: {fileID: 2100000, guid: cf6c5056b20e08040ba657fa83f1aa9b, type: 2}
     - target: {fileID: 3957815001026341203, guid: a7882c718d905024ea97f4ac8bb3d061, type: 3}
       propertyPath: isSwimming
       value: 1
@@ -36464,6 +36472,10 @@ PrefabInstance:
       propertyPath: ForceBall
       value: 10
       objectReference: {fileID: 0}
+    - target: {fileID: 6675943877703138384, guid: a7882c718d905024ea97f4ac8bb3d061, type: 3}
+      propertyPath: m_Mesh
+      value: 
+      objectReference: {fileID: -6203157608727584658, guid: b40eeb10d820fba4f838687cd030e451, type: 3}
     - target: {fileID: 6826329526788457829, guid: a7882c718d905024ea97f4ac8bb3d061, type: 3}
       propertyPath: m_IsKinematic
       value: 1
@@ -39290,7 +39302,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &2118352271
 Transform:
   m_ObjectHideFlags: 0

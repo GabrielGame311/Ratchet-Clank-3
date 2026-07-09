@@ -122,73 +122,76 @@ public class AllGameData : MonoBehaviour
                 SetArmor(3);
 
             }
-        
+
+        if (Armor == 4)
+        {
+            SetArmor(4);
+
+        }
 
 
-       
-       
-       
+
+
+
+
 
     }
 
 
-    public void SetArmor(int seting)
+    public void SetArmor(int setting)
     {
-        if (seting < 0 || seting >= meshMaterial_Armor1.Length ||
-            seting >= meshMaterial_Armor2.Length ||
-            seting >= MeshArmor.Length)
+        // 1. Säkerhetskoll för index (så vi inte går utanför arrayernas storlek)
+        if (setting < 0 ||
+            setting >= meshMaterial_Armor1.Length ||
+            setting >= meshMaterial_Armor2.Length ||
+            setting >= MeshArmor.Length)
         {
-            Debug.LogWarning("SetArmor index out of bounds!");
+            Debug.LogWarning($"SetArmor index {setting} är out of bounds!");
             return;
         }
 
-        if (meshMaterial_Armor1[seting] == null ||
-            meshMaterial_Armor2[seting] == null ||
-            MeshArmor[seting] == null)
+        // 2. Kolla så att inte objekten i arrayen är tomma (Null)
+        if (meshMaterial_Armor1[setting] == null ||
+            meshMaterial_Armor2[setting] == null ||
+            MeshArmor[setting] == null)
         {
-            Debug.LogWarning("One or more armor assets are missing.");
+            Debug.LogWarning($"Någon tillgång saknas i inspektorn för index {setting}.");
             return;
         }
 
-        // Prepare a new materials array if needed
-        Material[] mats = Player_Mesh.materials;
-        if(Armor > 0)
-        {
-            if (mats.Length < 4)
-            {
-                mats = new Material[4];
-            }
-        }
-        else
-        {
-            if (mats.Length > 4)
-            {
-               
-                Destroy(mats[0]);
-            }
-        }
-        if(Armor == 2)
-        {
-            if (mats.Length < 5)
-            {
-                mats = new Material[5];
-            }
+        Material[] mats;
 
-
-            mats[0] = meshMaterial_Armor1[seting];
-            mats[1] = meshMaterial_Armor2[seting];
-            mats[2] = meshMaterial_Armor2[seting];
-            mats[3] = meshMaterial_Armor1[seting];
-            mats[4] = meshMaterial_Armor1[seting];
-        }
-        else
+        // 3. Bestäm hur många material den aktuella rustningen har
+        if (setting == 3)
         {
-            mats[0] = meshMaterial_Armor1[seting];
-            mats[1] = meshMaterial_Armor2[seting];
-            mats[2] = meshMaterial_Armor1[seting];
-            mats[3] = meshMaterial_Armor2[seting];
+            mats = new Material[5];
+            mats[0] = meshMaterial_Armor1[setting];
+            mats[1] = meshMaterial_Armor2[setting];
+            mats[2] = meshMaterial_Armor2[setting];
+            mats[3] = meshMaterial_Armor1[setting];
+            mats[4] = meshMaterial_Armor1[setting];
         }
-        if(Armor == 3)
+        else if (setting == 4)
+        {
+            // HÄR HANTERAS NIVÅ 4: Den får också 5 material (eller ändra till 6 om du la till ännu ett)
+            mats = new Material[5];
+            mats[0] = meshMaterial_Armor1[setting];
+            mats[1] = meshMaterial_Armor2[setting];
+            mats[2] = meshMaterial_Armor1[setting];
+            mats[3] = meshMaterial_Armor2[setting];
+            mats[4] = meshMaterial_Armor1[setting]; // Ditt nya 5:e material
+        }
+        else // Gäller för 0, 1 och 2 (som bara har 4 material)
+        {
+            mats = new Material[4];
+            mats[0] = meshMaterial_Armor1[setting];
+            mats[1] = meshMaterial_Armor2[setting];
+            mats[2] = meshMaterial_Armor1[setting];
+            mats[3] = meshMaterial_Armor2[setting];
+        }
+
+        // 4. Hantera hjälmen
+        if (setting == 4)
         {
             Helmet.SetActive(false);
         }
@@ -196,15 +199,11 @@ public class AllGameData : MonoBehaviour
         {
             Helmet.SetActive(true);
         }
-        // Assign armor materials
-       
-      
+
+        // 5. Applicera den nya meshen och de nya materialen
         Player_Mesh.materials = mats;
-
-        // Assign new mesh
-        Player_Mesh.sharedMesh = MeshArmor[seting];
+        Player_Mesh.sharedMesh = MeshArmor[setting];
     }
-
 
 
 
