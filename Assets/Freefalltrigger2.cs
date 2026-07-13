@@ -34,7 +34,7 @@ public class Freefalltrigger2 : MonoBehaviour
     // Lägg detta i ett litet skript på din Trigger-zon eller i freefall-skriptet
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Player"))
+        if (other.tag == "Player")
         {
             // Starta fallet!
             freefall fallScript = other.GetComponent<freefall>();
@@ -42,7 +42,7 @@ public class Freefalltrigger2 : MonoBehaviour
             fallScript.RunForward(); // Startar ljudet också
         }
 
-        if(other.CompareTag("Ground"))
+        if (other.tag == "Ground")
         {
             freefall fallScript = other.GetComponent<freefall>();
             fallScript.ItsFalling = false;

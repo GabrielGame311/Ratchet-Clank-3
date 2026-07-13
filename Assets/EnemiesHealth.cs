@@ -1,12 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Scripting;
 
 public class EnemiesHealth : MonoBehaviour
 {
     public float colorChangeDuration = 0.2f;
-   
+
     public Renderer[] MaterialRed;
     public int health = 1;
     public int maxHealth = 0;
@@ -32,45 +31,30 @@ public class EnemiesHealth : MonoBehaviour
     public bool damagish = false;
 
     public float ExplodeTime;
-    
+    public float DamageHitRange;
+
+    Rigidbody rb;
+
     private void Start()
     {
-    
         MaterialRed = GetComponentsInChildren<Renderer>();
-
-      
-
+        rb = GetComponent<Rigidbody>();
 
         if (BossHealth)
         {
-            EnemieHealth_ = GetComponent<EnemiesHealth>();
+            EnemieHealth_ = this;
         }
 
         StartCoroutine(Wait());
         anime = GetComponentInChildren<Animator>();
-        //transform.parent = null;
         maxHealth = health;
-        //gameObject.SetActive(false);
-
-       
-        enemie = GetComponent<GameObject>();
-
-        
+        enemie = gameObject;
         sound = GetComponent<AudioSource>();
-
-
-       
-
     }
-
-
-   
 
     private void Update()
     {
-
-
-        if(damagish)
+        if (damagish)
         {
             ChangeColorTime -= Time.deltaTime;
             if (ChangeColorTime < 0)
@@ -84,13 +68,9 @@ public class EnemiesHealth : MonoBehaviour
                         mat.color = startColor;  // Återställ till startfärgen
                     }
                 }
-               
-
-                
             }
             else
             {
-               
                 foreach (Renderer renderer in MaterialRed)
                 {
                     foreach (Material mat in renderer.materials)
@@ -99,47 +79,13 @@ public class EnemiesHealth : MonoBehaviour
                     }
                 }
             }
-            
         }
-        
-       
-
     }
-
-    private IEnumerator ChangeColorTemporarily()
-    {
-        // Ändrar färgen till skadans färg för alla material på alla Renderer-komponenter
-        foreach (Renderer renderer in MaterialRed)
-        {
-            foreach (Material mat in renderer.materials)
-            {
-                mat.color = damageColor;  // Sätter materialets färg till röd
-            }
-        }
-
-        // Väntar under en viss tid
-        yield return new WaitForSeconds(colorChangeDuration);
-       
-        // Återställer färgen till ursprungsfärgen för alla material
-        foreach (Renderer renderer in MaterialRed)
-        {
-            foreach (Material mat in renderer.materials)
-            {
-                mat.color = startColor;  // Återställ till startfärgen
-            }
-        }
-
-        
-    }
-
 
     public void TakeDamage(int damage)
     {
         health -= damage;
-
-        
         damagish = true;
-        //StartCoroutine(ChangeColorTemporarily());
 
         if (DamageExplode)
         {
@@ -150,80 +96,49 @@ public class EnemiesHealth : MonoBehaviour
                 foreach (Rigidbody gm in exp.GetComponentsInChildren<Rigidbody>())
                 {
                     gm.AddExplosionForce(10, transform.position, 5);
-
                     DamageExplode = false;
                     ExplodePrefab = null;
                 }
-
             }
         }
 
-
-
         if (health <= 0)
         {
-
             health = 0;
-
             Die();
-            
         }
         else
         {
-            sound.PlayOneShot(SoundDamage);
+            if (sound != null && SoundDamage != null)
+            {
+                sound.PlayOneShot(SoundDamage);
+            }
         }
-        if(damage > 2)
+
+        if (damage > 2 && rb != null)
         {
-            anime.SetTrigger("Damage");
-
+            Vector3 jumpDirection = -transform.forward + Vector3.up * 0.5f;
+            rb.AddForce(jumpDirection.normalized * DamageHitRange, ForceMode.Impulse);
+            if (anime != null) anime.SetTrigger("Damage");
         }
-        animes.SetTrigger("DamageRed");
 
-    }
-
-
-    void OnEnable()
-    {
-        if (EnemiesMission.instance != null)
-        {
-           // EnemiesMission.instance.EnemiesList.Add(gameObject);
-        }
+        if (animes != null) animes.SetTrigger("DamageRed");
     }
 
     public void Die()
     {
-        if(anime != null)
+        if (anime != null)
         {
             anime.SetTrigger("Die");
         }
-       
 
         if (GetComponent<BloodFly>() != null)
         {
             GetComponent<BloodFly>().enabled = true;
         }
 
-        
-
-        
-            
-        
-       
-            
-        
-           
-        
-
+        // Förstör fiende-objektet efter explosionstiden
         Destroy(gameObject, ExplodeTime);
-
-
-       
-
-
-
-
-
-       
 
         if (GetComponent<MiniThyrra>() != null)
         {
@@ -233,38 +148,19 @@ public class EnemiesHealth : MonoBehaviour
         {
             GetComponent<RedNinja>().enabled = false;
         }
-
-       
-
-       
     }
-
-    
-    
 
     private void OnDestroy()
     {
-
-
-        // LevelWeapon.levelWeapon_.levelWeapon();
-
-        if (GameObject.FindObjectOfType<WeaponsUI>() != null)
+        // 1. Ge XP till spelarens vapen
+        WeaponsUI ui = FindObjectOfType<WeaponsUI>();
+        if (ui != null)
         {
-            if (GameObject.FindObjectOfType<WeaponsUI>().gameObject.activeSelf == true)
-            {
-                //WeaponsUI.WeaponsUI_.levelAmount += LevelXp;
-                GameObject.FindObjectOfType<WeaponsUI>().levelAmount += LevelXp;
-            }
+            ui.levelAmount += LevelXp;
         }
 
-      
-
-
-
-        Debug.Log("Destroy!");
-
-
-        if(!DamageExplode)
+        // 2. Skapa explosionseffekt om det inte redan har skett
+        if (!DamageExplode)
         {
             if (ExplodePrefab != null)
             {
@@ -273,150 +169,69 @@ public class EnemiesHealth : MonoBehaviour
                 foreach (Rigidbody gm in exp.GetComponentsInChildren<Rigidbody>())
                 {
                     gm.AddExplosionForce(10, transform.position, 5);
-
-
                 }
-
-
             }
         }
 
-       
-
-       
-
-        //WeaponsUI.WeaponsUI_.levelAmount += LevelXp;
-        Instantiate(Bolt, transform.position, transform.rotation);
-
-
-       
-
-        if(EnemiesMission.instance != null)
+        // 3. Spawna Bolts (Valuta)
+        if (Bolt != null)
         {
-
-            if (EnemiesMission.instance.gameObject.activeSelf == true)
-            {
-                EnemiesMission.instance.EnemiesList.Remove(gameObject);
-            }
+            Instantiate(Bolt, transform.position, transform.rotation);
         }
 
-        if (RocketMission.RocketMission_ != null)
+        // NOTERA: Kodraderna som manuellt tog bort detta gameObject från EnemiesMission.instance.EnemiesList 
+        // har plockats bort härifrån. Detta eftersom EnemiesMission.cs nu automatiskt städar bort null-referenser 
+        // i sin egen Update-loop på ett säkrare sätt.
+
+        // 4. Hantera RocketMission om det är aktivt
+        if (RocketMission.RocketMission_ != null && RocketMission.RocketMission_.gameObject.activeSelf)
         {
-
-            if (RocketMission.RocketMission_.gameObject.activeSelf == true)
-            {
-                RocketMission.RocketMission_.DropShip.Remove(gameObject);
-            }
-            if (RocketMission.RocketMission_.gameObject.activeSelf == true)
-            {
-                RocketMission.RocketMission_.Enemies.Remove(gameObject);
-            }
-            if (RocketMission.RocketMission_.gameObject.activeSelf == true)
-            {
-                RocketMission.RocketMission_.Rockets.Remove(gameObject);
-            }
+            RocketMission.RocketMission_.DropShip.Remove(gameObject);
+            RocketMission.RocketMission_.Enemies.Remove(gameObject);
+            RocketMission.RocketMission_.Rockets.Remove(gameObject);
         }
 
-
-
-
-
-        // 1. Ge XP till vapnet om UI:t finns
-        WeaponsUI ui = FindObjectOfType<WeaponsUI>();
-        if (ui != null)
-        {
-            ui.levelAmount += LevelXp;
-        }
-
-        // 2. Sök efter SpawnTime-skriptet EN gång och spara det i en variabel
+        // 5. Hantera SpawnTime-skriptet om det existerar
         SpawnTime spawnTime = FindObjectOfType<SpawnTime>();
-
-        // 3. Gör en null-check: Finns SpawnTime i scenen just nu?
         if (spawnTime != null)
         {
-            // Om det finns, kontrollera och ta bort från listorna säkert
-            if (spawnTime.DropshipsSpawned != null)
-            {
-                spawnTime.DropshipsSpawned.Remove(gameObject);
-            }
-
-            if (spawnTime.EnemiesSpawned != null)
-            {
-                spawnTime.EnemiesSpawned.Remove(gameObject);
-            }
+            if (spawnTime.DropshipsSpawned != null) spawnTime.DropshipsSpawned.Remove(gameObject);
+            if (spawnTime.EnemiesSpawned != null) spawnTime.EnemiesSpawned.Remove(gameObject);
         }
 
-
-
-
-
-
-
-
+        // Inaktivera alla andra skripter på objektet vid förstörelse
         MonoBehaviour[] scripts = GetComponents<MonoBehaviour>();
-        // Iterate through all scripts and disable them
         foreach (MonoBehaviour script in scripts)
         {
-            // Ensure we don't disable the DisableAllScripts script itself
             if (script != this)
             {
                 script.enabled = false;
             }
         }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        foreach (GalacticRangers gl in GameObject.FindObjectsOfType<GalacticRangers>())
+        // Säg till Rangers att sluta skjuta
+        foreach (GalacticRangers gl in FindObjectsOfType<GalacticRangers>())
         {
             gl.IsShooting = false;
-
         }
-       
-       
-        
     }
 
     public void takedamage()
     {
-        sound.PlayOneShot(clipsound);
+        if (sound != null && clipsound != null)
+        {
+            sound.PlayOneShot(clipsound);
+        }
     }
-  
 
     IEnumerator Wait()
     {
-
-        GetComponent<ThyrranoidLaser>().SePlayer = false;
-
-
-        yield return new WaitForSeconds(3);
-        GetComponent<ThyrranoidLaser>().SePlayer = true;
-
-
+        ThyrranoidLaser laser = GetComponent<ThyrranoidLaser>();
+        if (laser != null)
+        {
+            laser.SePlayer = false;
+            yield return new WaitForSeconds(3);
+            laser.SePlayer = true;
+        }
     }
-
 }

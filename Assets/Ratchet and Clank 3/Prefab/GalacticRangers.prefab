@@ -260,6 +260,10 @@ MonoBehaviour:
   splineContainer: {fileID: 0}
   MAX_SPLINE_WAIT_TIME: 10
   IsFreefall: 0
+  targetSplineContainer: {fileID: 0}
+  targetSplines: []
+  currentTargetSplineIndex: 0
+  isWaitingForSignal: 1
 --- !u!136 &1486857019903000985
 CapsuleCollider:
   m_ObjectHideFlags: 0

@@ -44,18 +44,19 @@ public class freefall : MonoBehaviour
     public float helicopterDistance = 5f; // Avståndet till marken när helikoptern startar
     public float helicopterFallSpeed = 5f; // Hur mycket han bromsar (lägre värde = långsammare)
     public bool isHelicoptering = false;
-
-   
+    public Transform Armor;
+    public Transform modelTransform; // Lägg till denna
 
     private void Start()
     {
-
+       
+        
         Freefall = GetComponent<freefall>();
         controller = GetComponent<CharacterController>();
         
         ratchet = GetComponent<RatchetController>();
         anim = GameObject.FindGameObjectWithTag("Ratchet").GetComponent<Animator>();
-
+        
         // Hämta Cinemachine-komponenten från ditt CamFreefall objekt
         if (CamFreefall != null)
             vCam = CamFreefall.GetComponent<CinemachineFreeLook>();
@@ -92,7 +93,7 @@ public class freefall : MonoBehaviour
         // Aktivera freefall-kameran (den som tittar ner)
         CamFreefall.SetActive(true);
         vCam.enabled = true;
-
+        vCam.m_Lens.Dutch = 0;
         // Hämta input
         hInput = Input.GetAxisRaw("Horizontal");
         vInput = Input.GetAxisRaw("Vertical");
@@ -100,6 +101,28 @@ public class freefall : MonoBehaviour
         {
             hInput = IOSController.IosController_.JoyStick_.Horizontal;
             vInput = IOSController.IosController_.JoyStick_.Vertical;
+        }
+        if (modelTransform != null)
+        {
+           
+
+            // 2. Utgå ifrån gubbens bas-rotation (framåt)
+            Quaternion baseRotation = transform.rotation;
+
+            // 3. Räkna ut hur mycket EXTRA han ska rotera/luta baserat på WASD
+            float maxTiltAngle = 20f;
+            float targetYRotation = hInput * maxTiltAngle; // Vrider ansiktet i sidled
+            float targetXRotation = vInput * 20f;         // Dyker framåt/bakåt
+            float targetZRotation = -hInput * 15f;        // Lutar kroppen i svängen
+
+            // Skapa en extra rotations-offset från knapparna
+            Quaternion tiltOffset = Quaternion.Euler(targetXRotation, targetYRotation, targetZRotation);
+
+            // Kombinera gubbens framåtriktning med knapp-lutningen
+            Quaternion targetWorldRotation = baseRotation * tiltOffset;
+
+            // Slerpa nu i World Space (.rotation) så att han garanterat följer med gubben rakt fram när du släpper knapparna
+            modelTransform.rotation = Quaternion.Slerp(modelTransform.rotation, targetWorldRotation, 8f * Time.deltaTime);
         }
 
         // Raycast för att se om vi ska fälla ut helikoptern
@@ -148,8 +171,8 @@ public class freefall : MonoBehaviour
                 controller.Move(fallVelocity * Time.deltaTime);
             }
 
-            // 4. Se till att Ratchet roterar åt det håll han faller
-            
+
+           
         }
     }
 

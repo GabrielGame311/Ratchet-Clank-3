@@ -15,7 +15,7 @@ public class BridegScrow : MonoBehaviour
     bool IsScrow = false;
     public Animator anime;
     public GameObject Enemies;
-    bool isCrowed = false;
+    public bool isCrowed = false;
     public static BridegScrow BridgeScrow_;
     public GameObject IOS_UI;
     public bool Scrowing = false;
@@ -123,7 +123,7 @@ public class BridegScrow : MonoBehaviour
 
             // Enemies.SetActive(true);
             //  IOS_UI.SetActive(false);
-            GameObject.FindObjectOfType<SpawnTime>().RangerTalk();
+           
 
             if(MissionSound.MissionSound_ != null)
             {
@@ -132,10 +132,11 @@ public class BridegScrow : MonoBehaviour
             }
 
 
-
+            Enemies.SetActive(true);
 
 
             isCrowed = false;
+            GameObject.FindObjectOfType<SpawnTime>().RangerTalk();
         }
 
 

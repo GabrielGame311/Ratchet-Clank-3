@@ -95,6 +95,13 @@ public class GalacticRangers : MonoBehaviour
     private GameObject lastEnemie;
     private bool isTurningToEnemy = false;
 
+
+    [Header("Spline Target Settings (Run List)")]
+    public List<SplineContainer> targetSplines; // Lista med våg-splines
+    public int currentTargetSplineIndex = 0;   // Vilken spline vi är på
+    private float targetSplineProgress2 = 0f;
+    public bool isWaitingForSignal = true;     // Startar som true (väntar på att våg 1 rensas)
+
     void Start()
     {
         instance = this;
@@ -154,7 +161,7 @@ public class GalacticRangers : MonoBehaviour
         {
             if (!enemie.activeInHierarchy || Vector3.Distance(transform.position, enemie.transform.position) > 15f)
             {
-                enemie = null;
+                //enemie = null;
                 IsShooting = false;
                 isTurningToEnemy = false;
             }
@@ -254,10 +261,24 @@ public class GalacticRangers : MonoBehaviour
                 HeadAnime.SetBool("ShootPos", false);
                 FootAnime.SetBool("ShootPos", false);
 
-                // --- 1. GLOBALT TVINGANDE STOPP (Körs så fort slutet nås på Spline eller TargetPoint) ---
-                if (hasReachedTargetSplineEnd || hasReachedTargetPointEnd)
+                // KONTROLL: VÄNTAR PÅ SIGNAL FRÅN ENEMIES MISSION (VÅGLISTA)?
+                if (targetSplines != null && currentTargetSplineIndex < targetSplines.Count && isWaitingForSignal)
                 {
-                    // Stäng av alla rörelser och animationer stenhårt
+                    // Stoppa dem stenhårt på platsen medan de väntar på att vågen ska dö
+                    HeadAnime.SetBool("Run", false);
+                    FootAnime.SetBool("Run", false);
+                    HeadAnime.SetBool("Walk", false);
+                    FootAnime.SetBool("Walk", false);
+                    isMoving = false;
+
+                    if (Controller != null && Controller.enabled)
+                    {
+                        Controller.Move(new Vector3(0, _directionY, 0) * Time.deltaTime);
+                    }
+                }
+                // --- 1. GLOBALT TVINGANDE STOPP (När slutet nås på Spline eller TargetPoint) ---
+                else if (hasReachedTargetSplineEnd || hasReachedTargetPointEnd)
+                {
                     HeadAnime.SetBool("Run", false);
                     FootAnime.SetBool("Run", false);
                     HeadAnime.SetBool("Walk", false);
@@ -269,7 +290,6 @@ public class GalacticRangers : MonoBehaviour
                         Controller.Move(new Vector3(0, _directionY, 0) * Time.deltaTime);
                     }
 
-                    // ROTATION UTIFRÅN TARGET POINT (Den blå pilen / forward)
                     if (hasReachedTargetPointEnd && targetPoint != null && targetPoint.Length > 0 && targetPoint[currentPoint] != null)
                     {
                         Vector3 targetForward = targetPoint[currentPoint].forward;
@@ -280,7 +300,6 @@ public class GalacticRangers : MonoBehaviour
                             transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, RotateSpeed * Time.deltaTime);
                         }
                     }
-                    // ROTATION UTIFRÅN RUN SPLINE (Riktningen i slutet av splinen)
                     else if (hasReachedTargetSplineEnd && targetSplineContainer != null)
                     {
                         Vector3 p1 = targetSplineContainer.EvaluatePosition(0.98f);
@@ -294,7 +313,7 @@ public class GalacticRangers : MonoBehaviour
                         }
                     }
                 }
-                // --- 2. EXTRA TARGET/RUN SPLINE ---
+                // --- 2. EXTRA SINGLE TARGET/RUN SPLINE ---
                 else if (targetSplineContainer != null)
                 {
                     HeadAnime.SetBool("Run", true);
@@ -410,7 +429,6 @@ public class GalacticRangers : MonoBehaviour
                     }
                 }
                 // --- 4. TARGET POINTS ARRAY ---
-                // --- 4. TARGET POINTS ARRAY ---
                 else if (targetPoint != null && targetPoint.Length > 0 && isMoving && isGrounded)
                 {
                     distanceToTarget = Vector3.Distance(transform.position, targetPoint[currentPoint].position);
@@ -418,22 +436,15 @@ public class GalacticRangers : MonoBehaviour
                     if (distanceToTarget <= stoppingDistance)
                     {
                         hasReachedTargetPointEnd = true;
-
-                        // LÅS ANIMATIONER
                         HeadAnime.SetBool("Run", false);
                         FootAnime.SetBool("Run", false);
-
-                        // TVINGA ROTATIONEN HELT TILL TARGETS ROTATION
-                        // Vi skiter i RotateTowards och sätter den direkt för att slippa "glidning"
                         transform.rotation = targetPoint[currentPoint].rotation;
 
-                        // Stanna rörelsen
                         if (Controller != null && Controller.enabled)
                             Controller.Move(new Vector3(0, _directionY, 0) * Time.deltaTime);
                     }
                     else
                     {
-                        // Fortsätt gå
                         HeadAnime.SetBool("Run", true);
                         FootAnime.SetBool("Run", true);
 
@@ -443,7 +454,6 @@ public class GalacticRangers : MonoBehaviour
                         Vector3 move = new Vector3(direction.x * MoveSpeed, _directionY, direction.z * MoveSpeed);
                         if (Controller != null && Controller.enabled) Controller.Move(move * Time.deltaTime);
 
-                        // Mjuk rotation medan han springer
                         Quaternion targetRot = Quaternion.LookRotation(new Vector3(direction.x, 0, direction.z));
                         transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, Time.deltaTime * 8f);
                     }
@@ -456,6 +466,72 @@ public class GalacticRangers : MonoBehaviour
                         Controller.Move(gravityMove * Time.deltaTime);
                     }
                 }
+            }
+        }
+
+        // =================================================================
+        // --- KORRIGERAD: TARGET SPLINES LISTA (RÖRELSE & SIGNAL-KONTROLL) ---
+        // =================================================================
+        if (targetSplines[currentTargetSplineIndex] != null && currentTargetSplineIndex < targetSplines.Count && !isWaitingForSignal && enemie == null)
+        {
+            SplineContainer currentSpline = targetSplines[currentTargetSplineIndex];
+
+            HeadAnime.SetBool("Run", true);
+            FootAnime.SetBool("Run", true);
+            rb.isKinematic = false;
+
+            float totalTargetLength = currentSpline.CalculateLength();
+            targetSplineProgress2 += (MoveSpeed / totalTargetLength) * Time.deltaTime;
+            targetSplineProgress2 = Mathf.Clamp01(targetSplineProgress2);
+
+            Vector3 splineTargetPos = currentSpline.EvaluatePosition(targetSplineProgress2);
+            Vector3 targetMoveDir = (splineTargetPos - transform.position);
+            targetMoveDir.y = 0;
+
+            float distToSplineEnd = targetMoveDir.magnitude;
+            targetMoveDir = targetMoveDir.normalized;
+
+            if (targetMoveDir != Vector3.zero)
+            {
+                Quaternion runRot = Quaternion.LookRotation(targetMoveDir);
+                transform.rotation = Quaternion.RotateTowards(transform.rotation, runRot, RotateSpeed * Time.deltaTime);
+            }
+
+            Vector3 moveVel = new Vector3(targetMoveDir.x * MoveSpeed, _directionY, targetMoveDir.z * MoveSpeed);
+            if (Controller != null && Controller.enabled) Controller.Move(moveVel * Time.deltaTime);
+
+            // Byt spline när roboten har sprungit hela vägen till slutet
+            if (targetSplineProgress2 >= 1f || (distToSplineEnd < 0.3f && targetSplineProgress2 > 0.95f))
+            {
+                currentTargetSplineIndex++; // Flytta fram indexet för nästa spline i kön
+                targetSplineProgress2 = 0f;
+                isWaitingForSignal = true;  // Sätt till true DIREKT! Nu stannar de och väntar på nästa våg av fiender
+
+                // Säg även till EnemiesMission att vi har stannat och är redo att ta emot en ny signal
+                if (EnemiesMission.instance != null)
+                {
+                    EnemiesMission.instance.isWaitingForNextWave = false;
+                }
+            }
+        }
+        // STOPP-LOGIK (Körs endast när alla splines i listan har körts färdigt)
+        else if (targetSplines != null && currentTargetSplineIndex >= targetSplines.Count)
+        {
+            isMoving = false;
+            HeadAnime.SetBool("Run", false);
+            FootAnime.SetBool("Run", false);
+            HeadAnime.SetBool("Walk", false);
+            FootAnime.SetBool("Walk", false);
+        }
+    }
+
+    public void AdvanceToNextSpline()
+    {
+        if (isWaitingForSignal)
+        {
+            if (currentTargetSplineIndex < targetSplines.Count)
+            {
+                isWaitingForSignal = false; // Bryt vänteläget och börja springa nästa spline!
             }
         }
     }
@@ -513,10 +589,20 @@ public class GalacticRangers : MonoBehaviour
 
     private void OnTriggerStay(Collider other)
     {
-        if (enemie == null && other.CompareTag("Sight"))
+        if (enemie == null && other.tag == "Sight")
         {
             enemie = other.gameObject;
             IsShooting = true;
+        }
+ 
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        if (enemie != null && other.tag == "Sight")
+        {
+            enemie = null;
+            IsShooting = false;
         }
     }
 }
