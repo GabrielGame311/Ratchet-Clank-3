@@ -109,20 +109,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   MoveSpeed: 5
   Distance: 45
-  anime: {fileID: 3973078247354516535}
+  minDistanceFromFirstEnemy: 4
   ShootTime: 1
   SePlayer: 0
-  SoundplayInt: 1
   Shooting: 0
   Gun: {fileID: 0}
+  pointGun: {fileID: 2804046990130667679}
+  ShootForce: 20
+  ParticlePrefab: {fileID: 8725247626259641378, guid: bad1697538621444dbd127c138e48ef1, type: 3}
+  DistanceFromPlayer: 15
   SoundFX:
   - {fileID: 8300000, guid: dd1f344cc17a2384093a7c97bdfc91f5, type: 3}
   - {fileID: 8300000, guid: de77a8eea51bd6645b3359e698743ff3, type: 3}
-  DistanceFromPlayer: 15
-  minDistanceFromFirstEnemy: 4
-  ParticlePrefab: {fileID: 8725247626259641378, guid: bad1697538621444dbd127c138e48ef1, type: 3}
-  pointGun: {fileID: 2804046990130667679}
-  ShootForce: 20
+  SoundplayInt: 1
+  anime: {fileID: 3973078247354516535}
 --- !u!54 &3973078248528916367
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -275,7 +275,19 @@ MonoBehaviour:
   damageColor: {r: 1, g: 0, b: 0, a: 1}
   startColor: {r: 1, g: 1, b: 1, a: 1}
   animes: {fileID: 0}
+  DamageExplode: 0
+  ChangeColorTime: 0.2
+  damagish: 0
   ExplodeTime: 3
+  DamageHitRange: 0
+  InfectorEffect: {fileID: 6532545777463119960, guid: 744ee8a45dff65e448ce5b6f538fb6a2, type: 3}
+  IsInfector: 0
+  PlayerDetect:
+    serializedVersion: 2
+    m_Bits: 8
+  currentTarget: {fileID: 0}
+  baseInfectionDuration: 15
+  durationIncreasePerLevel: 5
 --- !u!135 &2367273865764239511
 SphereCollider:
   m_ObjectHideFlags: 0

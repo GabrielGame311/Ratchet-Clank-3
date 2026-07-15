@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class MiniThyrra : MonoBehaviour
 {
-
     [Header("Combat")]
     public int damage = 10;
     public float attackInterval = 1f;   // hur ofta den får slå
@@ -18,7 +17,11 @@ public class MiniThyrra : MonoBehaviour
     public LayerMask playerLayer;
 
     private Animator anim;
-    private Transform player;
+    
+    // Används nu dynamiskt via EnemiesHealth istället för att bara söka efter "Player"
+    private Transform currentTarget; 
+    private EnemiesHealth myHealth;
+
     public float attackTimer;
 
     bool isJumping = false;
@@ -34,56 +37,56 @@ public class MiniThyrra : MonoBehaviour
     bool isPatrolWaiting = false;
 
     Rigidbody rb;
+
     void Start()
     {
         anim = GetComponentInChildren<Animator>();
         rb = GetComponent<Rigidbody>();
+        myHealth = GetComponent<EnemiesHealth>();
+        
         patrolTimer = patrolSwitchTime;
         IsPatroling = true;
     }
 
+    void Update()
+    {
+        if (isJumping) return;
 
-  
-        void Update()
+        // Hämta det aktuella målet direkt från EnemiesHealth!
+        currentTarget = (myHealth != null) ? myHealth.currentTarget : null;
+
+        if (currentTarget == null)
         {
-            if (isJumping) return;
-
-            if (player == null)
-            {
-                Patrol();
-                return;
-            }
-
-            float dist = Vector3.Distance(transform.position, player.position);
-
-            if (dist > attackRange && dist > 10f)
-            {
-                Patrol();
-                return;
-            }
-
-            if (dist <= attackRange || dist <= 10f)
-            {
-                anim.SetBool("Walk", false); // 🔁 Slå av patrullanimation
-                IsPatroling = false;
-                ChaseOrAttack(dist);
-                return;
-            }
-
+            Patrol();
+            return;
         }
 
+        float dist = Vector3.Distance(transform.position, currentTarget.position);
 
+        if (dist > attackRange && dist > 10f)
+        {
+            Patrol();
+            return;
+        }
 
+        if (dist <= attackRange || dist <= 10f)
+        {
+            anim.SetBool("Walk", false); // 🔁 Slå av patrullanimation
+            IsPatroling = false;
+            ChaseOrAttack(dist);
+            return;
+        }
+    }
 
     void ChaseOrAttack(float dis)
     {
         if (isJumping) return;
 
-        if (player == null) { anim.SetBool("Run", false); return; }
+        if (currentTarget == null) { anim.SetBool("Run", false); return; }
 
-        float dist = Vector3.Distance(transform.position, player.position);
+        float dist = Vector3.Distance(transform.position, currentTarget.position);
 
-        Vector3 lookDir = (player.position - transform.position); lookDir.y = 0;
+        Vector3 lookDir = (currentTarget.position - transform.position); lookDir.y = 0;
         if (lookDir.sqrMagnitude > 0.001f)
             transform.rotation = Quaternion.LookRotation(lookDir);
 
@@ -91,7 +94,7 @@ public class MiniThyrra : MonoBehaviour
         {
             anim.SetBool("Run", true);
             rb.isKinematic = false;
-            transform.position = Vector3.MoveTowards(transform.position, player.position, moveSpeed * Time.deltaTime);
+            transform.position = Vector3.MoveTowards(transform.position, currentTarget.position, moveSpeed * Time.deltaTime);
         }
         else
         {
@@ -103,10 +106,34 @@ public class MiniThyrra : MonoBehaviour
             {
                 attackTimer = attackInterval;
                 anim.SetTrigger("Attack");
-                player.GetComponent<Player>().TakeDamage(damage);
+                
+                // Deal Damage baserat på vem målet är
+                DealDamageToTarget();
 
                 // Starta bakåt-hopp
                 StartCoroutine(BackJump());
+            }
+        }
+    }
+
+    void DealDamageToTarget()
+    {
+        if (currentTarget == null) return;
+
+        if (currentTarget.CompareTag("Player"))
+        {
+            Player playerComponent = currentTarget.GetComponent<Player>();
+            if (playerComponent != null)
+            {
+                playerComponent.TakeDamage(damage);
+            }
+        }
+        else if (currentTarget.CompareTag("Enemie"))
+        {
+            EnemiesHealth otherEnemy = currentTarget.GetComponent<EnemiesHealth>();
+            if (otherEnemy != null)
+            {
+                otherEnemy.TakeDamage(damage);
             }
         }
     }
@@ -133,7 +160,6 @@ public class MiniThyrra : MonoBehaviour
         transform.rotation = Quaternion.LookRotation(dir);
     }
 
-
     IEnumerator PatrolPause()
     {
         isPatrolWaiting = true;
@@ -142,7 +168,7 @@ public class MiniThyrra : MonoBehaviour
 
         // Vänta stilla först
         yield return new WaitForSeconds(3.5f);
-       // anim.SetBool("Walk", true);
+
         // Mjuk vändning
         Quaternion startRot = transform.rotation;
         Vector3 newDir = new Vector3(0, 0, -patrolDirection); // Ny riktning
@@ -159,16 +185,12 @@ public class MiniThyrra : MonoBehaviour
         // Säkerställ exakt rotation
         transform.rotation = targetRot;
 
-        // Vänta stilla efter vändning
-        //yield return new WaitForSeconds(2);
-
         // Starta patrull igen
         patrolDirection *= -1;
         patrolTimer = patrolSwitchTime;
         anim.SetBool("Walk", true);
         isPatrolWaiting = false;
     }
-
 
     IEnumerator BackJump()
     {
@@ -191,16 +213,30 @@ public class MiniThyrra : MonoBehaviour
         isJumping = false;
     }
 
-
-    // Trigger för att börja följa spelaren
-    private void OnTriggerEnter(Collider other)
+    // Eftersom det nya systemet sköter målsökningen i bakgrunden via krockar och avstånd,
+    // kan vi städa bort de gamla OnTrigger-metoderna om du vill, men de kan ligga kvar som backup
+    // ifall du vill sätta ett primärt mål manuellt vid krock.
+   private void OnTriggerEnter(Collider other)
     {
+        // Om vi krockar med spelaren, berätta för EnemiesHealth att detta är vårt mål!
         if (other.CompareTag("Player"))
-            player = other.transform;
+        {
+            if (myHealth != null)
+            {
+                myHealth.currentTarget = other.transform;
+            }
+        }
     }
+
     private void OnTriggerExit(Collider other)
     {
+        // Om spelaren springer utanför vår trigger, tappar vi målet och börjar patrullera igen
         if (other.CompareTag("Player"))
-            player = null;
+        {
+            if (myHealth != null && myHealth.currentTarget == other.transform)
+            {
+                myHealth.currentTarget = null;
+            }
+        }
     }
 }

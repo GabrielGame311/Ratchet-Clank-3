@@ -184,7 +184,7 @@ public class SludgeInfector : MonoBehaviour
             if (enemyHealth != null)
             {
                 enemyHealth.TakeDamage((int)Damage);
-
+                enemyHealth.Infect(true); 
                 // HÄR KAN DU TRIGGA GRÖN INFICERINGS-EFFEKT / PARTIKLAR!
             }
 

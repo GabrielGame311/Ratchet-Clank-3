@@ -5,20 +5,16 @@ using UnityEngine;
 
 public class NableNative : MonoBehaviour
 {
-
     public int Damage;
 
-
     public float RotateSpeed;
-
     public float RunSpeed;
-
     public float WalkSpeed;
 
-    GameObject Player_;
+    // Denna sätts nu dynamiskt via EnemiesHealth istället för att bara söka efter "Player"
+    private Transform currentTarget; 
 
     public float AttackTime;
-
     float StartAttack;
     public LayerMask groundLayer;
 
@@ -36,7 +32,7 @@ public class NableNative : MonoBehaviour
     public float JumpSpeed;
     public bool IsHang;
     public GameObject HangAble;
-     bool IsHanging;
+    bool IsHanging;
     public float AttackDistance;
     public bool IsHangEnemie;
     public Rigidbody rb;
@@ -47,9 +43,10 @@ public class NableNative : MonoBehaviour
     public GameObject[] Mask;
     public bool IsPatroling = true;
     EnemiesHealth healt;
-    // Start is called before the first frame update
+    
     public Transform landTarget;
     public bool isWater = false;
+
     void Start()
     {
         healt = GetComponent<EnemiesHealth>();
@@ -57,50 +54,40 @@ public class NableNative : MonoBehaviour
         rb = GetComponent<Rigidbody>();
         patrolStartPos = transform.position; // Set where patrolling begins
         StartAttack = AttackTime;
-        
-        Player_ = GameObject.FindGameObjectWithTag("Player");
-
     }
 
-   
-
-    // Update is called once per frame
     void Update()
     {
-
-        if(healt.maxHealth > healt.health)
+        // Hantera masker när vi tar skada
+        if (healt != null && healt.maxHealth > healt.health)
         {
-            foreach(GameObject masks in Mask)
+            foreach (GameObject masks in Mask)
             {
-                if(masks != null)
+                if (masks != null)
                 {
-
-
-
                     Destroy(masks);
                     Mask = null;
                 }
             }
         }
 
-        // Kontrollera om fienden är på marken (använd din befintliga GroundLayer)
+        // Kontrollera om fienden är på marken
         bool isGrounded = Physics.CheckSphere(transform.position, 0.2f, groundLayer);
 
         if (isGrounded && !IsHanging)
         {
-            // Om vi har landat, gå tillbaka till vanlig Idle/Run
             anime.SetBool("Falling", false);
         }
         else if (!isGrounded && !IsHanging)
         {
-            // Om vi är i luften men inte hänger, spela fall-animationen
             anime.SetBool("Falling", true);
         }
 
-       
+        // Hämta det aktuella målet direkt från EnemiesHealth!
+        currentTarget = (healt != null) ? healt.currentTarget : null;
+
         if (IsHangEnemie)
         {
-
             if (IsHang)
             {
                 float dis = Vector3.Distance(transform.position, HangAble.transform.position);
@@ -108,46 +95,29 @@ public class NableNative : MonoBehaviour
                 // 1. OM HAN REDAN HÄNGER (Glid-fasen)
                 if (IsHanging && HangAble != null)
                 {
-                    // 1. RÖRELSE: Åk framåt med den hastighet du satt (7)
-                    // Vi använder fiendens egna framåtriktning som vi roterar mjukt
                     transform.position += transform.forward * RunSpeed * Time.deltaTime;
 
-                    // 2. MJUK ROTATION: Sväng mot linans riktning istället för att snappa
-                    // RotateSpeed (125) gör att han följer kurvor snyggt
                     Quaternion targetRot = HangAble.transform.rotation;
                     transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRot, RotateSpeed * Time.deltaTime);
 
-                    // 3. MJUK CENTRERING (Viktigast!): 
-                    // Istället för att spawna på linan, drar vi honom sakta mot mitten i sidled
                     Vector3 targetPos = new Vector3(HangAble.transform.position.x, transform.position.y, HangAble.transform.position.z);
                     transform.position = Vector3.MoveTowards(transform.position, targetPos, 2f * Time.deltaTime);
 
-
-                    // 3. EXIT-CHECK: 
-                    // Om vi kommit för långt bort från linans startpunkt, hoppa av.
+                    // EXIT-CHECK
                     float dist = Vector3.Distance(transform.position, HangAble.transform.position);
-                    if (dist > 15f) // Justera distansen efter hur långa dina linor är
+                    if (dist > 15f) 
                     {
                         DismountHang();
                     }
                 }
                 // 2. OM HAN ÄR NÄRA LINAN OCH SKA HOPPA UPP
-                else if (dis < 3.0f) // Justera för att starta hoppet tidigare från kanten
+                else if (dis < 3.0f)
                 {
-                    // Titta mot linan så hoppet blir rätt
-                    Vector3 dir = (HangAble.transform.position - transform.position).normalized;
-                    // transform.rotation = Quaternion.LookRotation(new Vector3(dir.x, 0, dir.z));
-
-                    // Starta animationen: Vi sätter Hang-boolen till true
                     anime.SetBool("Run", false);
                     anime.SetBool("Walking", false);
                     anime.SetBool("Hang", true);
-                    // Detta kommer att trigga övergången: Start -> Any State -> StartHang
 
-                    // Ge honom kraft framåt och uppåt mot linan
                     rb.linearVelocity = (transform.forward * RunSpeed) + (Vector3.up * JumpSpeed);
-
-                    // Vi sätter IsHanging till true i OnTriggerEnter när han nuddar linan
                 }
                 // 3. SPRING MOT KANTEN
                 else
@@ -155,223 +125,155 @@ public class NableNative : MonoBehaviour
                     transform.position = Vector3.MoveTowards(transform.position, HangAble.transform.position, RunSpeed * Time.deltaTime);
                     anime.SetBool("Run", true);
                     anime.SetBool("Walking", false);
-
-                    // Vector3 dir = (HangAble.transform.position - transform.position).normalized;
-                    // transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(new Vector3(dir.x, 0, dir.z)), RotateSpeed * Time.deltaTime);
                 }
             }
             else
             {
-                float dis = Vector3.Distance(transform.position, Player_.transform.position);
+                // Kontrollera om vi har ett giltigt mål att jaga/attackera
+                if (currentTarget != null)
+                {
+                    float dis = Vector3.Distance(transform.position, currentTarget.position);
+                    transform.eulerAngles = new Vector3(0, transform.eulerAngles.y, 0);
 
+                    // --- ATTACKERA MÅLET ---
+                    if (AttackDistance > dis)
+                    {
+                        AttackTime -= Time.deltaTime;
+                        anime.SetBool("Run", false);
+                        if (AttackTime < 0)
+                        {
+                            AttackTime = StartAttack;
+                            Attack();
+                        }
+                    }
+
+                    // --- JAGA MÅLET ---
+                    if (dis < PlayerDistance)
+                    {
+                        anime.SetBool("Walking", false);
+
+                        if (AttackDistance < dis)
+                        {
+                            IsHang = true;
+                            if (!IsHanging)
+                            {
+                                if (IsPatroling)
+                                {
+                                    if (IsGroundAhead())
+                                    {
+                                        // Mark finns! Spring mot målet (spelaren eller infekterad fiende)
+                                        transform.position = Vector3.MoveTowards(transform.position, currentTarget.position, RunSpeed * Time.deltaTime);
+                                        anime.SetBool("Run", true);
+
+                                        Vector3 direction = (currentTarget.position - transform.position).normalized;
+                                        Quaternion lookRotation = Quaternion.LookRotation(new Vector3(direction.x, 0, direction.z));
+                                        transform.rotation = Quaternion.RotateTowards(transform.rotation, lookRotation, RotateSpeed * Time.deltaTime);
+                                    }
+                                    else
+                                    {
+                                        // STUP!
+                                        anime.SetBool("Run", false);
+                                        anime.SetBool("Walking", true);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        // Om målet är för långt borta -> Patrullera
+                        if (IsPatroling)
+                        {
+                            Patrol();
+                            anime.SetBool("Run", false);
+                        }
+                    }
+                }
+                else
+                {
+                    // Inget mål -> Patrullera
+                    if (IsPatroling)
+                    {
+                        Patrol();
+                        anime.SetBool("Run", false);
+                    }
+                }
+            }
+        }
+
+        // --- OM FIENDEN INTE SKA HÄNGA (IsHangEnemie == false) ---
+        if (!IsHangEnemie)
+        {
+            if (currentTarget != null)
+            {
+                float dis = Vector3.Distance(transform.position, currentTarget.position);
                 transform.eulerAngles = new Vector3(0, transform.eulerAngles.y, 0);
 
+                // --- ATTACKERA MÅLET ---
                 if (AttackDistance > dis)
                 {
                     AttackTime -= Time.deltaTime;
                     anime.SetBool("Run", false);
                     if (AttackTime < 0)
                     {
-
                         AttackTime = StartAttack;
-
                         Attack();
-
                     }
-
-                }
-                if (GetComponent<EnemiesHealth>().health == 0)
-                {
-                    die();
                 }
 
+                // --- JAGA MÅLET ---
                 if (dis < PlayerDistance)
                 {
-
+                    isWater = true;
                     anime.SetBool("Walking", false);
-
                     
-                    
-                        if (AttackDistance < dis)
+                    if (AttackDistance < dis)
+                    {
+                        if (IsGroundAhead())
                         {
-                            IsHang = true;
-                            if (!IsHanging)
-                            {
-
-
-                                if(IsPatroling)
-                                {
-                                    if (IsGroundAhead())
-                                    {
-                                        // Mark finns! Spring mot spelaren
-                                        transform.position = Vector3.MoveTowards(transform.position, Player_.transform.position, RunSpeed * Time.deltaTime);
-                                        anime.SetBool("Run", true);
-                                        // Rotera fortfarande mot spelaren så den ser arg ut vid kanten
-                                        Vector3 direction = (Player_.transform.position - transform.position).normalized;
-                                        Quaternion lookRotation = Quaternion.LookRotation(new Vector3(direction.x, 0, direction.z));
-                                        transform.rotation = Quaternion.RotateTowards(transform.rotation, lookRotation, RotateSpeed * Time.deltaTime);
-                                    }
-                                    else
-                                    {
-                                        // STUP! Istället för att stå still, låt oss backa lite eller sluta springa
-                                        anime.SetBool("Run", false);
-                                        anime.SetBool("Walking", true);
-
-                                        // Backa långsamt bort från kanten
-                                       // transform.position = Vector3.MoveTowards(transform.position, transform.position - transform.forward, WalkSpeed * Time.deltaTime);
-
-                                        // Valfritt: Få den att se sig omkring (Looking animation)
-                                        // anime.SetTrigger("Looking"); 
-                                    }
-
-                                    
-                                }
-
-                               
-                            }
-
-
+                            // Spring mot målet
+                            transform.position = Vector3.MoveTowards(transform.position, currentTarget.position, RunSpeed * Time.deltaTime);
+                            anime.SetBool("Run", true);
                         }
-                     
+                        else
+                        {
+                            // Stup! Backa undan
+                            anime.SetBool("Run", false);
+                            transform.position = Vector3.MoveTowards(transform.position, transform.position - transform.forward, WalkSpeed * Time.deltaTime);
+                        }
 
-                   
-
-
-
-
-
-
-
-
+                        // Titta mot målet
+                        Vector3 direction = (currentTarget.position - transform.position).normalized;
+                        Quaternion lookRotation = Quaternion.LookRotation(new Vector3(direction.x, 0, direction.z));
+                        transform.rotation = Quaternion.RotateTowards(transform.rotation, lookRotation, RotateSpeed * Time.deltaTime);
+                    }
                 }
                 else
                 {
-
-
-
-                    if(IsPatroling)
+                    if (IsPatroling)
                     {
                         Patrol();
                         anime.SetBool("Run", false);
                     }
-
-
-
                 }
-            }
-        }
-
-        if(!IsHangEnemie)
-        {
-
-            float dis = Vector3.Distance(transform.position, Player_.transform.position);
-
-            transform.eulerAngles = new Vector3(0, transform.eulerAngles.y, 0);
-
-            if (AttackDistance > dis)
-            {
-                AttackTime -= Time.deltaTime;
-                anime.SetBool("Run", false);
-                if (AttackTime < 0)
-                {
-
-                    AttackTime = StartAttack;
-
-                    Attack();
-
-                }
-
-            }
-            if (GetComponent<EnemiesHealth>().health == 0)
-            {
-                die();
-            }
-
-            if (dis < PlayerDistance)
-            {
-                isWater = true;
-                anime.SetBool("Walking", false);
-                if (AttackDistance < dis)
-                {
-                    if (IsGroundAhead())
-                    {
-                        
-
-                       
-                        // Mark finns! Spring mot spelaren
-                        transform.position = Vector3.MoveTowards(transform.position, Player_.transform.position, RunSpeed * Time.deltaTime);
-                        anime.SetBool("Run", true);
-                        
-                    }
-                    else
-                    {
-                        // STUP! Istället för att stå still, låt oss backa lite eller sluta springa
-                        anime.SetBool("Run", false);
-                        //anime.SetBool("Walking", true);
-
-                        // Backa långsamt bort från kanten
-                        transform.position = Vector3.MoveTowards(transform.position, transform.position - transform.forward, WalkSpeed * Time.deltaTime);
-
-                        // Valfritt: Få den att se sig omkring (Looking animation)
-                        // anime.SetTrigger("Looking"); 
-                        
-                    }
-
-
-                        // Rotera fortfarande mot spelaren så den ser arg ut vid kanten
-                        Vector3 direction = (Player_.transform.position - transform.position).normalized;
-                        Quaternion lookRotation = Quaternion.LookRotation(new Vector3(direction.x, 0, direction.z));
-                        transform.rotation = Quaternion.RotateTowards(transform.rotation, lookRotation, RotateSpeed * Time.deltaTime);
-                    
-
-                }
-
-
-
-
-
-
-
-
             }
             else
             {
-
-
-
-                if(IsPatroling)
+                if (IsPatroling)
                 {
                     Patrol();
                     anime.SetBool("Run", false);
                 }
-
-
-
             }
         }
-
-        
-
-        
-
-
-
-
-        
     }
-
-    // Inuti din if (IsHanging) i Update:
-    
 
     bool IsGroundAhead()
     {
-        // Skjut en stråle från en punkt framför fienden och neråt
-        // transform.forward * 0.5f gör att vi kollar ca en halv meter framför fötterna
         Vector3 forwardPos = transform.position + transform.forward * 0.5f;
-
-        // Vi startar strålen 1 meter upp (Vector3.up) för att vara säkra på att den inte börjar under marken
         return Physics.Raycast(forwardPos + Vector3.up, Vector3.down, 2f, groundLayer);
     }
+
     void Patrol()
     {
         if (isWaiting)
@@ -380,44 +282,38 @@ public class NableNative : MonoBehaviour
             if (patrolTimer >= PatrolTime)
             {
                 isWaiting = false;
-                
                 patrolTimer = 0f;
-                patrollingRight = !patrollingRight; // Turn around
+                patrollingRight = !patrollingRight; // Vänd om
             }
             anime.SetBool("Walking", false);
             return;
         }
-
-
 
         if (!IsGroundAhead())
         {
             isWaiting = true;
             patrolTimer = 0f;
             anime.SetBool("Walking", false);
-            return; // Avbryt rörelsen här så den inte går över kanten
+            return; 
         }
 
         Vector3 targetPos = patrolStartPos + (patrollingRight ? Vector3.right : Vector3.left) * patrolDistance;
-            transform.position = Vector3.MoveTowards(transform.position, targetPos, WalkSpeed * Time.deltaTime);
+        transform.position = Vector3.MoveTowards(transform.position, targetPos, WalkSpeed * Time.deltaTime);
 
-            Vector3 direction = (targetPos - transform.position).normalized;
-            if (direction != Vector3.zero)
-            {
-                Quaternion lookRotation = Quaternion.LookRotation(direction);
-                transform.rotation = Quaternion.RotateTowards(transform.rotation, lookRotation, RotateSpeed * Time.deltaTime);
-            }
+        Vector3 direction = (targetPos - transform.position).normalized;
+        if (direction != Vector3.zero)
+        {
+            Quaternion lookRotation = Quaternion.LookRotation(direction);
+            transform.rotation = Quaternion.RotateTowards(transform.rotation, lookRotation, RotateSpeed * Time.deltaTime);
+        }
 
-            anime.SetBool("Walking", true);
+        anime.SetBool("Walking", true);
 
-            if (Vector3.Distance(transform.position, targetPos) < 0.1f)
-            {
-                isWaiting = true;
-                anime.SetTrigger("Looking");
-            }
-        
-
-        
+        if (Vector3.Distance(transform.position, targetPos) < 0.1f)
+        {
+            isWaiting = true;
+            anime.SetTrigger("Looking");
+        }
     }
 
     void DismountHang()
@@ -425,22 +321,17 @@ public class NableNative : MonoBehaviour
         IsHang = false;
         sound.Stop();
         IsHanging = false;
-        rb.useGravity = true; // Slå på gravitationen så han faller ner
+        rb.useGravity = true; 
         IsHangEnemie = false;
-        // Uppdatera Animator:
-        // Vi stänger av "Hang"-boolen, vilket kommer trigga dina utgångar.
-        // Se till att övergångarna från HangIdle -> HangExiit 
-        // och HangExiit -> HangFall är korrekt inställda med 'Has Exit Time'.
         anime.SetBool("Hang", false);
 
-        // Ge en liten knuff framåt/neråt när man hoppar av
         rb.AddForce((transform.forward + Vector3.up) * 5f, ForceMode.Impulse);
     }
+
     private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("EnemieHang"))
         {
-            // Vi sparar bara den nya linan för att få dess riktning (Z-axel)
             HangAble = other.gameObject;
 
             if (!IsHanging)
@@ -451,21 +342,13 @@ public class NableNative : MonoBehaviour
                 IsHanging = true;
                 rb.useGravity = false;
                 rb.linearVelocity = Vector3.zero;
-                
             }
         }
 
-        // I din OnTriggerEnter
         if (other.CompareTag("HangEnd"))
         {
             DismountHang();
-           // Destroy(HangAble);
         }
-
-
-        
-
-
     }
 
     private void OnTriggerStay(Collider other)
@@ -473,38 +356,28 @@ public class NableNative : MonoBehaviour
         if (other.CompareTag("WaterExit") && isWater)
         {
             isWater = false;
-            Destroy(other.gameObject, 01);
+            Destroy(other.gameObject, 0.1f);
             JumpOutOfWater();
         }
     }
-
-    
 
     void JumpOutOfWater()
     {
         if (landTarget == null) return;
 
-        // 1. Nollställ all fart under vatten så hoppet blir super-snappy
         rb.linearVelocity = Vector3.zero;
         rb.useGravity = true;
         
-        // 2. Räkna ut riktningen till mitten av marken
         Vector3 targetPos = landTarget.position;
         Vector3 direction = (targetPos - transform.position);
 
-        // Vi delar upp kraften: 
-        // Horisontell (X, Z) för att nå fram snabbt
         Vector3 horizontalDist = new Vector3(direction.x, 0, direction.z);
-        // Vertikal (Y) för att komma UPP ur vattnet snabbt
-        float verticalLift = 8f; // Öka denna om han är djupt under ytan
-        float speedToCenter = 4f; // Öka denna för att han ska flyga snabbare framåt
+        float verticalLift = 8f; 
+        float speedToCenter = 4f; 
 
         Vector3 finalJumpForce = horizontalDist.normalized * speedToCenter + Vector3.up * verticalLift;
 
-        // 3. Skjut iväg! VelocityChange struntar i Mass och ger omedelbar fart
         rb.AddForce(finalJumpForce, ForceMode.VelocityChange);
-
-        // 4. Se till att han tittar mot mitten direkt
         transform.LookAt(new Vector3(targetPos.x, transform.position.y, targetPos.z));
 
         anime.SetTrigger("Jump");
@@ -512,17 +385,10 @@ public class NableNative : MonoBehaviour
 
     private void OnTriggerExit(Collider other)
     {
-        if (other.tag == "EnemieHang")
-        {
-            //IsHanging = false;
-
-
-        }
-
         if (other.CompareTag("WaterExit") && isWater)
         {
             isWater = false;
-            Destroy(other.gameObject, 02);
+            Destroy(other.gameObject, 0.2f);
         }
     }
 
@@ -531,16 +397,32 @@ public class NableNative : MonoBehaviour
         GetComponent<Rigidbody>().useGravity = false;
         GetComponent<Rigidbody>().linearVelocity = -transform.forward * 15;
         this.enabled = false;
-
     }
-
 
     public void Attack()
     {
-
         anime.SetTrigger("Attack");
        
-        Player_.GetComponent<Player>().TakeDamage(Damage);
+        // Om vårt mål är spelaren, skada spelaren.
+        // Om vårt mål är en annan fiende (infektion), skada den fienden istället!
+        if (currentTarget != null)
+        {
+            if (currentTarget.CompareTag("Player"))
+            {
+                Player playerComponent = currentTarget.GetComponent<Player>();
+                if (playerComponent != null)
+                {
+                    playerComponent.TakeDamage(Damage);
+                }
+            }
+            else if (currentTarget.CompareTag("Enemie"))
+            {
+                EnemiesHealth otherEnemy = currentTarget.GetComponent<EnemiesHealth>();
+                if (otherEnemy != null)
+                {
+                    otherEnemy.TakeDamage(Damage);
+                }
+            }
+        }
     }
-
 }

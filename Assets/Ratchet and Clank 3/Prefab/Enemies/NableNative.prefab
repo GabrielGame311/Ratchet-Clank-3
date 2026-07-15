@@ -96,6 +96,15 @@ MonoBehaviour:
   ChangeColorTime: 0.2
   damagish: 0
   ExplodeTime: 2
+  DamageHitRange: 0
+  InfectorEffect: {fileID: 6532545777463119960, guid: 744ee8a45dff65e448ce5b6f538fb6a2, type: 3}
+  IsInfector: 0
+  PlayerDetect:
+    serializedVersion: 2
+    m_Bits: 8
+  currentTarget: {fileID: 0}
+  baseInfectionDuration: 15
+  durationIncreasePerLevel: 5
 --- !u!114 &6984926726363407993
 MonoBehaviour:
   m_ObjectHideFlags: 0

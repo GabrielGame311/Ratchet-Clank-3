@@ -27,13 +27,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2802265164084475401}
+  serializedVersion: 2
   m_LocalRotation: {x: -0.45275784, y: 0.43787214, z: 0.54770297, w: -0.5507267}
   m_LocalPosition: {x: -0.29, y: 0.02, z: 0.18}
   m_LocalScale: {x: 0.25618505, y: 0.25618502, z: 0.21686389}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: -11.921, y: 1.266, z: -0.8}
 --- !u!2083052967 &2802265164084475396
 VisualEffect:
@@ -48,6 +48,7 @@ VisualEffect:
   m_InitialEventNameOverriden: 0
   m_StartSeed: 0
   m_ResetSeedOnPlay: 0
+  m_AllowInstancing: 1
   m_ResourceVersion: 1
   m_PropertySheet:
     m_Float:
@@ -108,6 +109,11 @@ VFXRenderer:
   m_ReflectionProbeUsage: 0
   m_RayTracingMode: 0
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_StaticBatchInfo:
@@ -127,9 +133,11 @@ VFXRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
 --- !u!114 &4401092744862764429
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -142,7 +150,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8e3bca95839fb4645b21fbaafe777ff1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  damage: 1
+  laserDamage: 10
+  laserRange: 20
+  hitLayers:
+    serializedVersion: 2
+    m_Bits: 264
+  laserDuration: 0.1
 --- !u!65 &1291753902613331117
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -151,8 +164,16 @@ BoxCollider:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2802265164084475401}
   m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
   m_IsTrigger: 1
+  m_ProvidesContacts: 0
   m_Enabled: 0
-  serializedVersion: 2
+  serializedVersion: 3
   m_Size: {x: 3.004999, y: 4.1245003, z: 238.97809}
   m_Center: {x: -0.008677487, y: 0.0672292, z: 123.3846}

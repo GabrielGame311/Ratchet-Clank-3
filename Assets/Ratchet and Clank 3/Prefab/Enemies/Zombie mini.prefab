@@ -29,6 +29,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4298039756062039529}
+  serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0.9460726, z: -0, w: 0.32395476}
   m_LocalPosition: {x: -1063.4543, y: 743.913, z: -807.49}
   m_LocalScale: {x: 0.57343286, y: 0.57343286, z: 0.57343286}
@@ -36,7 +37,6 @@ Transform:
   m_Children:
   - {fileID: 223736619883886639}
   m_Father: {fileID: 0}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: -142.195, z: 0}
 --- !u!114 &4298039756062039531
 MonoBehaviour:
@@ -86,6 +86,19 @@ MonoBehaviour:
   damageColor: {r: 1, g: 0, b: 0, a: 1}
   startColor: {r: 1, g: 1, b: 1, a: 1}
   animes: {fileID: 0}
+  DamageExplode: 0
+  ChangeColorTime: 0.2
+  damagish: 0
+  ExplodeTime: 0
+  DamageHitRange: 0
+  InfectorEffect: {fileID: 6532545777463119960, guid: 744ee8a45dff65e448ce5b6f538fb6a2, type: 3}
+  IsInfector: 0
+  PlayerDetect:
+    serializedVersion: 2
+    m_Bits: 0
+  currentTarget: {fileID: 0}
+  baseInfectionDuration: 15
+  durationIncreasePerLevel: 5
 --- !u!65 &4298039756062039533
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -94,9 +107,17 @@ BoxCollider:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4298039756062039529}
   m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
   m_IsTrigger: 0
+  m_ProvidesContacts: 0
   m_Enabled: 1
-  serializedVersion: 2
+  serializedVersion: 3
   m_Size: {x: 1.41, y: 1.31, z: 1}
   m_Center: {x: 0, y: 0.27, z: -0.23}
 --- !u!135 &4298039756062039532
@@ -107,9 +128,17 @@ SphereCollider:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4298039756062039529}
   m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
   m_IsTrigger: 1
+  m_ProvidesContacts: 0
   m_Enabled: 1
-  serializedVersion: 2
+  serializedVersion: 3
   m_Radius: 12
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!54 &4298039756062039535
@@ -119,10 +148,21 @@ Rigidbody:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4298039756062039529}
-  serializedVersion: 2
+  serializedVersion: 5
   m_Mass: 0.5
-  m_Drag: 0
-  m_AngularDrag: 0.02
+  m_LinearDamping: 0
+  m_AngularDamping: 0.02
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
   m_UseGravity: 1
   m_IsKinematic: 0
   m_Interpolate: 0
@@ -139,6 +179,7 @@ AudioSource:
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 0}
+  m_Resource: {fileID: 0}
   m_PlayOnAwake: 0
   m_Volume: 1
   m_Pitch: 1
@@ -229,6 +270,7 @@ PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Modification:
+    serializedVersion: 3
     m_TransformParent: {fileID: 4298039756062039530}
     m_Modifications:
     - target: {fileID: 35306805437840061, guid: e1f5cb4bdee52b14a8eac4b810ee3f5e, type: 3}
@@ -726,6 +768,9 @@ PrefabInstance:
     m_RemovedComponents:
     - {fileID: 3358716515535673789, guid: e1f5cb4bdee52b14a8eac4b810ee3f5e, type: 3}
     - {fileID: 1602306647157103537, guid: e1f5cb4bdee52b14a8eac4b810ee3f5e, type: 3}
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: e1f5cb4bdee52b14a8eac4b810ee3f5e, type: 3}
 --- !u!4 &223736619883886639 stripped
 Transform:

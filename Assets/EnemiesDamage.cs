@@ -1,26 +1,35 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.VFX;
-
-
+using UnityEngine.VFX; // Kom ihåg att importera denna!
 
 public class EnemiesDamage : MonoBehaviour
 {
+    [Header("Laser Settings")]
+    public int laserDamage = 10;       // Skada som lasern gör
+    public float laserRange = 20f;     // Hur långt lasern når
+    public LayerMask hitLayers;        // Kom ihåg att bocka i både Player och Enemie-lagren i Unity!
+    public float laserDuration = 0.1f; // Hur länge lasereffekten ska vara aktiv
 
-    public int laserDamage = 10; // Damage the laser deals
-    public float laserRange = 20f;  // Range of the laser
-    public LayerMask hitLayers;     // Layers to detect (e.g., Player layer)
-    public float laserDuration = 0.1f; // Duration of the laser visual effect
+    [Header("VFX Graph Settings")]
+    private VisualEffect vfxLaser;     // Referens till din Visual Effect-komponent
+    
+    // Sträng-namnen måste matcha exakt det du har döpt dem till i din VFX Graph (Blackboard)
+    public string startPosName = "LaserStart";
+    public string endPosName = "LaserEnd";
 
-    private LineRenderer laserLine;   // The LineRenderer component to represent the laser
-    private float laserTimer;         // Timer to handle visual effect duration
-    private bool laserHitPlayer = false; // Flag to ensure laser only damages once per hit
+    private float laserTimer;         
+    private bool laserHitTarget = false; 
 
     void Start()
     {
-        laserLine = GetComponent<LineRenderer>(); // Get the LineRenderer (for laser visualization)
+        vfxLaser = GetComponent<VisualEffect>(); 
         laserTimer = laserDuration;
+
+        if (vfxLaser != null)
+        {
+            vfxLaser.Play(); // Starta eller aktivera VFX-effekten
+        }
     }
 
     void Update()
@@ -31,37 +40,76 @@ public class EnemiesDamage : MonoBehaviour
     void ShootLaser()
     {
         RaycastHit hit;
-        laserHitPlayer = false; // Reset the flag for this frame
+        laserHitTarget = false; 
 
-        // Show the laser visual effect (LineRenderer) only if there's a hit
-        if (Physics.Raycast(transform.position, transform.forward, out hit, laserRange, hitLayers))
+        // Sätt alltid startpunkten till vapnets/skriptets position
+        Vector3 startPosition = transform.position;
+        Vector3 endPosition;
+
+        // Skjut lasern rakt framåt med Raycast
+        if (Physics.Raycast(startPosition, transform.forward, out hit, laserRange, hitLayers))
         {
-            laserLine.SetPosition(0, transform.position); // Start position of the laser
-            laserLine.SetPosition(1, hit.point); // End of the laser (where it hits)
+            // Träffpunkt blir laserns slutdestination
+            endPosition = hit.point;
 
-            // Apply damage only if the raycast hits the player and hasn't hit it already
-            if (hit.collider.CompareTag("Player") && !laserHitPlayer)
+            // Se till att lasern inte träffar den fiende som faktiskt skjuter den!
+            if (hit.transform.root != transform.root)
             {
-                hit.collider.GetComponent<Player>().TakeDamage(laserDamage);
-                Destroy(GetComponent<EnemiesDamage>());
-                laserHitPlayer = true; // Set the flag to prevent further damage in the same frame
-            }
+                // Skicka positionerna direkt till din VFX Graph!
+                UpdateVFXPositions(startPosition, endPosition);
 
-            // Trigger any additional visual effects at the hit point if needed (e.g., spark or explosion)
-            // Example: Instantiate(laserHitEffect, hit.point, Quaternion.LookRotation(hit.normal));
+                // 1. TRÄFFAR SPELAREN
+                if (hit.collider.CompareTag("Player") && !laserHitTarget)
+                {
+                    Player playerScript = hit.collider.GetComponent<Player>();
+                    if (playerScript != null)
+                    {
+                        playerScript.TakeDamage(laserDamage);
+                        laserHitTarget = true;
+                        
+                        // Ta bort skadeskriptet så den inte skadar mer (behåller VFX-objektet vid liv)
+                        Destroy(GetComponent<EnemiesDamage>()); 
+                    }
+                }
+                // 2. TRÄFFAR EN FIENDE
+                else if (hit.collider.CompareTag("Enemie") && !laserHitTarget)
+                {
+                    EnemiesHealth enemyHealth = hit.collider.GetComponent<EnemiesHealth>();
+                    if (enemyHealth != null)
+                    {
+                        enemyHealth.TakeDamage(laserDamage);
+                        laserHitTarget = true;
+                        
+                        Destroy(GetComponent<EnemiesDamage>()); 
+                    }
+                }
+            }
         }
         else
         {
-            // If no hit, show the laser reaching max range
-            laserLine.SetPosition(0, transform.position);
-            laserLine.SetPosition(1, transform.position + transform.forward * laserRange);
+            // Om vi inte träffar något, sätt slutpunkten till max räckvidd rakt framåt
+            endPosition = startPosition + (transform.forward * laserRange);
+            UpdateVFXPositions(startPosition, endPosition);
         }
 
-        // Decrease the laser effect timer
+        // Timer för att stänga av VFX-lasern efter dess duration
         laserTimer -= Time.deltaTime;
         if (laserTimer <= 0)
         {
-            laserLine.enabled = false; // Disable LineRenderer after laser duration
+            if (vfxLaser != null)
+            {
+                vfxLaser.Stop(); // Stoppar partikelutsläppet i VFX Graphen
+            }
+        }
+    }
+
+    // Hjälpmetod för att säkert skicka koordinater till grafikkortet (VFX Graph)
+    void UpdateVFXPositions(Vector3 start, Vector3 end)
+    {
+        if (vfxLaser != null)
+        {
+            vfxLaser.SetVector3(startPosName, start);
+            vfxLaser.SetVector3(endPosName, end);
         }
     }
 }

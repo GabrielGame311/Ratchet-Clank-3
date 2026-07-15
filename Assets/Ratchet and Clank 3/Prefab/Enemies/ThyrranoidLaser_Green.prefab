@@ -134,12 +134,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b986b15fabaa02e4d9eba99707091d70, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  PlayerDetect:
-    serializedVersion: 2
-    m_Bits: 8
-  collisionLayer:
-    serializedVersion: 2
-    m_Bits: 384
   IsIdle: 0
   RotateSpeed: 0
   Particle1: {fileID: 2802265164084475401, guid: ba327e11b4d997c4c96ead49620a929b, type: 3}
@@ -152,7 +146,6 @@ MonoBehaviour:
   PlayerDistance: 15
   ShootDistance: 12
   SePlayer: 0
-  DistanceFromEnemy: 5
   anime: {fileID: 4910589327719034060}
   ShootCount: 0
 --- !u!65 &4910589327655591868
@@ -253,6 +246,14 @@ MonoBehaviour:
   damagish: 0
   ExplodeTime: 2
   DamageHitRange: 1
+  InfectorEffect: {fileID: 6532545777463119960, guid: 744ee8a45dff65e448ce5b6f538fb6a2, type: 3}
+  IsInfector: 0
+  PlayerDetect:
+    serializedVersion: 2
+    m_Bits: 8
+  currentTarget: {fileID: 0}
+  baseInfectionDuration: 15
+  durationIncreasePerLevel: 5
 --- !u!135 &1326291999804082718
 SphereCollider:
   m_ObjectHideFlags: 0

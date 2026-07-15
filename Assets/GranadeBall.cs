@@ -13,14 +13,15 @@ public class GranadeBall : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        sound = GameObject.FindGameObjectWithTag("Bolt").GetComponent<AudioSource>();
+        sound.transform.SetParent(null);
     }
 
     private void OnDestroy()
     {
         Instantiate(particle2, transform.position, transform.rotation);
         sound.PlayOneShot(soundexp);
-
+       
+        Destroy(sound.gameObject, 3f);
         GameObject.FindObjectOfType<GranadeShooter>().shoot = true;
     }
 

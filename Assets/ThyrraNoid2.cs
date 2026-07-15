@@ -4,46 +4,50 @@ using UnityEngine;
 
 public class ThyrraNoid2 : MonoBehaviour
 {
-
-
+    [Header("Movement & Separation")]
     public float MoveSpeed;
-
     public float Distance;
-    public Animator anime;
-    GameObject player;
-    public float ShootTime;
-    float startShoot;
-    public bool SePlayer = false;
-    public int SoundplayInt = 0;
-    public bool Shooting = false;
-    AudioSource sound;
-    public GameObject Gun;
-    public AudioClip[] SoundFX;
-    public float DistanceFromPlayer;
     public float minDistanceFromFirstEnemy;
-    public GameObject ParticlePrefab;
+
+    [Header("Combat & Shooting")]
+    public float ShootTime;
+    private float startShoot;
+    public bool SePlayer = false;
+    public bool Shooting = false;
+    public GameObject Gun;
     public Transform pointGun;
     public float ShootForce;
-    // Start is called before the first frame update
+    public GameObject ParticlePrefab;
+
+    [Header("Distance Settings")]
+    public float DistanceFromPlayer;
+
+    [Header("Audio")]
+    private AudioSource sound;
+    public AudioClip[] SoundFX;
+    public int SoundplayInt = 0;
+
+    [Header("Components")]
+    public Animator anime;
+    private EnemiesHealth myHealth;
+    private Transform currentTarget; // Hämtas dynamiskt från EnemiesHealth!
+
     void Start()
     {
         sound = GetComponent<AudioSource>();
-        player = GameObject.FindGameObjectWithTag("Player");
         anime = GetComponentInChildren<Animator>();
+        myHealth = GetComponent<EnemiesHealth>();
         startShoot = ShootTime;
     }
 
-    // Update is called once per frame
     void Update()
     {
+        // 1. SEPARATIONSLOGIK (Håll avstånd till andra fiender)
         GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemie");
-
-        
-
 
         foreach (GameObject enemy in enemies)
         {
-
+            if (enemy == this.gameObject) continue; // Undvik att trycka bort oss själva
 
             float distances = Vector3.Distance(transform.position, enemy.transform.position);
 
@@ -55,109 +59,110 @@ public class ThyrraNoid2 : MonoBehaviour
             }
         }
 
-        float dis = Vector3.Distance(transform.position, player.transform.position);
+        // 2. HÄMTA AKTUELLT MÅL FRÅN ENEMIESHEALTH
+        currentTarget = (myHealth != null) ? myHealth.currentTarget : null;
 
-        if(dis < Distance)
+        if (currentTarget == null)
+        {
+            anime.SetBool("Run", false);
+            SePlayer = false;
+            return;
+        }
+
+        // 3. LOGIK FÖR ATT UPPTÄCKA MÅLET
+        float dis = Vector3.Distance(transform.position, currentTarget.position);
+
+        if (dis < Distance)
         {
             SePlayer = true;
-            
         }
         else
         {
             SePlayer = false;
-            
         }
 
-
-
-    
-      
-
+        // 4. SKJUT- OCH JAKTLOGIK
         if (Shooting)
         {
-
-            if(ShootTime < 3)
+            if (ShootTime < 3)
             {
                 Shooting = false;
                 anime.SetTrigger("Shoot");
             }
-
-            
-
-
         }
         else
         {
-
-
             if (SePlayer)
             {
-
-                float disp = Vector3.Distance(transform.position, player.transform.position);
-
+                float disp = Vector3.Distance(transform.position, currentTarget.position);
 
                 if (DistanceFromPlayer < disp)
                 {
-                    transform.position = Vector3.MoveTowards(transform.position, player.transform.position, MoveSpeed * Time.deltaTime);
-                    transform.LookAt(player.transform);
+                    // Spring mot målet
+                    transform.position = Vector3.MoveTowards(transform.position, currentTarget.position, MoveSpeed * Time.deltaTime);
+                    transform.LookAt(new Vector3(currentTarget.position.x, transform.position.y, currentTarget.position.z));
                     anime.SetBool("Run", true);
-
-
-
                 }
                 else
                 {
+                    // Stå still och titta på målet
                     anime.SetBool("Run", false);
-                    transform.LookAt(player.transform);
-
+                    transform.LookAt(new Vector3(currentTarget.position.x, transform.position.y, currentTarget.position.z));
                     SePlayer = false;
                 }
+
                 ShootTime -= Time.deltaTime;
 
                 if (ShootTime < 0)
                 {
-
                     ShootTime = startShoot;
                     Shooting = true;
                 }
-
-
             }
             else
             {
-
-
-
+                anime.SetBool("Run", false);
             }
         }
-
     }
-
 
     public void Shoot()
     {
-        SoundplayInt = 0;
-        sound.PlayOneShot(SoundFX[SoundplayInt]);
-      
-
-
+        if (SoundFX.Length > 0)
+        {
+            SoundplayInt = 0;
+            sound.PlayOneShot(SoundFX[SoundplayInt]);
+        }
     }
 
     public void ShootParticle()
     {
-        GameObject prefab = Instantiate(ParticlePrefab, pointGun.transform.position, pointGun.transform.rotation);
+        if (ParticlePrefab == null || pointGun == null) return;
 
-        prefab.GetComponent<Rigidbody>().linearVelocity = pointGun.transform.forward * ShootForce;
+        // Skjut partikeln rakt framåt i den riktning som pistolen/fienden pekar mot målet
+        GameObject prefab = Instantiate(ParticlePrefab, pointGun.position, pointGun.rotation);
 
-        ParticlePrefab.GetComponent<ParticleSystem>().Play();
+        Rigidbody bulletRb = prefab.GetComponent<Rigidbody>();
+        if (bulletRb != null)
+        {
+            bulletRb.linearVelocity = pointGun.forward * ShootForce;
+        }
 
+        ParticleSystem ps = ParticlePrefab.GetComponent<ParticleSystem>();
+        if (ps != null)
+        {
+            ps.Play();
+        }
 
-        Destroy(prefab, 15);
+        Destroy(prefab, 15f);
     }
 
     public void Glad()
     {
-        SoundplayInt = 1;
-        sound.PlayOneShot(SoundFX[SoundplayInt]);
+        if (SoundFX.Length > 1)
+        {
+            SoundplayInt = 1;
+            sound.PlayOneShot(SoundFX[SoundplayInt]);
+        }
     }
 }

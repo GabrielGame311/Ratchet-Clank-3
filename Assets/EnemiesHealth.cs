@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class EnemiesHealth : MonoBehaviour
+public class EnemiesHealth : MonoBehaviour, IInfectable
 {
     public float colorChangeDuration = 0.2f;
 
@@ -22,8 +22,8 @@ public class EnemiesHealth : MonoBehaviour
     public bool BossHealth = false;
     public float LevelXp = 0.5f;
     public static EnemiesHealth EnemieHealth_;
-    public Color damageColor = Color.red;         // F�rg f�r skada (r�d)
-    public Color startColor = Color.white;        // Ursprunglig f�rg
+    public Color damageColor = Color.red;         // Färg för skada (röd)
+    public Color startColor = Color.white;        // Ursprunglig färg
     public Animator animes;
 
     public bool DamageExplode = false;
@@ -32,9 +32,26 @@ public class EnemiesHealth : MonoBehaviour
 
     public float ExplodeTime;
     public float DamageHitRange;
-
+    public GameObject InfectorEffect;
     Rigidbody rb;
 
+    [Header("Infector & Targeting System")]
+    public bool IsInfector = false;
+    public LayerMask PlayerDetect;
+    
+    [Tooltip("Detta är målet som dina andra skript (rörelse/skytte) ska jaga!")]
+    public Transform currentTarget; 
+
+    private bool isCurrentlyInfected = false;
+    private float targetScanTimer = 0f;
+    private float infectionTimer = 0f;
+    private float currentInfectionDuration = 15f;
+
+    [Tooltip("Hur länge infektionen varar på Level 1")]
+    public float baseInfectionDuration = 15f; 
+    [Tooltip("Hur många extra sekunder man får per nivå över Level 1")]
+    public float durationIncreasePerLevel = 5f; 
+    GameObject InfeCtorClone;
     private void Start()
     {
         MaterialRed = GetComponentsInChildren<Renderer>();
@@ -50,10 +67,14 @@ public class EnemiesHealth : MonoBehaviour
         maxHealth = health;
         enemie = gameObject;
         sound = GetComponent<AudioSource>();
+
+        // Kör en första sökning direkt vid start
+        FindTarget();
     }
 
     private void Update()
     {
+        // Hantera färgblinkning vid skada
         if (damagish)
         {
             ChangeColorTime -= Time.deltaTime;
@@ -65,7 +86,7 @@ public class EnemiesHealth : MonoBehaviour
                 {
                     foreach (Material mat in renderer.materials)
                     {
-                        mat.color = startColor;  // �terst�ll till startf�rgen
+                        mat.color = startColor;
                     }
                 }
             }
@@ -75,11 +96,138 @@ public class EnemiesHealth : MonoBehaviour
                 {
                     foreach (Material mat in renderer.materials)
                     {
-                        mat.color = damageColor;  // S�tter materialets f�rg till r�d
+                        mat.color = damageColor;
                     }
                 }
             }
         }
+
+        // --- INFECTOR: Nedräkning av tid ---
+        if (isCurrentlyInfected)
+        {
+            infectionTimer += Time.deltaTime;
+            if (infectionTimer >= currentInfectionDuration)
+            {
+                
+
+                Destroy(InfeCtorClone);
+                
+                Infect(false);
+                Debug.Log($"{gameObject.name} är inte längre infekterad.");
+            }
+        }
+
+        // Sök efter mål med jämna mellanrum (optimerat till var 0.2:e sekund istället för varje frame)
+        targetScanTimer += Time.deltaTime;
+        if (targetScanTimer > 0.2f)
+        {
+            targetScanTimer = 0f;
+            FindTarget();
+        }
+
+        // --- GEMENSAMT KROCK-SKYDD FÖR ALLA FIENDER ---
+        // Om vi inte är infekterade och har ett giltigt mål som inte är en annan fiende (dvs vi jagar spelaren)
+        if (!isCurrentlyInfected && currentTarget != null && !currentTarget.CompareTag("Enemie"))
+        {
+            float distanceFromEnemy = 5f; 
+            GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemie");
+            
+            foreach (GameObject enemy in enemies)
+            {
+                if (enemy == this.gameObject || enemy == null) continue;
+
+                float distances = Vector3.Distance(transform.position, enemy.transform.position);
+                if (distances < distanceFromEnemy)
+                {
+                    Vector3 direction = (enemy.transform.position - transform.position).normalized;
+                    Vector3 newPosition = transform.position + direction * distanceFromEnemy;
+                    enemy.transform.position = newPosition;
+                }
+            }
+        }
+    }
+
+    // --- MÅLSÖKNINGSLOGIK (Gemensam för ALLA fiender!) ---
+    private void FindTarget()
+    {
+        if (isCurrentlyInfected)
+        {
+            // Sök efter närmaste FIENDE att attackera
+            currentTarget = FindNearestOtherEnemy();
+        }
+        else
+        {
+            // Sök efter SPELAREN att attackera
+            Collider[] colliders = Physics.OverlapSphere(transform.position, 50f, PlayerDetect);
+            if (colliders.Length > 0 && colliders[0] != null)
+            {
+                currentTarget = colliders[0].transform;
+            }
+            else
+            {
+                currentTarget = null;
+            }
+        }
+    }
+
+    private Transform FindNearestOtherEnemy()
+    {
+        GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemie");
+        float closestDistance = Mathf.Infinity;
+        Transform closestEnemy = null;
+
+        foreach (GameObject enemy in enemies)
+        {
+            if (enemy == this.gameObject || enemy == null) continue;
+
+            // Undvik att attackera kompisar som också är infekterade
+            EnemiesHealth otherHealth = enemy.GetComponent<EnemiesHealth>();
+            if (otherHealth != null && otherHealth.isCurrentlyInfected) continue;
+
+            float dist = Vector3.Distance(transform.position, enemy.transform.position);
+            if (dist < closestDistance)
+            {
+                closestDistance = dist;
+                closestEnemy = enemy.transform;
+            }
+        }
+        return closestEnemy;
+    }
+
+    // --- IInfectable Implementering ---
+    public void Infect(bool state)
+    {
+        Infect(state, 1);
+    }
+
+    public void Infect(bool state, int level)
+    {
+        isCurrentlyInfected = state;
+        IsInfector = state; 
+        // 1. Spawna effekten på fiendens position
+        GameObject effect = Instantiate(InfectorEffect, transform.position, transform.rotation);
+        InfeCtorClone = effect;
+
+        // 2. Fäst effekten på fienden så att den följer med när de springer!
+        InfeCtorClone.transform.SetParent(this.transform);
+
+        // 3. Flytta upp effekten lite på Y-axeln (så att den hamnar runt huvudet/axlarna)
+        // Sätt t.ex. Y till 1.2 eller 1.5 beroende på hur hög din fiendemodell är
+        InfeCtorClone.transform.localPosition = new Vector3(0, 1.3f, 0);
+        if (state)
+        {
+            int clampedLevel = Mathf.Clamp(level, 1, 5);
+            currentInfectionDuration = baseInfectionDuration + ((clampedLevel - 1) * durationIncreasePerLevel);
+            infectionTimer = 0f;
+            Debug.Log($"{gameObject.name} infekterad på Lvl {clampedLevel} i {currentInfectionDuration} sekunder!");
+        }
+        else
+        {
+            Destroy(InfeCtorClone);
+            currentTarget = null;
+        }
+        
+        FindTarget(); 
     }
 
     public void TakeDamage(int damage)
@@ -137,29 +285,30 @@ public class EnemiesHealth : MonoBehaviour
             GetComponent<BloodFly>().enabled = true;
         }
 
-        // F�rst�r fiende-objektet efter explosionstiden
         Destroy(gameObject, ExplodeTime);
 
-        if (GetComponent<MiniThyrra>() != null)
+        // Stäng av alla andra beteendeskript dynamiskt vid död
+        MonoBehaviour[] allScripts = GetComponents<MonoBehaviour>();
+        foreach (MonoBehaviour script in allScripts)
         {
-            GetComponent<MiniThyrra>().enabled = false;
-        }
-        else if (GetComponent<RedNinja>() != null)
-        {
-            GetComponent<RedNinja>().enabled = false;
+            if (script != this && script.GetType() != typeof(BloodFly))
+            {
+                script.enabled = false;
+            }
         }
     }
 
     private void OnDestroy()
     {
-        // 1. Ge XP till spelarens vapen
         WeaponsUI ui = FindObjectOfType<WeaponsUI>();
         if (ui != null)
         {
             ui.levelAmount += LevelXp;
         }
-
-        // 2. Skapa explosionseffekt om det inte redan har skett
+        if(InfectorEffect != null)
+        {
+            Destroy(InfectorEffect);
+        }
         if (!DamageExplode)
         {
             if (ExplodePrefab != null)
@@ -173,17 +322,11 @@ public class EnemiesHealth : MonoBehaviour
             }
         }
 
-        // 3. Spawna Bolts (Valuta)
         if (Bolt != null)
         {
             Instantiate(Bolt, transform.position, transform.rotation);
         }
 
-        // NOTERA: Kodraderna som manuellt tog bort detta gameObject fr�n EnemiesMission.instance.EnemiesList 
-        // har plockats bort h�rifr�n. Detta eftersom EnemiesMission.cs nu automatiskt st�dar bort null-referenser 
-        // i sin egen Update-loop p� ett s�krare s�tt.
-
-        // 4. Hantera RocketMission om det �r aktivt
         if (RocketMission.RocketMission_ != null && RocketMission.RocketMission_.gameObject.activeSelf)
         {
             RocketMission.RocketMission_.DropShip.Remove(gameObject);
@@ -191,7 +334,6 @@ public class EnemiesHealth : MonoBehaviour
             RocketMission.RocketMission_.Rockets.Remove(gameObject);
         }
 
-        // 5. Hantera SpawnTime-skriptet om det existerar
         SpawnTime spawnTime = FindObjectOfType<SpawnTime>();
         if (spawnTime != null)
         {
@@ -199,17 +341,6 @@ public class EnemiesHealth : MonoBehaviour
             if (spawnTime.EnemiesSpawned != null) spawnTime.EnemiesSpawned.Remove(gameObject);
         }
 
-        // Inaktivera alla andra skripter p� objektet vid f�rst�relse
-        MonoBehaviour[] scripts = GetComponents<MonoBehaviour>();
-        foreach (MonoBehaviour script in scripts)
-        {
-            if (script != this)
-            {
-                script.enabled = false;
-            }
-        }
-
-        // S�g till Rangers att sluta skjuta
         foreach (GalacticRangers gl in FindObjectsOfType<GalacticRangers>())
         {
             gl.IsShooting = false;
