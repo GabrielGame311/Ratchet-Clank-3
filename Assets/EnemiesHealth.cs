@@ -205,15 +205,27 @@ public class EnemiesHealth : MonoBehaviour, IInfectable
         isCurrentlyInfected = state;
         IsInfector = state; 
         // 1. Spawna effekten på fiendens position
+       // 1. Spawna din partikeleffekt
         GameObject effect = Instantiate(InfectorEffect, transform.position, transform.rotation);
         InfeCtorClone = effect;
 
-        // 2. Fäst effekten på fienden så att den följer med när de springer!
+        // 2. Fäst den på fienden
         InfeCtorClone.transform.SetParent(this.transform);
+        InfeCtorClone.transform.localPosition = Vector3.zero; // Nollställ så den sitter mitt på
 
-        // 3. Flytta upp effekten lite på Y-axeln (så att den hamnar runt huvudet/axlarna)
-        // Sätt t.ex. Y till 1.2 eller 1.5 beroende på hur hög din fiendemodell är
-        InfeCtorClone.transform.localPosition = new Vector3(0, 1.3f, 0);
+        // 3. Hämta fiendens SkinnedMeshRenderer (den animerade kroppen)
+        SkinnedMeshRenderer enemyMesh = GetComponentInChildren<SkinnedMeshRenderer>();
+        ParticleSystem ps = InfeCtorClone.GetComponent<ParticleSystem>();
+
+        if (enemyMesh != null && ps != null)
+        {
+            // Hämta Shape-modulen i partikelsystemet
+            var shape = ps.shape;
+            
+            // Byt shape till Skinned Mesh Renderer och tilldela fiendens mesh!
+            shape.shapeType = ParticleSystemShapeType.SkinnedMeshRenderer;
+            shape.skinnedMeshRenderer = enemyMesh;
+        }
         if (state)
         {
             int clampedLevel = Mathf.Clamp(level, 1, 5);
