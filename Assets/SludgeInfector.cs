@@ -1,159 +1,187 @@
 using UnityEngine;
 
+[RequireComponent(typeof(Rigidbody))]
 public class SludgeInfector : MonoBehaviour
 {
     [Header("Damage & Range")]
     public float Damage = 10f;
-    public float SearchRadius = 15f; // Hur långt bort den kan upptäcka fiender
+    public float SearchRadius = 25f;
 
-    [Header("Movement Settings")]
-    public float MoveSpeed = 6f;
-    
-    public float RotationSpeed = 10f; // Hur snabbt den svänger mot mål/riktning
+    [Header("Utskjutning & Fart")]
+    public float LaunchForce = 4f;       
+    public float LaunchUpwardForce = 1.5f; 
+    public float MoveSpeed = 6f;         
 
-    [Header("Physics & Grounding")]
-    public LayerMask groundLayer;      // Välj din mark/terrain-layer här!
-    public float groundOffset = 0.2f;  // Hur högt över markytan projektilens mittpunkt ska ligga
-
-    [Header("Sway (No Target)")]
-    public float swayAmount = 2f;      // Hur mycket den svänger i sidled
-    public float swaySpeed = 3f;       // Hur snabbt den svajar fram och tillbaka
+    [Header("Pingis-studs (Tung Gravitation)")]
+    public float GravityMultiplier = 7f; 
 
     [Header("Graphics")]
-    public Transform visualModel;      // Dra in 3D-modellen (barnet) som ska rulla här
-
-    private GameObject targetEnemy;
-    private Vector3 currentVelocity;
-    private float aliveTime;
-    private Vector3 randomDirection;
+    public Transform visualModel;      
     public Transform MeshFilter;
-
+    public float RotationSpeed = 300f; 
+    
+    private float currentRollAngle = 0f; 
+    private Vector3 currentMoveDirection; // Håller reda på den aktuella raka riktningen
+    private Rigidbody rb;
 
     [Header("Puddle Trail")]
-    public GameObject puddlePrefab;    // Dra in din slem-pöl prefab här!
-    public float distanceBetweenPuddles = 0.4f; // Hur ofta en pöl ska spawnas (i meter)
+    public GameObject puddlePrefab;    
+    public float distanceBetweenPuddles = 0.4f; 
     private Vector3 lastPuddlePosition;
 
     void Start()
     {
-        // Sätt en initial riktning framåt baserat på hur den sköts ut
-        randomDirection = transform.forward;
-        aliveTime = Random.Range(0f, 100f); // Slumpmässig start för sinusvågen så alla inte svajar likadant
+        rb = GetComponent<Rigidbody>();
+        
+        rb.isKinematic = false;
+        rb.useGravity = false; 
+        rb.constraints = RigidbodyConstraints.FreezeRotation;
+
+        // Startriktningen är rakt framåt från där den skjuts ut
+        currentMoveDirection = transform.forward;
+        currentMoveDirection.y = 0;
+        currentMoveDirection.Normalize();
+
+        // Startskottet
+        Vector3 launchDir = (currentMoveDirection * LaunchForce) + (Vector3.up * LaunchUpwardForce);
+        rb.AddForce(launchDir, ForceMode.Impulse);
+
         lastPuddlePosition = transform.position;
+
         if (visualModel == null)
         {
-            // Om ingen modell har dragits in, försök hitta första child-objektet
             if (transform.childCount > 0)
                 visualModel = transform.GetChild(0);
             else
                 visualModel = transform;
         }
 
-        // Förstör efter 10 sekunder om den inte träffar något
         Destroy(gameObject, 10f);
-    }
-
-    private void LateUpdate()
-    {
-        MeshFilter.transform.Rotate(-RotationSpeed * Time.deltaTime, 0, 0);
     }
 
     void Update()
     {
-
-        // Kolla om vi har rört oss tillräckligt långt för att lägga en ny slem-pöl på marken
         float distanceMoved = Vector3.Distance(transform.position, lastPuddlePosition);
         if (distanceMoved >= distanceBetweenPuddles)
         {
-           SpawnPuddle();
+            RaycastHit hit;
+            if (Physics.Raycast(transform.position, Vector3.down, out hit, 1.2f))
+            {
+                SpawnPuddle(hit.point, hit.normal);
+            }
         }
 
-        aliveTime += Time.deltaTime;
+       
+    }
 
-        // 1. SÖK EFTER FIENDE (om vi inte redan har en)
-        if (targetEnemy == null)
+    void FixedUpdate()
+    {
+        // Tung gravitation drar ner bollen för pingis-effekten
+        rb.AddForce(Physics.gravity * GravityMultiplier, ForceMode.Acceleration);
+
+        // Håll farten stabil framåt i den riktning som är vald just nu (svänger INTE i luften)
+        Vector3 currentXZVelocity = new Vector3(rb.linearVelocity.x, 0, rb.linearVelocity.z);
+        Vector3 targetXZVelocity = currentMoveDirection * MoveSpeed;
+        
+        Vector3 velocityChange = targetXZVelocity - currentXZVelocity;
+        rb.AddForce(velocityChange, ForceMode.VelocityChange);
+
+        // Rotera baserat på färdriktning
+        if (currentMoveDirection != Vector3.zero)
         {
-            FindNearestEnemy();
+            Quaternion targetRot = Quaternion.LookRotation(currentMoveDirection, Vector3.up);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, 15f * Time.fixedDeltaTime);
+        }
+    }
+
+    private void LateUpdate()
+    {
+        if (MeshFilter != null)
+        {
+            // 1. Kaotisk rotation (Tumla)
+            MeshFilter.transform.Rotate(new Vector3(1f, 0.7f, 0.4f) * RotationSpeed * Time.deltaTime, Space.Self);
+
+            // 2. Wobble-effekt (Squash & Stretch)
+            // Får slembollen att snabbt krympa och växa pyttelite så den ser "slajmig" ut
+            float wobble = 1f + Mathf.Sin(Time.time * 15f) * 0.15f; 
+            MeshFilter.transform.localScale = new Vector3(wobble, 2f - wobble, wobble);
+        }
+    }
+
+    private void OnCollisionEnter(Collision collision)
+{
+    // 1. Om vi krockar direkt med en fiende
+    if (collision.collider.CompareTag("Enemie"))
+    {
+        EnemiesHealth enemyHealth = collision.collider.GetComponent<EnemiesHealth>();
+        if (enemyHealth != null)
+        {
+            enemyHealth.TakeDamage((int)Damage);
+            enemyHealth.Infect(true); 
         }
 
-        // 2. BERÄKNA RÖRELSERIKTNING (XZ-planet)
-        Vector3 moveDirection = Vector3.zero;
+        SpawnPuddle(collision.contacts[0].point, collision.contacts[0].normal);
+        Destroy(gameObject);
+        return;
+    }
 
-        if (targetEnemy != null)
+    // Hämta normalen på ytan vi krockade med för att veta om det är vägg eller golv
+    Vector3 hitNormal = collision.contacts[0].normal;
+    
+    // Om Y-värdet på normalen är lågt (närmare 0), betyder det att ytan är lodrät = en VÄGG
+    bool isWall = Mathf.Abs(hitNormal.y) < 0.5f;
+
+    SpawnPuddle(collision.contacts[0].point, hitNormal);
+
+    GameObject nearestEnemy = FindNearestEnemy();
+
+    // 2. Om vi krockade med en VÄGG
+    if (isWall)
+    {
+        if (nearestEnemy != null)
         {
-            // Sväng mot fienden
-            Vector3 toEnemy = (targetEnemy.transform.position - transform.position);
-            toEnemy.y = 0; // Håll rörelsen platt på XZ
-            moveDirection = toEnemy.normalized;
+            // Gå in mot fienden
+            Vector3 toEnemy = (nearestEnemy.transform.position - transform.position);
+            toEnemy.y = 0;
+            currentMoveDirection = toEnemy.normalized;
         }
         else
         {
-            // Rulla framåt med ett mjukt svajande mönster i sidled
-            Vector3 forward = randomDirection;
-            Vector3 right = Vector3.Cross(Vector3.up, forward);
-
-            // Skapar en mjuk sinus-kurva för zick-zack-rörelsen
-            float sway = Mathf.Sin(aliveTime * swaySpeed) * swayAmount;
-            moveDirection = (forward + right * sway).normalized;
+            // Slumpa 90 grader vänster eller höger (eftersom vi slog i en vägg och ingen fiende finns)
+            if (Random.value > 0.5f)
+            {
+                currentMoveDirection = new Vector3(currentMoveDirection.z, 0, -currentMoveDirection.x).normalized;
+            }
+            else
+            {
+                currentMoveDirection = new Vector3(-currentMoveDirection.z, 0, currentMoveDirection.x).normalized;
+            }
         }
-
-        // 3. APPLICERA RÖRELSE (Utmed marken)
-        if (moveDirection != Vector3.zero)
-        {
-            // Flytta objektet framåt i rörelseriktningen
-            transform.position += moveDirection * MoveSpeed * Time.deltaTime;
-
-            // Rotera huvudobjektet mjukt i rörelseriktningen runt Y-axeln
-            Quaternion targetRot = Quaternion.LookRotation(moveDirection, Vector3.up);
-            // transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, RotationSpeed * Time.deltaTime);
-            
-        }
-        
-        // 4. KLISTRA OCH UTGÅ FRÅN MARKENS LUTNING (Raycasting)
-        AlignWithGround();
-
-        // 5. VISUELL RULL-ANIMATION
-        // Rulla modellen framåt runt sin lokala X-axel
-        
     }
+    // 3. Om vi krockade med GOLVET (studs)
+    else
+    {
+        // Ändra bara riktning om vi har en fiende att jaga, annars fortsätt rakt fram (studsa vidare)
+        if (nearestEnemy != null)
+        {
+            Vector3 toEnemy = (nearestEnemy.transform.position - transform.position);
+            toEnemy.y = 0;
+            currentMoveDirection = toEnemy.normalized;
+        }
+    }
+}
 
-
-    void SpawnPuddle()
+    void SpawnPuddle(Vector3 spawnPos, Vector3 groundNormal)
     {
         if (puddlePrefab != null)
         {
-            // Vi spawnar pölen precis vid bollens fötter/marken
-            Vector3 spawnPos = transform.position;
-
-            // Använd samma rotation som bollen har mot marken så att pölen ligger platt mot backen
-            Instantiate(puddlePrefab, spawnPos, transform.rotation);
-
+            Quaternion puddleRot = Quaternion.FromToRotation(Vector3.up, groundNormal);
+            Instantiate(puddlePrefab, spawnPos + groundNormal * 0.02f, puddleRot);
             lastPuddlePosition = transform.position;
         }
     }
 
-    // Anpassar projektilen efter markens höjd och lutning
-    void AlignWithGround()
-    {
-        RaycastHit hit;
-        // Skjut en raycast från en bit ovanför projektilen och neråt
-        Vector3 rayStart = transform.position + Vector3.up * 2f;
-
-        if (Physics.Raycast(rayStart, Vector3.down, out hit, 5f, groundLayer))
-        {
-            // Sätt höjden exakt på marken plus din offset
-            Vector3 newPosition = transform.position;
-            newPosition.y = hit.point.y + groundOffset;
-            transform.position = newPosition;
-
-            // Rotera projektilen så att den lutar med marken (använd markens normal)
-            Quaternion slopeRotation = Quaternion.FromToRotation(transform.up, hit.normal) * transform.rotation;
-            transform.rotation = Quaternion.Slerp(transform.rotation, slopeRotation, 15f * Time.deltaTime);
-        }
-    }
-
-    // Letar efter den närmaste fienden inom sökradien
-    void FindNearestEnemy()
+    GameObject FindNearestEnemy()
     {
         GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemie");
         float closestDistance = SearchRadius;
@@ -165,32 +193,12 @@ public class SludgeInfector : MonoBehaviour
             {
                 float dist = Vector3.Distance(transform.position, enemy.transform.position);
                 if (dist < closestDistance)
+                {
+                    closestDistance = dist;
                     closestEnemy = enemy;
+                }
             }
         }
-
-        if (closestEnemy != null)
-        {
-            targetEnemy = closestEnemy;
-        }
-    }
-
-    private void OnCollisionEnter(Collision collision)
-    {
-        // Träffar vi en fiende?
-        if (collision.collider.CompareTag("Enemie"))
-        {
-            EnemiesHealth enemyHealth = collision.collider.GetComponent<EnemiesHealth>();
-            if (enemyHealth != null)
-            {
-                enemyHealth.TakeDamage((int)Damage);
-                enemyHealth.Infect(true); 
-                // HÄR KAN DU TRIGGA GRÖN INFICERINGS-EFFEKT / PARTIKLAR!
-            }
-
-            Destroy(gameObject);
-        }
-
-        SpawnPuddle();
+        return closestEnemy;
     }
 }

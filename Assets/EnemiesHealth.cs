@@ -52,6 +52,13 @@ public class EnemiesHealth : MonoBehaviour, IInfectable
     [Tooltip("Hur många extra sekunder man får per nivå över Level 1")]
     public float durationIncreasePerLevel = 5f; 
     GameObject InfeCtorClone;
+
+    [Header("Kantskydd (Utan NavMesh)")]
+    [Tooltip("Hur långt framför fienden vi ska söka efter mark (bör matcha fiendens radie + marginal)")]
+    public float edgeCheckDistance = 0.6f;
+    [Tooltip("Vilket Layer som räknas som mark/broar så att vi inte kliver på tomma intet")]
+    public LayerMask groundLayer;
+
     private void Start()
     {
         MaterialRed = GetComponentsInChildren<Renderer>();
@@ -70,6 +77,40 @@ public class EnemiesHealth : MonoBehaviour, IInfectable
 
         // Kör en första sökning direkt vid start
         FindTarget();
+    }
+
+    private void FixedUpdate()
+    {
+        // --- 1. PROAKTIVT KANTSKYDD (STOPPAR RÖRELSEN INNAN DE KLIVER AV) ---
+        if (rb != null)
+        {
+            // Ta reda på vilken riktning fienden faktiskt försöker röra sig i
+            Vector3 moveDirection = rb.velocity;
+            moveDirection.y = 0; // Vi bryr oss bara om rörelse på X- och Z-axeln
+
+            // Om de rör på sig, gör en koll framåt
+            if (moveDirection.magnitude > 0.05f)
+            {
+                Vector3 normalizedDir = moveDirection.normalized;
+                
+                // Positionen framför fienden där de är på väg att sätta sin fot
+                Vector3 checkPosition = transform.position + (normalizedDir * edgeCheckDistance);
+                
+                // Vi startar Raycasten en bit ovanför fötterna och skjuter neråt
+                Vector3 rayOrigin = checkPosition + Vector3.up * 1.0f; 
+                
+                // Skjut en stråle rakt ner för att se om det finns mark framför oss
+                if (!Physics.Raycast(rayOrigin, Vector3.down, 1.5f, groundLayer))
+                {
+                    // OJ! Det finns ingen mark framför oss! 
+                    // Vi stoppar omedelbart all fart i rörelseriktningen så att de "krockar" med kanten
+                    rb.velocity = new Vector3(0, rb.velocity.y, 0);
+                    
+                    // Knuffa tillbaka dem ytterst lite så att de inte "hänger" över kanten
+                    rb.position -= normalizedDir * 0.05f;
+                }
+            }
+        }
     }
 
     private void Update()
@@ -108,16 +149,13 @@ public class EnemiesHealth : MonoBehaviour, IInfectable
             infectionTimer += Time.deltaTime;
             if (infectionTimer >= currentInfectionDuration)
             {
-                
-
                 Destroy(InfeCtorClone);
-                
                 Infect(false);
                 Debug.Log($"{gameObject.name} är inte längre infekterad.");
             }
         }
 
-        // Sök efter mål med jämna mellanrum (optimerat till var 0.2:e sekund istället för varje frame)
+        // Sök efter mål med jämna mellanrum
         targetScanTimer += Time.deltaTime;
         if (targetScanTimer > 0.2f)
         {
@@ -126,7 +164,6 @@ public class EnemiesHealth : MonoBehaviour, IInfectable
         }
 
         // --- GEMENSAMT KROCK-SKYDD FÖR ALLA FIENDER ---
-        // Om vi inte är infekterade och har ett giltigt mål som inte är en annan fiende (dvs vi jagar spelaren)
         if (!isCurrentlyInfected && currentTarget != null && !currentTarget.CompareTag("Enemie"))
         {
             float distanceFromEnemy = 5f; 
@@ -147,17 +184,15 @@ public class EnemiesHealth : MonoBehaviour, IInfectable
         }
     }
 
-    // --- MÅLSÖKNINGSLOGIK (Gemensam för ALLA fiender!) ---
+    // --- MÅLSÖKNINGSLOGIK ---
     private void FindTarget()
     {
         if (isCurrentlyInfected)
         {
-            // Sök efter närmaste FIENDE att attackera
             currentTarget = FindNearestOtherEnemy();
         }
         else
         {
-            // Sök efter SPELAREN att attackera
             Collider[] colliders = Physics.OverlapSphere(transform.position, 50f, PlayerDetect);
             if (colliders.Length > 0 && colliders[0] != null)
             {
@@ -180,7 +215,6 @@ public class EnemiesHealth : MonoBehaviour, IInfectable
         {
             if (enemy == this.gameObject || enemy == null) continue;
 
-            // Undvik att attackera kompisar som också är infekterade
             EnemiesHealth otherHealth = enemy.GetComponent<EnemiesHealth>();
             if (otherHealth != null && otherHealth.isCurrentlyInfected) continue;
 
@@ -204,25 +238,24 @@ public class EnemiesHealth : MonoBehaviour, IInfectable
     {
         isCurrentlyInfected = state;
         IsInfector = state; 
-        // 1. Spawna effekten på fiendens position
-       // 1. Spawna din partikeleffekt
-        GameObject effect = Instantiate(InfectorEffect, transform.position, transform.rotation);
-        InfeCtorClone = effect;
 
-        // 2. Fäst den på fienden
+        if(InfeCtorClone == null)
+        {
+            GameObject effect = Instantiate(InfectorEffect, transform.position, transform.rotation);
+            InfeCtorClone = effect;
+        }
+        
+       
+
         InfeCtorClone.transform.SetParent(this.transform);
-        InfeCtorClone.transform.localPosition = Vector3.zero; // Nollställ så den sitter mitt på
+        InfeCtorClone.transform.localPosition = Vector3.zero;
 
-        // 3. Hämta fiendens SkinnedMeshRenderer (den animerade kroppen)
         SkinnedMeshRenderer enemyMesh = GetComponentInChildren<SkinnedMeshRenderer>();
         ParticleSystem ps = InfeCtorClone.GetComponent<ParticleSystem>();
 
         if (enemyMesh != null && ps != null)
-        {
-            // Hämta Shape-modulen i partikelsystemet
+        { 
             var shape = ps.shape;
-            
-            // Byt shape till Skinned Mesh Renderer och tilldela fiendens mesh!
             shape.shapeType = ParticleSystemShapeType.SkinnedMeshRenderer;
             shape.skinnedMeshRenderer = enemyMesh;
         }
@@ -299,7 +332,6 @@ public class EnemiesHealth : MonoBehaviour, IInfectable
 
         Destroy(gameObject, ExplodeTime);
 
-        // Stäng av alla andra beteendeskript dynamiskt vid död
         MonoBehaviour[] allScripts = GetComponents<MonoBehaviour>();
         foreach (MonoBehaviour script in allScripts)
         {

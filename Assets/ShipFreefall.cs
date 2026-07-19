@@ -20,9 +20,9 @@ public class ShipFreefall : MonoBehaviour
     public LayerMask groundLayer;
     public float slowDownDuration = 1.5f;
 
-    [Header("Landing Targets (Dra in dina LandingPoints här)")]
+    [Header("Landing Targets (Dra in dina LandingPoints hï¿½r)")]
     public Transform[] landingPoints;
-
+    public bool WithoutPlayer = false;
     Animator anime;
     CharacterController controller;
     RatchetController playercontroller;
@@ -48,7 +48,7 @@ public class ShipFreefall : MonoBehaviour
             }
         }
 
-        // Ställ in startposition
+        // Stï¿½ll in startposition
         playercontroller = player.GetComponent<RatchetController>();
         playercontroller.CanMove = false;
 
@@ -60,18 +60,28 @@ public class ShipFreefall : MonoBehaviour
         controller.enabled = true;
 
         // Starta sekvensen
-        StartCoroutine(MoveRobotsThenPlayer());
+        if(WithoutPlayer)
+        {
+            //player = null;
+            player.GetComponent<freefall>().ItsFalling = true;
+            StartCoroutine(MoveRobots());
+        }
+        else
+        {
+            StartCoroutine(MoveRobotsThenPlayer());
+        }
     }
 
-    IEnumerator MoveRobotsThenPlayer()
+
+    IEnumerator MoveRobots()
     {
        
 
         yield return new WaitForSeconds(2);
 
-        Sound.Play();
+        
 
-        // 1. Starta ALLA robotars rörelse först så att de hamnar längst fram
+        // 1. Starta ALLA robotars rï¿½relse fï¿½rst sï¿½ att de hamnar lï¿½ngst fram
         for (int i = 0; i < robots.Length; i++)
         {
             if (robots[i] != null)
@@ -80,10 +90,31 @@ public class ShipFreefall : MonoBehaviour
             }
         }
 
-        // 2. En kort fördröjning så robotarna hinner springa före spelaren ut mot dörren
+       
+
+        yield return null;
+    }
+    IEnumerator MoveRobotsThenPlayer()
+    {
+       
+
+        yield return new WaitForSeconds(2);
+
+        Sound.Play();
+
+        // 1. Starta ALLA robotars rï¿½relse fï¿½rst sï¿½ att de hamnar lï¿½ngst fram
+        for (int i = 0; i < robots.Length; i++)
+        {
+            if (robots[i] != null)
+            {
+                StartCoroutine(MoveToDoorAndJump(robots[i], true, i));
+            }
+        }
+
+        // 2. En kort fï¿½rdrï¿½jning sï¿½ robotarna hinner springa fï¿½re spelaren ut mot dï¿½rren
         yield return new WaitForSeconds(0.4f);
 
-        // 3. Starta spelaren sist så han hamnar bakom robotarna
+        // 3. Starta spelaren sist sï¿½ han hamnar bakom robotarna
         StartCoroutine(MoveToDoorAndJump(player, false, -1));
 
         yield return null;
@@ -94,24 +125,24 @@ public class ShipFreefall : MonoBehaviour
         CharacterController cc = character.GetComponentInChildren<CharacterController>();
 
         float timer = 0f;
-        float maxTime = 2.5f; // Säkerhetsgräns
+        float maxTime = 2.5f; // Sï¿½kerhetsgrï¿½ns
 
-        // Tvinga nollställning av rörelse vid start
+        // Tvinga nollstï¿½llning av rï¿½relse vid start
         if (cc != null && cc.enabled)
         {
             cc.Move(Vector3.zero);
         }
 
-        // Kör loopen tills vi är framme eller tiden går ut
+        // Kï¿½r loopen tills vi ï¿½r framme eller tiden gï¿½r ut
         while (Vector3.Distance(new Vector3(0, 0, character.transform.position.z), new Vector3(0, 0, doorPosition.position.z)) > 0.3f && timer < maxTime)
         {
             timer += Time.deltaTime;
 
-            // Rörelsevektor
+            // Rï¿½relsevektor
             Vector3 direction = character.transform.forward * speed;
             direction.y = -9.81f; // Applicera konstant gravitationskraft
 
-            // Sätt löp-animationer
+            // Sï¿½tt lï¿½p-animationer
             if (!isRobot)
             {
                 anime.SetBool("Run", true);
@@ -127,7 +158,7 @@ public class ShipFreefall : MonoBehaviour
                 }
             }
 
-            // Utför rörelse
+            // Utfï¿½r rï¿½relse
             if (cc != null && cc.enabled)
             {
                 cc.Move(direction * Time.deltaTime);
@@ -143,11 +174,11 @@ public class ShipFreefall : MonoBehaviour
         // Timeout-varning
         if (timer >= maxTime)
         {
-            Debug.LogWarning(character.name + " fastnade vid dörren!");
+            Debug.LogWarning(character.name + " fastnade vid dï¿½rren!");
         }
 
         // ========================================================
-        // STÄNG AV LÖPNING OCH FÖRBERED HOPP
+        // STï¿½NG AV Lï¿½PNING OCH Fï¿½RBERED HOPP
         // ========================================================
         if (!isRobot)
         {
@@ -159,11 +190,11 @@ public class ShipFreefall : MonoBehaviour
             if (ranger != null)
             {
                 ranger.HeadAnime.SetBool("Run", false);
-                ranger.FootAnime.SetBool("Run", false); // Ändrade från "FootAnime" till false
+                ranger.FootAnime.SetBool("Run", false); // ï¿½ndrade frï¿½n "FootAnime" till false
             }
         }
 
-        // Beräkna hopp-vektor
+        // Berï¿½kna hopp-vektor
         float jumpForce = 5f;
         float jumpUp = 4f;
         Vector3 jumpVelocity = (character.transform.forward * jumpForce) + (Vector3.up * jumpUp);
@@ -240,14 +271,14 @@ public class ShipFreefall : MonoBehaviour
         ranger.HeadAnime.SetBool("FreeFall", true);
         ranger.FootAnime.SetBool("FreeFall", true);
 
-        // Se till att Ground är avstängd under fallet
+        // Se till att Ground ï¿½r avstï¿½ngd under fallet
         ranger.HeadAnime.SetBool("Ground", false);
         ranger.FootAnime.SetBool("Ground", false);
 
         CharacterController cc = robot.GetComponentInChildren<CharacterController>();
         if (cc != null) cc.enabled = true;
 
-        // HOPP-MOMENTUM UT UR DÖRREN (ROBOT)
+        // HOPP-MOMENTUM UT UR Dï¿½RREN (ROBOT)
         float jumpTimer = 0f;
         float jumpDuration = 0.6f;
 
@@ -292,7 +323,7 @@ public class ShipFreefall : MonoBehaviour
             float targetX = robot.transform.position.x;
             float targetZ = robot.transform.position.z;
 
-            // 1. Beräkna avstånd till marken för Slow Landing
+            // 1. Berï¿½kna avstï¿½nd till marken fï¿½r Slow Landing
             float distToGround = 50f;
             RaycastHit airHit;
             if (Physics.Raycast(robot.transform.position, Vector3.down, out airHit, 50f, groundLayer))
@@ -306,7 +337,7 @@ public class ShipFreefall : MonoBehaviour
             if (distToGround < 10f)
             {
                 currentFallSpeed = Mathf.Lerp(slowSpeed, fallSpeed, distToGround / 10f);
-                // Stäng av FreeFall animation när vi närmar oss marken
+                // Stï¿½ng av FreeFall animation nï¿½r vi nï¿½rmar oss marken
                 ranger.HeadAnime.SetBool("FreeFall", false);
                 ranger.FootAnime.SetBool("FreeFall", false);
             }
@@ -320,7 +351,7 @@ public class ShipFreefall : MonoBehaviour
                 targetZ = Mathf.Lerp(robot.transform.position.z, targetLandingPoint.position.z, Time.deltaTime * flySmoothSpeed);
                 
                 currentFallSpeed = Mathf.Lerp(slowSpeed, fallSpeed, distToGround / 10f);
-                // Stäng av FreeFall animation när vi närmar oss marken
+                // Stï¿½ng av FreeFall animation nï¿½r vi nï¿½rmar oss marken
                 ranger.HeadAnime.SetBool("FreeFall", false);
                 ranger.FootAnime.SetBool("FreeFall", false);
             }
@@ -342,7 +373,7 @@ public class ShipFreefall : MonoBehaviour
 
             float deltaX = targetX - robot.transform.position.x;
             float deltaZ = targetZ - robot.transform.position.z;
-            float deltaY = -currentFallSpeed * Time.deltaTime; // Använd den justerade hastigheten
+            float deltaY = -currentFallSpeed * Time.deltaTime; // Anvï¿½nd den justerade hastigheten
 
             Vector3 moveDirection = new Vector3(deltaX, deltaY, deltaZ);
 

@@ -378,7 +378,7 @@ MeshCollider:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8944288566484539548}
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 13400000, guid: ca780587bddb6774680f9eb38a410cc8, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -407,16 +407,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: '::'
   Damage: 10
   SearchRadius: 15
-  MoveSpeed: 3
-  RotationSpeed: 10
-  groundLayer:
-    serializedVersion: 2
-    m_Bits: 128
-  groundOffset: 0.8
-  swayAmount: 2
-  swaySpeed: 3
+  LaunchForce: 4
+  LaunchUpwardForce: 1.5
+  MoveSpeed: 10
+  GravityMultiplier: 3
   visualModel: {fileID: 0}
   MeshFilter: {fileID: 7303633785683307575}
+  RotationSpeed: 500
   puddlePrefab: {fileID: 2600991430196557793, guid: 5116e1f58b5beff408bd25716930b879, type: 3}
   distanceBetweenPuddles: 0.4
 --- !u!135 &8840553973216012227
