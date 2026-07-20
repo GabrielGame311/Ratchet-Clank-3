@@ -250,12 +250,14 @@ MonoBehaviour:
   IsInfector: 0
   PlayerDetect:
     serializedVersion: 2
-    m_Bits: 8
+    m_Bits: 2056
   currentTarget: {fileID: 0}
   baseInfectionDuration: 15
   durationIncreasePerLevel: 5
-  fallDepthThreshold: 10
-  lookAheadDistance: 10
+  edgeCheckDistance: 0.6
+  groundLayer:
+    serializedVersion: 2
+    m_Bits: 0
 --- !u!135 &1230819354886911189
 SphereCollider:
   m_ObjectHideFlags: 0

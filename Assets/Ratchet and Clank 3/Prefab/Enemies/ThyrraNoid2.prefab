@@ -108,7 +108,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   MoveSpeed: 5
-  Distance: 45
+  Distance: 200
   minDistanceFromFirstEnemy: 4
   ShootTime: 1
   SePlayer: 0
@@ -284,10 +284,14 @@ MonoBehaviour:
   IsInfector: 0
   PlayerDetect:
     serializedVersion: 2
-    m_Bits: 8
+    m_Bits: 2056
   currentTarget: {fileID: 0}
   baseInfectionDuration: 15
   durationIncreasePerLevel: 5
+  edgeCheckDistance: 0.6
+  groundLayer:
+    serializedVersion: 2
+    m_Bits: 0
 --- !u!135 &2367273865764239511
 SphereCollider:
   m_ObjectHideFlags: 0
