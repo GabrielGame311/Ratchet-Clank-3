@@ -26,19 +26,24 @@ public class EnemiesMission : MonoBehaviour
     [HideInInspector]
     public bool isWaitingForNextWave = false;
     private int activeEnemiesCount = 0;
-
+    public bool ISEnemiesAdd = false;
     void Start()
     {
         instance = this;
         player = GameObject.FindGameObjectWithTag("Player");
 
-        // Om du har satt upp fiender i listan via Editorn, aktivera/inaktivera dem här baserat på din inställning
+        // Om du har satt upp fiender i listan via Editorn, aktivera/inaktivera dem hï¿½r baserat pï¿½ din instï¿½llning
         if (SetactiveEnemies)
         {
             foreach (GameObject enemy in EnemiesList)
             {
                 if (enemy != null) enemy.SetActive(false);
             }
+        }
+        if(ISEnemiesAdd)
+        {
+            FindAllEnemiesIncludeInactive();
+            ISEnemiesAdd = false;
         }
     }
 
@@ -49,16 +54,21 @@ public class EnemiesMission : MonoBehaviour
 
     void Update()
     {
-        // 1. Om listan är helt tom från början (inte inställd i Inspector), gör ingenting för att förhindra direkt vinst
+
+
+
+        
+
+        // 1. Om listanr helt tom frn brjan (inte instlld i Inspector), gr ingenting fr att frhindra direkt vinst
         if (EnemiesList.Count == 0 && !hasProcessedEnemies)
         {
             return;
         }
 
-        // 2. Nollställ räknaren för aktiva fiender denna frame
+        // 2. Nollstï¿½ll rï¿½knaren fï¿½r aktiva fiender denna frame
         activeEnemiesCount = 0;
 
-        // 3. Gå igenom listan baklänges för att rensa bort helt förstörda (null) objekt
+        // 3. Gï¿½ igenom listan baklï¿½nges fï¿½r att rensa bort helt fï¿½rstï¿½rda (null) objekt
         for (int i = EnemiesList.Count - 1; i >= 0; i--)
         {
             if (EnemiesList[i] == null)
@@ -67,22 +77,22 @@ public class EnemiesMission : MonoBehaviour
             }
             else if (EnemiesList[i].activeSelf)
             {
-                // Räkna endast fiender som är aktiva och lever i scenen just nu
+                // Rï¿½kna endast fiender som ï¿½r aktiva och lever i scenen just nu
                 activeEnemiesCount++;
             }
         }
 
-        // 4. VÅG-LOGIK: Trigga nästa spline när nuvarande aktiva våg är död (alla blivit inaktiverade/SetActive(false))
+        // 4. Vï¿½G-LOGIK: Trigga nï¿½sta spline nï¿½r nuvarande aktiva vï¿½g ï¿½r dï¿½d (alla blivit inaktiverade/SetActive(false))
         if (activeEnemiesCount <= 0 && !isWaitingForNextWave && EnemiesList.Count > 0)
         {
             if (GalacticRangers.instance != null)
             {
                 GalacticRangers.instance.AdvanceToNextSpline();
-                isWaitingForNextWave = true; // Pausa signaler tills Rangers nått nästa spline-slut
+                isWaitingForNextWave = true; // Pausa signaler tills Rangers nï¿½tt nï¿½sta spline-slut
             }
         }
 
-        // 5. VINST-LOGIK: Trigga vinst ENDAST när hela listan är helt tom (alla fiender i hela uppdraget är Destroyed/null)
+        // 5. VINST-LOGIK: Trigga vinst ENDAST nï¿½r hela listan ï¿½r helt tom (alla fiender i hela uppdraget ï¿½r Destroyed/null)
         if (EnemiesList.Count <= 0 && !IsWin)
         {
             IsWin = true;
@@ -139,7 +149,22 @@ public class EnemiesMission : MonoBehaviour
         
     }
 
-    // Publik funktion för att dynamiskt lägga till fiender till uppdraget från andra skript (t.ex. spawner-system)
+    void FindAllEnemiesIncludeInactive()
+    {
+        EnemiesList.Clear();
+
+        // HÃ¤mta alla Transforms i scenen (Ã¤ven de som Ã¤r inaktiva)
+        Transform[] allTransforms = FindObjectsByType<Transform>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+
+        foreach (Transform t in allTransforms)
+        {
+            if (t.CompareTag("Enemie")) // Kontrollera taggen
+            {
+                EnemiesList.Add(t.gameObject);
+            }
+        }
+    }
+    // Publik funktion fï¿½r att dynamiskt lï¿½gga till fiender till uppdraget frï¿½n andra skript (t.ex. spawner-system)
     public void AddEnemyToMission(GameObject newEnemy)
     {
         if (newEnemy != null && !EnemiesList.Contains(newEnemy))

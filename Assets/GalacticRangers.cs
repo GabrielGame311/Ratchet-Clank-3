@@ -290,6 +290,8 @@ public class GalacticRangers : MonoBehaviour
                 // --- 1. GLOBALT TVINGANDE STOPP (När slutet nås på Spline eller TargetPoint) ---
                 else if (hasReachedTargetSplineEnd || hasReachedTargetPointEnd)
                 {
+                    HeadAnime.SetBool("Crouch", false);
+                    FootAnime.SetBool("Crouch", false);
                     HeadAnime.SetBool("Run", false);
                     FootAnime.SetBool("Run", false);
                     HeadAnime.SetBool("Walk", false);
@@ -327,6 +329,8 @@ public class GalacticRangers : MonoBehaviour
                 // --- 2. EXTRA SINGLE TARGET/RUN SPLINE ---
                 else if (targetSplineContainer != null)
                 {
+                    HeadAnime.SetBool("Crouch", false);
+                    FootAnime.SetBool("Crouch", false);
                     HeadAnime.SetBool("Run", true);
                     FootAnime.SetBool("Run", true);
                     HeadAnime.SetBool("Walk", false);
@@ -473,7 +477,8 @@ public class GalacticRangers : MonoBehaviour
                     {
                         HeadAnime.SetBool("Run", true);
                         FootAnime.SetBool("Run", true);
-
+                        HeadAnime.SetBool("Crouch", false);
+                        FootAnime.SetBool("Crouch", false);
                         Vector3 targetPos = targetPoint[currentPoint].position;
                         Vector3 direction = (targetPos - transform.position).normalized;
 
@@ -504,6 +509,8 @@ public class GalacticRangers : MonoBehaviour
 
             HeadAnime.SetBool("Run", true);
             FootAnime.SetBool("Run", true);
+            HeadAnime.SetBool("Crouch", false);
+            FootAnime.SetBool("Crouch", false);
             rb.isKinematic = false;
 
             float totalTargetLength = currentSpline.CalculateLength();
