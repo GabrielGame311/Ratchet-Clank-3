@@ -74,10 +74,10 @@ public class GalacticRangers : MonoBehaviour
     public SplineContainer splineContainer;
     private float splineProgress = 0f;
     private bool splineWaitTimerActive = false;
-    private float splineWaitTimer = 0f;
+    public float splineWaitTimer = 0f;
     public float MAX_SPLINE_WAIT_TIME = 10f;
     public bool IsFreefall = false;
-
+    public bool ContinueWalk = false;
     [Header("Spline Target Settings (Run)")]
     public SplineContainer targetSplineContainer;
     private float targetSplineProgress = 0f;
@@ -88,7 +88,7 @@ public class GalacticRangers : MonoBehaviour
 
     // INTERVALLPAUSER UNDER GÅNGEN
     private bool splineIntervalPause = false;
-    private float splineIntervalPauseTimer = 0f;
+    public float splineIntervalPauseTimer = 0f;
     private float nextIntervalDuration = 0f;
 
     // SPÅRA SENASTE FIENDEN OCH ROTATIONSTILLSTÅND
@@ -120,38 +120,49 @@ public class GalacticRangers : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (Crouching)
-        {
-            Iscrouch = true;
-        }
 
-        if (!Iscrouch)
+        if(enemie != null)
         {
-            crouchTimer = 0f;
-            uncrouchTimer = 0f;
-            HeadAnime.SetBool("Crouch", false);
-            FootAnime.SetBool("Crouch", false);
-        }
-        else
-        {
-            if (crouchTimer < 5f)
+            
+            if (Crouching)
             {
-                crouchTimer += Time.deltaTime;
-                HeadAnime.SetBool("Crouch", true);
-                FootAnime.SetBool("Crouch", true);
+                Iscrouch = true;
             }
-            else if (uncrouchTimer < 5f)
+
+
+
+
+
+            if (!Iscrouch)
             {
-                uncrouchTimer += Time.deltaTime;
+                crouchTimer = 0f;
+                uncrouchTimer = 0f;
                 HeadAnime.SetBool("Crouch", false);
                 FootAnime.SetBool("Crouch", false);
             }
             else
             {
-                crouchTimer = 0f;
-                uncrouchTimer = 0f;
+                if (crouchTimer < 5f)
+                {
+                    crouchTimer += Time.deltaTime;
+                    HeadAnime.SetBool("Crouch", true);
+                    FootAnime.SetBool("Crouch", true);
+                }
+                else if (uncrouchTimer < 5f)
+                {
+                    uncrouchTimer += Time.deltaTime;
+                    HeadAnime.SetBool("Crouch", false);
+                    FootAnime.SetBool("Crouch", false);
+                }
+                else
+                {
+                    crouchTimer = 0f;
+                    uncrouchTimer = 0f;
+                }
             }
         }
+
+
     }
 
     void Update()
@@ -415,16 +426,31 @@ public class GalacticRangers : MonoBehaviour
                             Controller.Move(moveVelocity * Time.deltaTime);
                         }
 
-                        if (splineProgress >= 1f || (distanceToPoint < 0.3f && splineProgress > 0.95f))
+                        if(!ContinueWalk)
                         {
-                            splineIntervalPauseTimer = 0f;
-                            splineWaitTimerActive = true;
+                            if (splineProgress >= 1f || (distanceToPoint < 0.3f && splineProgress > 0.95f))
+                            {
+                                splineIntervalPauseTimer = 0f;
+                                splineWaitTimerActive = true;
+                            }
+                            else if (splineIntervalPauseTimer >= nextIntervalDuration)
+                            {
+                                splineIntervalPauseTimer = 0f;
+                                splineIntervalPause = true;
+                                nextIntervalDuration = Random.Range(5f, 10f);
+                            }
                         }
-                        else if (splineIntervalPauseTimer >= nextIntervalDuration)
+                        else
                         {
+
+                            if (splineProgress >= 1f)
+                            {
+                                ContinueWalk = false;
+                                ContinueWalk = true;
+                            }
+
                             splineIntervalPauseTimer = 0f;
-                            splineIntervalPause = true;
-                            nextIntervalDuration = Random.Range(5f, 10f);
+
                         }
                     }
                 }
@@ -472,7 +498,7 @@ public class GalacticRangers : MonoBehaviour
         // =================================================================
         // --- KORRIGERAD: TARGET SPLINES LISTA (RÖRELSE & SIGNAL-KONTROLL) ---
         // =================================================================
-        if (targetSplines[currentTargetSplineIndex] != null && currentTargetSplineIndex < targetSplines.Count && !isWaitingForSignal && enemie == null)
+        if (targetSplines[currentTargetSplineIndex] != null && currentTargetSplineIndex < targetSplines.Count && !isWaitingForSignal)
         {
             SplineContainer currentSpline = targetSplines[currentTargetSplineIndex];
 
@@ -503,7 +529,7 @@ public class GalacticRangers : MonoBehaviour
             // Byt spline när roboten har sprungit hela vägen till slutet
             if (targetSplineProgress2 >= 1f || (distToSplineEnd < 0.3f && targetSplineProgress2 > 0.95f))
             {
-                currentTargetSplineIndex++; // Flytta fram indexet för nästa spline i kön
+                //currentTargetSplineIndex++; // Flytta fram indexet för nästa spline i kön
                 targetSplineProgress2 = 0f;
                 isWaitingForSignal = true;  // Sätt till true DIREKT! Nu stannar de och väntar på nästa våg av fiender
 

@@ -46,12 +46,21 @@ public class GranadeDamage : MonoBehaviour
         if (other.CompareTag("Health"))
         {
             other.GetComponent<HealthItem>().Break(Damage);
-            Destroy(gameObject);
+            
         }
         if (other.tag == "BoltCrate")
         {
             Destroy(other.gameObject);
         }
+        if (other.tag == "RangerCover")
+        {
+            
+
+            other.GetComponent<RangerCover>().TakeDamage(20);
+            
+
+        }
+        //Destroy(gameObject);
     }
 
     IEnumerator wait()

@@ -50,6 +50,14 @@ public class BallGun : MonoBehaviour
         {
             Destroy(other.gameObject);
         }
+        if (other.collider.tag == "RangerCover")
+        {
+            
+
+            other.collider.GetComponent<RangerCover>().TakeDamage(15);
+            Destroy(gameObject);
+
+        }
         Destroy(gameObject);
     }
 

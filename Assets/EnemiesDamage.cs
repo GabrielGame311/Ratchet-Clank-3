@@ -83,6 +83,17 @@ public class EnemiesDamage : MonoBehaviour
                         Destroy(GetComponent<EnemiesDamage>()); 
                     }
                 }
+                else if(hit.collider.CompareTag("RangerCover") && !laserHitTarget)
+                {
+                    RangerCover rangerCover = hit.collider.GetComponent<RangerCover>();
+                    if (rangerCover != null)
+                    {
+                        rangerCover.TakeDamage(laserDamage);
+                        laserHitTarget = true;
+                        
+                        Destroy(GetComponent<EnemiesDamage>()); 
+                    }
+                }
             }
         }
         else

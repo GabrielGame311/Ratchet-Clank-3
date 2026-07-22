@@ -76,7 +76,15 @@ public class ParticleShootgun : MonoBehaviour
         {
             Destroy(other.gameObject);
         }
+        if (other.tag == "RangerCover")
+        {
+            
 
+            other.GetComponent<RangerCover>().TakeDamage(Damage);
+           
+
+        }
+         Destroy(gameObject, 2);
     }
 
 

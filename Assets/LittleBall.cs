@@ -67,7 +67,14 @@ public class LittleBall : MonoBehaviour
 
 
         }
-       
+        if (other.collider.tag == "RangerCover")
+        {
+            
+
+            other.collider.GetComponent<RangerCover>().TakeDamage(Damage);
+            Destroy(gameObject);
+
+        }
 
     }
 

@@ -85,7 +85,7 @@ public class EnemiesHealth : MonoBehaviour, IInfectable
         if (rb != null)
         {
             // Ta reda på vilken riktning fienden faktiskt försöker röra sig i
-            Vector3 moveDirection = rb.velocity;
+            Vector3 moveDirection = rb.linearVelocity;
             moveDirection.y = 0; // Vi bryr oss bara om rörelse på X- och Z-axeln
 
             // Om de rör på sig, gör en koll framåt
@@ -104,7 +104,7 @@ public class EnemiesHealth : MonoBehaviour, IInfectable
                 {
                     // OJ! Det finns ingen mark framför oss! 
                     // Vi stoppar omedelbart all fart i rörelseriktningen så att de "krockar" med kanten
-                    rb.velocity = new Vector3(0, rb.velocity.y, 0);
+                    rb.linearVelocity = new Vector3(0, rb.linearVelocity.y, 0);
                     
                     // Knuffa tillbaka dem ytterst lite så att de inte "hänger" över kanten
                     rb.position -= normalizedDir * 0.05f;

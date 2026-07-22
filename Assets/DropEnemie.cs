@@ -285,7 +285,7 @@ public class SmoothDropship : MonoBehaviour
         // Skjut ut fienden i en härlig fallande båge
         if (enemyRb != null)
         {
-            enemyRb.velocity = Vector3.zero;
+            enemyRb.linearVelocity = Vector3.zero;
             Vector3 pushDir = (transform.forward * 1.9f + Vector3.down * 0.1f).normalized;
             enemyRb.AddForce(pushDir * enemyLaunchForce, ForceMode.Impulse);
         }

@@ -916,6 +916,11 @@ MonoBehaviour:
   Point2: {fileID: 5395331264331387095}
   BulletPrefab: {fileID: 2104697324679226973, guid: 7edd432cbc8ddd04b9846fa38cd74d2d, type: 3}
   ShootForce: 15
+  fireRate: 0.35
+  burstPause: 1.5
+  shotsPerBurst: 10
+  shootSound: {fileID: 8300000, guid: 5ca1f06f9bd1ff148bca5ccf2233048c, type: 3}
+  muzzleFlashPrefab: {fileID: 0}
   playerOrbitRadius: 30
   playerFlyHeight: 2
   rangerOrbitRadius: 15
@@ -972,6 +977,10 @@ MonoBehaviour:
   currentTarget: {fileID: 0}
   baseInfectionDuration: 15
   durationIncreasePerLevel: 5
+  edgeCheckDistance: 0.6
+  groundLayer:
+    serializedVersion: 2
+    m_Bits: 0
 --- !u!54 &307570542081124379
 Rigidbody:
   m_ObjectHideFlags: 0

@@ -45,6 +45,17 @@ public class ParticleDamage : MonoBehaviour
             Destroy(other.gameObject);
         }
 
+
+        if (other.tag == "RangerCover")
+        {
+            
+
+            other.GetComponent<RangerCover>().TakeDamage(Damage);
+            Destroy(gameObject);
+
+        }
+        
+
     }
 
     private void OnCollisionEnter(Collision collision)
@@ -60,6 +71,14 @@ public class ParticleDamage : MonoBehaviour
         if (collision.collider.tag == "Enemie")
         {
             collision.collider.GetComponent<EnemiesHealth>().TakeDamage(Damage);
+        }
+        if (collision.collider.tag == "RangerCover")
+        {
+            
+
+            collision.collider.GetComponent<RangerCover>().TakeDamage(Damage);
+            Destroy(gameObject);
+
         }
         Destroy(gameObject);
     }

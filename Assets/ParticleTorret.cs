@@ -68,6 +68,15 @@ public class ParticleTorret : MonoBehaviour
         {
             Destroy(other.gameObject);
         }
+
+        if (other.tag == "RangerCover")
+        {
+            
+
+            other.GetComponent<RangerCover>().TakeDamage(5);
+            Destroy(gameObject);
+
+        }
     }
 
 

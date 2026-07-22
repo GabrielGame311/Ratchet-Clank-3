@@ -9,19 +9,26 @@ public class ThyrranoidArcShip : MonoBehaviour
     public Transform Point2;
     public GameObject BulletPrefab;
     public float ShootForce = 70f;
+    public float fireRate = 0.25f;           // Tid mellan varje skott (i sekunder)
+    public float burstPause = 1.5f;           // Paus mellan skjut-salvor
+    public int shotsPerBurst = 6;            // Hur mÃ¥nga skott per salva
+
+    [Header("Audio & FX")]
+    public AudioClip shootSound;
+    public GameObject muzzleFlashPrefab;
 
     [Header("Flight - Player (Flying)")]
-    public float playerOrbitRadius = 30f;   // Större cirkel för flygstrid
-    public float playerFlyHeight = 2f;      // Låg höjdskillnad eftersom båda flyger
+    public float playerOrbitRadius = 30f;
+    public float playerFlyHeight = 2f;
 
     [Header("Flight - Rangers (Ground)")]
-    public float rangerOrbitRadius = 15f;   // Mindre cirkel för markmål
-    public float rangerFlyHeight = 10f;     // Högre upp så de inte krockar med marken
+    public float rangerOrbitRadius = 15f;
+    public float rangerFlyHeight = 10f;
 
     [Header("Global Flight Settings")]
     public float moveSpeed = 20f;
-    public float rotationSpeed = 3.0f;      // Sänkt för att inte vara så "ryckig"
-    public float orbitSpeedMultiplier = 0.5f; // Sänkt så den inte snurrar för snabbt
+    public float rotationSpeed = 3.0f;
+    public float orbitSpeedMultiplier = 0.5f;
     public float bankingAmount = 55f;
 
     [Header("AI Logic")]
@@ -34,10 +41,19 @@ public class ThyrranoidArcShip : MonoBehaviour
     private bool targetIsPlayer = false;
     private float orbitTimer;
     private Animator anime;
+    private AudioSource audioSource;
+
+    // Skjut-timers
+    private float nextFireTime;
+    private int currentBurstCount;
+    private bool isPauseBetweenBursts = false;
 
     void Start()
     {
         anime = GetComponentInChildren<Animator>();
+        audioSource = GetComponent<AudioSource>();
+        if (audioSource == null) audioSource = gameObject.AddComponent<AudioSource>();
+
         orbitTimer = Random.Range(0f, 10f);
     }
 
@@ -48,10 +64,13 @@ public class ThyrranoidArcShip : MonoBehaviour
         if (hasTarget && currentTarget != null)
         {
             HandleCombatFlight();
+            HandleShootingTimer(); // Hanterar automatisk skjutning
         }
         else
         {
+            // Flyg rakt fram nÃ¤r inget mÃ¥l finns
             transform.position += transform.forward * (moveSpeed * 0.4f) * Time.deltaTime;
+            if (anime) anime.SetBool("IsShooting", false);
         }
     }
 
@@ -74,7 +93,7 @@ public class ThyrranoidArcShip : MonoBehaviour
         {
             currentTarget = players[0].gameObject;
             hasTarget = true;
-            targetIsPlayer = true; // Kom ihåg att det är spelaren
+            targetIsPlayer = true;
             return;
         }
 
@@ -84,17 +103,15 @@ public class ThyrranoidArcShip : MonoBehaviour
         {
             currentTarget = rangers[0].gameObject;
             hasTarget = true;
-            targetIsPlayer = false; // Det är en ranger
+            targetIsPlayer = false;
         }
     }
 
     void HandleCombatFlight()
     {
-        // Välj värden baserat på målet
         float currentRadius = targetIsPlayer ? playerOrbitRadius : rangerOrbitRadius;
         float currentHeight = targetIsPlayer ? playerFlyHeight : rangerFlyHeight;
 
-        // Snurra långsammare
         orbitTimer += Time.deltaTime * orbitSpeedMultiplier;
 
         float x = Mathf.Cos(orbitTimer) * currentRadius;
@@ -102,7 +119,6 @@ public class ThyrranoidArcShip : MonoBehaviour
 
         Vector3 targetPos = currentTarget.transform.position + new Vector3(x, currentHeight, z);
 
-        // Mjukare förflyttning
         transform.position = Vector3.MoveTowards(transform.position, targetPos, moveSpeed * Time.deltaTime);
 
         Vector3 dirToTarget = (currentTarget.transform.position - transform.position).normalized;
@@ -116,20 +132,60 @@ public class ThyrranoidArcShip : MonoBehaviour
             targetRot *= Quaternion.Euler(0, 0, -bank);
             transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, Time.deltaTime * rotationSpeed);
         }
+    }
 
-        if (anime) anime.SetBool("IsShooting", true);
+    void HandleShootingTimer()
+    {
+        if (Time.time < nextFireTime) return;
+
+        // Skjut en salva
+        Shooting();
+        currentBurstCount++;
+
+        if (currentBurstCount >= shotsPerBurst)
+        {
+            // Ta en paus mellan salvorna
+            currentBurstCount = 0;
+            nextFireTime = Time.time + burstPause;
+            if (anime) anime.SetBool("IsShooting", false);
+        }
+        else
+        {
+            // NÃ¤sta skott i samma salva
+            nextFireTime = Time.time + fireRate;
+            if (anime) anime.SetBool("IsShooting", true);
+        }
     }
 
     public void Shooting()
     {
-        if (Point1 && Point2) { Fire(Point1); Fire(Point2); }
+        if (Point1) Fire(Point1);
+        if (Point2) Fire(Point2);
+
+        if (shootSound != null && audioSource != null)
+        {
+            audioSource.PlayOneShot(shootSound);
+        }
     }
 
     void Fire(Transform p)
     {
+        if (BulletPrefab == null || p == null) return;
+
         GameObject b = Instantiate(BulletPrefab, p.position, p.rotation);
-        if (b.GetComponent<Rigidbody>())
-            b.GetComponent<Rigidbody>().linearVelocity = p.forward * ShootForce;
+        
+        Rigidbody rb = b.GetComponent<Rigidbody>();
+        if (rb != null)
+        {
+            rb.linearVelocity = p.forward * ShootForce;
+        }
+
+        if (muzzleFlashPrefab != null)
+        {
+            GameObject flash = Instantiate(muzzleFlashPrefab, p.position, p.rotation);
+            Destroy(flash, 0.5f);
+        }
+
         Destroy(b, 4f);
     }
 }
