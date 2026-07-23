@@ -27,6 +27,7 @@ public class EnemiesMission : MonoBehaviour
     public bool isWaitingForNextWave = false;
     private int activeEnemiesCount = 0;
     public bool ISEnemiesAdd = false;
+    public Transform enemyParent;
     void Start()
     {
         instance = this;
@@ -153,10 +154,16 @@ public class EnemiesMission : MonoBehaviour
     {
         EnemiesList.Clear();
 
-        // Hämta alla Transforms i scenen (även de som är inaktiva)
-        Transform[] allTransforms = FindObjectsByType<Transform>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        if (enemyParent == null)
+        {
+            Debug.LogWarning("enemyParent är inte tilldelad i Inspector!");
+            return;
+        }
 
-        foreach (Transform t in allTransforms)
+        // 'true' gör att GetComponentsInChildren även hämtar inaktiva barnobjekt under parent!
+        Transform[] allChildren = enemyParent.GetComponentsInChildren<Transform>(true);
+
+        foreach (Transform t in allChildren)
         {
             if (t.CompareTag("Enemie")) // Kontrollera taggen
             {

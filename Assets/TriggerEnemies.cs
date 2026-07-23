@@ -15,7 +15,7 @@ public class TriggerEnemies : MonoBehaviour
 
     public GameObject[] triggers;
 
-
+    public bool SetactiveEnemies = false;
     // Start is called before the first frame update
     void Start()
     {
@@ -84,9 +84,20 @@ public class TriggerEnemies : MonoBehaviour
             }
         }
             
+        if(SetactiveEnemies)
+        {
+            if(other.tag == "Enemie")
+            {
+                    if (IsSound)
+                    {
+                        MissionSound.MissionSound_.i++;
+                        MissionSound.MissionSound_.Mission4(MissionSound.MissionSound_.i);
+                    }
+                    Destroy(gameObject);
+            }
+
+        }
         
-
-
        
 
        

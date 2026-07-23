@@ -36,10 +36,10 @@ public class WeaponSwitcher : MonoBehaviour
 
         if (handObject != null)
         {
-            // Hämta alla WeaponsUI-komponenter som är kopplade till "Hand" och dess barn
+            // Hï¿½mta alla WeaponsUI-komponenter som ï¿½r kopplade till "Hand" och dess barn
             WeaponsUI[] weaponsUIComponents = handObject.GetComponentsInChildren<WeaponsUI>(true);
             
-            // Lägg till dessa komponenter till WeaponsUI_-listan
+            // Lï¿½gg till dessa komponenter till WeaponsUI_-listan
             WeaponsUI_.AddRange(weaponsUIComponents);
             foreach (WeaponsUI weaponsUI in WeaponsUI_)
             {
@@ -63,7 +63,7 @@ public class WeaponSwitcher : MonoBehaviour
 
     void UpdateWeaponUI()
     {
-        // Hämta WeaponUICanvas-objektet
+        // Hï¿½mta WeaponUICanvas-objektet
         WeaponUICanvas weaponUICanvas = GameObject.FindObjectOfType<WeaponUICanvas>();
 
         if (weaponUICanvas == null)
@@ -72,20 +72,20 @@ public class WeaponSwitcher : MonoBehaviour
             return;
         }
 
-        // Töm UI-bilderna
+        // Tï¿½m UI-bilderna
         foreach (var image in weaponUICanvas.images)
         {
            // image.enabled = false;
         }
 
-        // Uppdatera UI-bilder baserat på vapnens ordning
+        // Uppdatera UI-bilder baserat pï¿½ vapnens ordning
         for (int i = 0; i < WeaponsUI_.Count; i++)
         {
             WeaponsUI wp = WeaponsUI_[i];
 
             if (wp.WeaponImg != null && i < weaponUICanvas.images.Count)
             {
-                // Aktivera och uppdatera UI-bilden för vapnet
+                // Aktivera och uppdatera UI-bilden fï¿½r vapnet
                 weaponUICanvas.img.Add(wp);
                 weaponUICanvas.images[i].enabled = true;
                 weaponUICanvas.images[i].sprite = wp.WeaponImg;
@@ -159,11 +159,20 @@ public class WeaponSwitcher : MonoBehaviour
     }
 
 
-    private void DeactivateWeapons()
+    public void DeactivateWeapons()
     {
         foreach (Transform weapon in Weapons)
         {
             weapon.gameObject.SetActive(false);
+        }
+    }
+
+
+    public void ActivateWeapons()
+    {
+        foreach (Transform weapon in Weapons)
+        {
+            WeaponSwitch();
         }
     }
 

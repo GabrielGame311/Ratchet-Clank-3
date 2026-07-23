@@ -49,7 +49,8 @@ public class PlayerShip : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        startshoots = shooter;
+        //startshoots = shooter;
+        startshoot = ShootTime;
         Cursor.lockState = CursorLockMode.Locked;
         sound.GetComponent<AudioSource>();
         playerHolder = GameObject.FindGameObjectWithTag("Playerholder");
@@ -62,7 +63,7 @@ public class PlayerShip : MonoBehaviour
        // player.SetActive(false);
         playership_ = GetComponent<PlayerShip>();
         MaxHealth = CurrentHealth;
-        startshoot = ShootTime;
+        
         cn = GetComponentInChildren<CinemachineVirtualCamera>();
 
        
@@ -116,14 +117,14 @@ public class PlayerShip : MonoBehaviour
 
                 if(isshooting == true)
                 {
-                    shooter -= Time.deltaTime;
+                    ShootTime -= Time.deltaTime;
 
 
-                    if(shooter < 0)
+                    if(ShootTime < 0)
                     {
 
                         isshooting = false;
-                        startshoots = shooter;
+                        startshoots = ShootTime;
                     }
 
                 }

@@ -54,6 +54,14 @@ public class ParticleDamage : MonoBehaviour
             Destroy(gameObject);
 
         }
+        if (other.tag == "Ranger")
+        {
+            
+
+            other.GetComponent<RangerHealth>().TakeDamage(Damage);
+            Destroy(gameObject);
+
+        }
         
 
     }
@@ -77,6 +85,14 @@ public class ParticleDamage : MonoBehaviour
             
 
             collision.collider.GetComponent<RangerCover>().TakeDamage(Damage);
+            Destroy(gameObject);
+
+        }
+        if (collision.collider.tag == "Ranger")
+        {
+            
+
+            collision.collider.GetComponent<RangerHealth>().TakeDamage(Damage);
             Destroy(gameObject);
 
         }

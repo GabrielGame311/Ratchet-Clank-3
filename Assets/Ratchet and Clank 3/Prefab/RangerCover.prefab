@@ -194,6 +194,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 9ab5a8db00066a3459be2827c9ca1270, type: 3}
       insertIndex: -1
       addedObject: {fileID: 2480280218887399047}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 9ab5a8db00066a3459be2827c9ca1270, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1975566223035412449}
     - targetCorrespondingSourceObject: {fileID: -8808878123899235148, guid: 9ab5a8db00066a3459be2827c9ca1270, type: 3}
       insertIndex: -1
       addedObject: {fileID: 7774121722035060312}
@@ -253,7 +256,7 @@ MonoBehaviour:
     m_Bits: 262144
   topMesh: {fileID: 7077023229760888246}
   breakParticlePrefab: {fileID: 3420559006360750875, guid: 0decd01689998af49b489355329668b1, type: 3}
-  explosionParticlePrefab: {fileID: 0}
+  explosionParticlePrefab: {fileID: 3420559006360750875, guid: 0decd01689998af49b489355329668b1, type: 3}
   boltPrefab: {fileID: 7525093284224587269, guid: f9d9500f9aa23944f8157cf4325f0169, type: 3}
   boltsPerPiece: 3
   boltScatterForce: 12
@@ -382,6 +385,33 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!54 &1975566223035412449
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 285127618034737213}
+  serializedVersion: 5
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 126
+  m_CollisionDetection: 0
 --- !u!4 &630269349439830663 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 9ab5a8db00066a3459be2827c9ca1270, type: 3}
@@ -850,6 +880,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 9ab5a8db00066a3459be2827c9ca1270, type: 3}
       insertIndex: -1
       addedObject: {fileID: 6369445125593127549}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 9ab5a8db00066a3459be2827c9ca1270, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2174597393861357418}
     - targetCorrespondingSourceObject: {fileID: -8808878123899235148, guid: 9ab5a8db00066a3459be2827c9ca1270, type: 3}
       insertIndex: -1
       addedObject: {fileID: 3475435493661561755}
@@ -1216,7 +1249,7 @@ MonoBehaviour:
     m_Bits: 262144
   topMesh: {fileID: 938540415026010133}
   breakParticlePrefab: {fileID: 3420559006360750875, guid: 0decd01689998af49b489355329668b1, type: 3}
-  explosionParticlePrefab: {fileID: 0}
+  explosionParticlePrefab: {fileID: 3420559006360750875, guid: 0decd01689998af49b489355329668b1, type: 3}
   boltPrefab: {fileID: 7525093284224587269, guid: f9d9500f9aa23944f8157cf4325f0169, type: 3}
   boltsPerPiece: 3
   boltScatterForce: 12
@@ -1345,3 +1378,30 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!54 &2174597393861357418
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7837394369076389278}
+  serializedVersion: 5
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 126
+  m_CollisionDetection: 0

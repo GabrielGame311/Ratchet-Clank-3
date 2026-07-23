@@ -63781,13 +63781,22 @@ MonoBehaviour:
   EnemiesCount: 0
   NumberMusic: 8
   IS: 0
-  EnemiesList: []
+  EnemiesList:
+  - {fileID: 145567507}
+  - {fileID: 978247694}
+  - {fileID: 900949807}
+  - {fileID: 1161338299}
+  - {fileID: 694083060}
+  - {fileID: 1844313508}
+  - {fileID: 145952080}
+  - {fileID: 1706384060}
   SetactiveEnemies: 1
   Mission: 1
   IsWin: 0
   LoadScene: Thyrra_Mission
   SetactivePlayer: 1
   isWaitingForNextWave: 0
+  ISEnemiesAdd: 0
 --- !u!114 &568196191
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -88137,6 +88146,7 @@ MonoBehaviour:
   LoadScene: Thyrra_Mission
   SetactivePlayer: 0
   isWaitingForNextWave: 0
+  ISEnemiesAdd: 0
 --- !u!64 &1020015860
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -102480,6 +102490,7 @@ MonoBehaviour:
   LoadScene: Thyrra_Mission
   SetactivePlayer: 1
   isWaitingForNextWave: 0
+  ISEnemiesAdd: 0
 --- !u!64 &1343671364
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -132820,6 +132831,7 @@ MonoBehaviour:
   LoadScene: Thyrra_Mission
   SetactivePlayer: 0
   isWaitingForNextWave: 0
+  ISEnemiesAdd: 0
 --- !u!114 &1885034209
 MonoBehaviour:
   m_ObjectHideFlags: 0

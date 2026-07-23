@@ -525,7 +525,7 @@ AnimatorStateTransition:
   m_Name: 
   m_Conditions:
   - m_ConditionMode: 1
-    m_ConditionEvent: Car
+    m_ConditionEvent: isDriving
     m_EventTreshold: 0
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: -779877068850685623}
@@ -1946,7 +1946,7 @@ AnimatorStateTransition:
   m_Name: 
   m_Conditions:
   - m_ConditionMode: 2
-    m_ConditionEvent: Car
+    m_ConditionEvent: isDriving
     m_EventTreshold: 0
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: 6391073836054123046}
@@ -2159,7 +2159,7 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: 7400000, guid: f365f00b0ec6b3042bebe7bd244897a5, type: 2}
+  m_Motion: {fileID: 7400000, guid: fb0258eb98d91ec4381339ab237ddc5a, type: 2}
   m_Tag: 
   m_SpeedParameter: 
   m_MirrorParameter: 
@@ -2454,7 +2454,7 @@ AnimatorController:
     m_DefaultInt: 0
     m_DefaultBool: 0
     m_Controller: {fileID: 9100000}
-  - m_Name: Car
+  - m_Name: isDriving
     m_Type: 4
     m_DefaultFloat: 0
     m_DefaultInt: 0
@@ -2791,7 +2791,7 @@ AnimatorStateMachine:
     m_Position: {x: 730, y: 230, z: 0}
   - serializedVersion: 1
     m_State: {fileID: -779877068850685623}
-    m_Position: {x: 970, y: 600, z: 0}
+    m_Position: {x: 810, y: 700, z: 0}
   - serializedVersion: 1
     m_State: {fileID: 1872221721170033294}
     m_Position: {x: 750, y: -70, z: 0}
@@ -2872,7 +2872,7 @@ AnimatorStateMachine:
     m_Position: {x: 220, y: 1300, z: 0}
   - serializedVersion: 1
     m_State: {fileID: 833058064663020581}
-    m_Position: {x: 190, y: 410, z: 0}
+    m_Position: {x: 210, y: 330, z: 0}
   m_ChildStateMachines: []
   m_AnyStateTransitions: []
   m_EntryTransitions: []
@@ -3302,7 +3302,7 @@ AnimatorStateTransition:
   m_Name: 
   m_Conditions:
   - m_ConditionMode: 1
-    m_ConditionEvent: Car
+    m_ConditionEvent: isDriving
     m_EventTreshold: 0
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: -779877068850685623}
@@ -4607,7 +4607,7 @@ AnimatorStateTransition:
   m_Name: 
   m_Conditions:
   - m_ConditionMode: 1
-    m_ConditionEvent: Car
+    m_ConditionEvent: isDriving
     m_EventTreshold: 0
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: -779877068850685623}

@@ -95,6 +95,7 @@ public class RangerCover : MonoBehaviour
             isDestroyed = true;
             if (destroySound != null) audioSource.PlayOneShot(destroySound);
             DestroyCoverRatchetStyle(hitPoint);
+            Destroy(gameObject);
             return;
         }
 

@@ -17,6 +17,9 @@ public class RangerHealth : MonoBehaviour
     public Animator animeFoot;
     public MonoBehaviour[] ScriptsDisabled;
     bool YesSir = false;
+
+    public bool IsDamageable = false;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -32,10 +35,10 @@ public class RangerHealth : MonoBehaviour
 
         Vector3 rayDirection = Quaternion.AngleAxis(verticalAngle, transform.right) * transform.forward;
 
-        // Vi kastar strålen med den nya riktningen (rayDirection)
+        // Vi kastar strï¿½len med den nya riktningen (rayDirection)
         if (Physics.Raycast(transform.position, rayDirection, out hit, RangerDistance))
         {
-            // Flyttade Debug.DrawRay hit så den använder den faktiska riktningen
+            // Flyttade Debug.DrawRay hit sï¿½ den anvï¿½nder den faktiska riktningen
             Debug.DrawRay(transform.position, rayDirection * RangerDistance, Color.red);
 
 
@@ -62,7 +65,7 @@ public class RangerHealth : MonoBehaviour
         }
         else
         {
-            // Tips: Rita strålen som grön när den INTE träffar något, så ser du i Scene-vyn var den pekar!
+            // Tips: Rita strï¿½len som grï¿½n nï¿½r den INTE trï¿½ffar nï¿½got, sï¿½ ser du i Scene-vyn var den pekar!
             Debug.DrawRay(transform.position, rayDirection * RangerDistance, Color.green);
         }
 
@@ -110,15 +113,22 @@ public class RangerHealth : MonoBehaviour
 
     public void TakeDamage(float damage)
     {
-
-        Health -= damage;
-
-        if(Health < 0)
+        if(IsDamageable)
         {
-            Health = 0;
-            Die();
+                Health -= damage;
 
+            if(Health < 0)
+            {
+                Health = 0;
+                Die();
+
+            }
         }
+        
+            
+        
+
+       
 
 
 

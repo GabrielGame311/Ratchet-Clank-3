@@ -258,9 +258,12 @@ MonoBehaviour:
   Controller: {fileID: 6443301131787814089}
   raycastYOffset: 0.2
   splineContainer: {fileID: 0}
+  splineWaitTimer: 0
   MAX_SPLINE_WAIT_TIME: 10
   IsFreefall: 0
+  ContinueWalk: 0
   targetSplineContainer: {fileID: 0}
+  splineIntervalPauseTimer: 0
   targetSplines: []
   currentTargetSplineIndex: 0
   isWaitingForSignal: 1
@@ -417,7 +420,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9eba7e523450386469f97cf5149401f4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Health: 10
+  Health: 100
   MaxHealth: 0
   CrackedRanger: {fileID: 7572659952356967133, guid: f77846b9f7abe0d429265dea8ca59b95, type: 3}
   verticalAngle: 0
@@ -428,6 +431,7 @@ MonoBehaviour:
   animeFoot: {fileID: 1486857019968374390}
   ScriptsDisabled:
   - {fileID: 1486857019903000984}
+  IsDamageable: 0
 --- !u!65 &32089201307787789
 BoxCollider:
   m_ObjectHideFlags: 0
