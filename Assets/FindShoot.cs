@@ -12,6 +12,9 @@ public class FindShoot : MonoBehaviour
     public bool IsPatrol = true;
     Quaternion rot;
 
+    public bool ISRun = false;
+
+
     public GalacticRangerGame RangerGame;
 
     // Start is called before the first frame update
@@ -25,6 +28,18 @@ public class FindShoot : MonoBehaviour
     {
        
         transform.position = head.transform.position;
+        Vector3 currentEuler = transform.localEulerAngles;
+
+        if (ISRun)
+        {
+            // Återställ till rak position (0 grader)
+            transform.localEulerAngles = new Vector3(currentEuler.x, currentEuler.y, 30f);
+        }
+        else
+        {
+            // Vinkla 45 grader neråt
+            transform.localEulerAngles = new Vector3(currentEuler.x, currentEuler.y, 0);
+        }
 
         if(IsPatrol)
         {

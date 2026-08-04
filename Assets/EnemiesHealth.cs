@@ -59,6 +59,11 @@ public class EnemiesHealth : MonoBehaviour, IInfectable
     [Tooltip("Vilket Layer som räknas som mark/broar så att vi inte kliver på tomma intet")]
     public LayerMask groundLayer;
 
+
+    public int IndexMission;
+    public bool IsMissionEnemy = false;
+
+
     private void Start()
     {
         MaterialRed = GetComponentsInChildren<Renderer>();
@@ -115,6 +120,10 @@ public class EnemiesHealth : MonoBehaviour, IInfectable
 
     private void Update()
     {
+
+       
+
+
         // Hantera färgblinkning vid skada
         if (damagish)
         {
@@ -366,6 +375,19 @@ public class EnemiesHealth : MonoBehaviour, IInfectable
             }
         }
 
+        if(IsMissionEnemy)
+        {
+
+            foreach(EnemiesHealth en in Object.FindObjectsOfType<EnemiesHealth>())
+            {
+                MissionSound.MissionSound_.Mission4(IndexMission);
+                en.IsMissionEnemy = false;
+            }
+
+            
+
+
+        }
         if (Bolt != null)
         {
             Instantiate(Bolt, transform.position, transform.rotation);

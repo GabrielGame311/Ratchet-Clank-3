@@ -13,19 +13,18 @@ public class Spawn : MonoBehaviour
     void Start()
     {
 
-        Player = GameObject.FindWithTag("Player");
+           Player = GameObject.FindWithTag("Player");
 
-        GameObject.FindObjectOfType<CharacterController>().enabled = false;
-        Player.transform.position = transform.position;
-        GameObject.FindObjectOfType<CharacterController>().enabled = true;
+            Player.GetComponent<CharacterController>().enabled = false;
+            Player.transform.position = transform.position;
+            Player.GetComponent<CharacterController>().enabled = true;
     }
+
+
+
 
     // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
+    
     public void ship()
     {
         anime.SetTrigger("Ship");

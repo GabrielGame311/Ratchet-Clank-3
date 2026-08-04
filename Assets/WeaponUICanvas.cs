@@ -2,109 +2,96 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using System.Linq;
 
 public class WeaponUICanvas : MonoBehaviour
 {
+    public List<Image> images = new List<Image>();
+    public List<WeaponsUI> img = new List<WeaponsUI>();
 
+    [Header("Referens till Spelarens Vapen-objekt")]
+    [Tooltip("Dra in 'Weapons' eller 'Hand' från Hierarchy här!")]
+    public Transform weaponHolder;
 
-
-    public List<Image> images;
-    public List<WeaponsUI> img;
     public int WeaponSelect = 0;
-    public int weapon;
     public static WeaponUICanvas weaponcanvas_;
-    
+    private int lastSelectedWeapon = -1;
 
-    // Start is called before the first frame update
+    void Awake()
+    {
+        weaponcanvas_ = this;
+    }
+
     void Start()
     {
-        //WeaponsUI[] img = FindObjectsOfType<WeaponsUI>();
-        // img.Add(GameObject.FindObjectOfType<WeaponsUI>());
-
-        weaponcanvas_ = GetComponent<WeaponUICanvas>();
-       
-
-
+        SetupWeaponWheel();
     }
 
-  
+    public void SetupWeaponWheel()
+{
+    img.Clear();
 
+    // 1. Dölj alla platser i hjulet från början
+    for (int i = 0; i < images.Count; i++)
+    {
+        if (images[i] != null) images[i].enabled = false;
+    }
 
-    // Update is called once per frame
+    // Om weaponHolder inte är tilldelad, försök hitta spelarens WeaponSwitcher
+    if (weaponHolder == null && WeaponSwitcher.WeaponSwitcher_ != null)
+    {
+        weaponHolder = WeaponSwitcher.WeaponSwitcher_.transform;
+    }
+
+    if (weaponHolder == null)
+    {
+        Debug.LogError("[WeaponUICanvas] Du måste dra in ditt 'Weapons'-objekt till 'Weapon Holder' i Inspector!");
+        return;
+    }
+
+    // 2. Hämta BARA vapen som ligger under spelaren (även inaktiva)
+    WeaponsUI[] playerWeapons = weaponHolder.GetComponentsInChildren<WeaponsUI>(true);
+
+    // 3. Lägg till vapnen i hjulet och koppla klick-funktion automatiskt
+    foreach (WeaponsUI ui in playerWeapons)
+    {
+        img.Add(ui);
+
+        if (ui.WeaponImg != null && ui.WeaponID >= 0 && ui.WeaponID < images.Count)
+        {
+            int targetID = ui.WeaponID; // Spara ID för knappen
+
+            images[targetID].sprite = ui.WeaponImg;
+            images[targetID].enabled = true;
+
+            // Gör bilden klickbar automatiskt
+            Button btn = images[targetID].GetComponent<Button>();
+            if (btn == null)
+            {
+                btn = images[targetID].gameObject.AddComponent<Button>();
+            }
+
+            // Koppla klicket till SwitchWeapon
+            btn.onClick.RemoveAllListeners();
+            btn.onClick.AddListener(() => SwitchWeapon(targetID));
+        }
+    }
+}
+
     void Update()
     {
-       
-       
-      
-
-
-        if (WeaponSelect == 0)
+        if (WeaponSelect >= 0 && WeaponSelect <= 7)
         {
-            WeaponSwitcher.WeaponSwitcher_.WeaponSelecter = 0;
-            WeaponSwitcher.WeaponSwitcher_.WeaponSwitch();
+            if (WeaponSwitcher.WeaponSwitcher_ != null && WeaponSelect != lastSelectedWeapon)
+            {
+                WeaponSwitcher.WeaponSwitcher_.WeaponSelecter = WeaponSelect;
+                WeaponSwitcher.WeaponSwitcher_.WeaponSwitch();
+                lastSelectedWeapon = WeaponSelect;
+            }
         }
-        if (WeaponSelect == 1)
-        {
-            WeaponSwitcher.WeaponSwitcher_.WeaponSelecter = 1;
-            WeaponSwitcher.WeaponSwitcher_.WeaponSwitch();
-        }
-        if (WeaponSelect == 2)
-        {
-            WeaponSwitcher.WeaponSwitcher_.WeaponSelecter = 2;
-            WeaponSwitcher.WeaponSwitcher_.WeaponSwitch();
-        }
-        if (WeaponSelect == 3)
-        {
-            WeaponSwitcher.WeaponSwitcher_.WeaponSelecter = 3;
-            WeaponSwitcher.WeaponSwitcher_.WeaponSwitch();
-        }
-        if (WeaponSelect == 4)
-        {
-            WeaponSwitcher.WeaponSwitcher_.WeaponSelecter = 4;
-            WeaponSwitcher.WeaponSwitcher_.WeaponSwitch();
-        }
-        if (WeaponSelect == 5)
-        {
-            WeaponSwitcher.WeaponSwitcher_.WeaponSelecter = 5;
-            WeaponSwitcher.WeaponSwitcher_.WeaponSwitch();
-        }
-        if (WeaponSelect == 6)
-        {
-            WeaponSwitcher.WeaponSwitcher_.WeaponSelecter = 6;
-            WeaponSwitcher.WeaponSwitcher_.WeaponSwitch();
-        }
-        if (WeaponSelect == 7)
-        {
-            WeaponSwitcher.WeaponSwitcher_.WeaponSelecter = 7;
-            WeaponSwitcher.WeaponSwitcher_.WeaponSwitch();
-
-        }
-
-
-       
-
-
     }
-
-    public void UpdateWeaponImage(Sprite newSprite, int weaponID)
-    {
-       
-        
-        
-        // Update the weapon image for the specified weapon ID.
-        images[weaponID].sprite = newSprite;
-    }
-
 
     public void SwitchWeapon(int wp)
     {
         WeaponSelect = wp;
-
-
-
     }
-
-
 }
-

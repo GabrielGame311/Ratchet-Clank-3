@@ -4646,7 +4646,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7755d986a201a3847b6f60e9a4f1c5ec, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Enemies: []
   EnemiesCount: 0
   NumberMusic: 5
   IS: 0
@@ -4656,6 +4655,10 @@ MonoBehaviour:
   IsWin: 0
   LoadScene: RangerShipCity
   SetactivePlayer: 0
+  isWaitingForNextWave: 0
+  ISEnemiesAdd: 0
+  enemyParent: {fileID: 0}
+  ScrewMission_: []
 --- !u!114 &690976089
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6147,6 +6150,21 @@ MonoBehaviour:
   ChangeColorTime: 0.2
   damagish: 0
   ExplodeTime: 0
+  DamageHitRange: 0
+  InfectorEffect: {fileID: 0}
+  IsInfector: 0
+  PlayerDetect:
+    serializedVersion: 2
+    m_Bits: 0
+  currentTarget: {fileID: 0}
+  baseInfectionDuration: 15
+  durationIncreasePerLevel: 5
+  edgeCheckDistance: 0.6
+  groundLayer:
+    serializedVersion: 2
+    m_Bits: 0
+  IndexMission: 0
+  IsMissionEnemy: 0
 --- !u!114 &932609917
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6159,20 +6177,26 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4f8cad86b5ea3e643b8677b49c51c038, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  endPoint: {fileID: 107096078}
-  startPoint: {fileID: 1933454583}
+  dropPoint: {fileID: 0}
+  exitWayPoint: {fileID: 0}
   finalTurnDirection: 0
   finalExitDistance: 50
   accelerationRate: 15
   maxExitSpeed: 45
-  moveSpeed: 20
+  entrySpeed: 35
   turnSpeed: 3
   bankingAmount: 35
+  brakeOvershootAmount: 4
+  brakeSettleSpeed: 3
   enemyPrefabs:
   - {fileID: 5140501480939856235, guid: 0fb82c160e41a9743996b13d91e77083, type: 3}
   - {fileID: 5140501480939856235, guid: 0fb82c160e41a9743996b13d91e77083, type: 3}
   spawnPoint: {fileID: 856157739}
   timeBetweenEnemies: 0.8
+  enemyLaunchForce: 14
+  scaleUpDuration: 0.5
+  startScaleFactor: 0.15
+  thrusterParticles: []
 --- !u!64 &933917029
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -6232,6 +6256,21 @@ MonoBehaviour:
   ChangeColorTime: 0.2
   damagish: 0
   ExplodeTime: 0
+  DamageHitRange: 0
+  InfectorEffect: {fileID: 0}
+  IsInfector: 0
+  PlayerDetect:
+    serializedVersion: 2
+    m_Bits: 0
+  currentTarget: {fileID: 0}
+  baseInfectionDuration: 15
+  durationIncreasePerLevel: 5
+  edgeCheckDistance: 0.6
+  groundLayer:
+    serializedVersion: 2
+    m_Bits: 0
+  IndexMission: 0
+  IsMissionEnemy: 0
 --- !u!64 &940979354
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -16889,7 +16928,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7755d986a201a3847b6f60e9a4f1c5ec, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Enemies: []
   EnemiesCount: 0
   NumberMusic: 6
   IS: 0
@@ -16904,6 +16942,10 @@ MonoBehaviour:
   IsWin: 0
   LoadScene: RangerShipCity
   SetactivePlayer: 0
+  isWaitingForNextWave: 0
+  ISEnemiesAdd: 0
+  enemyParent: {fileID: 0}
+  ScrewMission_: []
 --- !u!114 &1755680365
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -17585,6 +17627,21 @@ MonoBehaviour:
   ChangeColorTime: 0.2
   damagish: 0
   ExplodeTime: 0
+  DamageHitRange: 0
+  InfectorEffect: {fileID: 0}
+  IsInfector: 0
+  PlayerDetect:
+    serializedVersion: 2
+    m_Bits: 0
+  currentTarget: {fileID: 0}
+  baseInfectionDuration: 15
+  durationIncreasePerLevel: 5
+  edgeCheckDistance: 0.6
+  groundLayer:
+    serializedVersion: 2
+    m_Bits: 0
+  IndexMission: 0
+  IsMissionEnemy: 0
 --- !u!1001 &1824766983
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -18900,7 +18957,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7755d986a201a3847b6f60e9a4f1c5ec, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Enemies: []
   EnemiesCount: 0
   NumberMusic: 6
   IS: 0
@@ -18912,6 +18968,10 @@ MonoBehaviour:
   IsWin: 0
   LoadScene: RangerShipCity
   SetactivePlayer: 0
+  isWaitingForNextWave: 0
+  ISEnemiesAdd: 0
+  enemyParent: {fileID: 0}
+  ScrewMission_: []
 --- !u!114 &1941226892
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -20204,19 +20264,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5543905689527651199, guid: a7882c718d905024ea97f4ac8bb3d061, type: 3}
       propertyPath: m_LocalRotation.w
-      value: -0.29171687
+      value: -0.3047903
       objectReference: {fileID: 0}
     - target: {fileID: 5543905689527651199, guid: a7882c718d905024ea97f4ac8bb3d061, type: 3}
       propertyPath: m_LocalRotation.x
-      value: -0.006247947
+      value: -0.083707035
       objectReference: {fileID: 0}
     - target: {fileID: 5543905689527651199, guid: a7882c718d905024ea97f4ac8bb3d061, type: 3}
       propertyPath: m_LocalRotation.y
-      value: 0.956265
+      value: 0.914859
       objectReference: {fileID: 0}
     - target: {fileID: 5543905689527651199, guid: a7882c718d905024ea97f4ac8bb3d061, type: 3}
       propertyPath: m_LocalRotation.z
-      value: -0.020481175
+      value: -0.25125518
       objectReference: {fileID: 0}
     - target: {fileID: 5543905689837884226, guid: a7882c718d905024ea97f4ac8bb3d061, type: 3}
       propertyPath: m_XAxis.Value
@@ -20228,15 +20288,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5543905689837884227, guid: a7882c718d905024ea97f4ac8bb3d061, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 32.229343
+      value: 32.1841
       objectReference: {fileID: 0}
     - target: {fileID: 5543905689837884227, guid: a7882c718d905024ea97f4ac8bb3d061, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 9.475105
+      value: 9.57504
       objectReference: {fileID: 0}
     - target: {fileID: 5543905689837884227, guid: a7882c718d905024ea97f4ac8bb3d061, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -9.354397
+      value: -9.341242
       objectReference: {fileID: 0}
     - target: {fileID: 5543905690259868908, guid: a7882c718d905024ea97f4ac8bb3d061, type: 3}
       propertyPath: m_RootOrder
@@ -20294,6 +20354,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: PlayerHolder
       objectReference: {fileID: 0}
+    - target: {fileID: 5543905690259868909, guid: a7882c718d905024ea97f4ac8bb3d061, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5543905690358360533, guid: a7882c718d905024ea97f4ac8bb3d061, type: 3}
       propertyPath: m_FollowOffset.y
       value: 2.246965
@@ -20316,19 +20380,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5543905690698983591, guid: a7882c718d905024ea97f4ac8bb3d061, type: 3}
       propertyPath: m_LocalRotation.w
-      value: -0.29175216
+      value: -0.3047903
       objectReference: {fileID: 0}
     - target: {fileID: 5543905690698983591, guid: a7882c718d905024ea97f4ac8bb3d061, type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0.0042973887
+      value: -0.083707035
       objectReference: {fileID: 0}
     - target: {fileID: 5543905690698983591, guid: a7882c718d905024ea97f4ac8bb3d061, type: 3}
       propertyPath: m_LocalRotation.y
-      value: 0.9563806
+      value: 0.914859
       objectReference: {fileID: 0}
     - target: {fileID: 5543905690698983591, guid: a7882c718d905024ea97f4ac8bb3d061, type: 3}
       propertyPath: m_LocalRotation.z
-      value: 0.014087052
+      value: -0.25125518
       objectReference: {fileID: 0}
     - target: {fileID: 5543905690726935174, guid: a7882c718d905024ea97f4ac8bb3d061, type: 3}
       propertyPath: m_FollowOffset.y
@@ -20368,19 +20432,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5543905690906127840, guid: a7882c718d905024ea97f4ac8bb3d061, type: 3}
       propertyPath: m_LocalRotation.w
-      value: -0.2917822
+      value: -0.3047903
       objectReference: {fileID: 0}
     - target: {fileID: 5543905690906127840, guid: a7882c718d905024ea97f4ac8bb3d061, type: 3}
       propertyPath: m_LocalRotation.x
-      value: -0.00096865144
+      value: -0.083707035
       objectReference: {fileID: 0}
     - target: {fileID: 5543905690906127840, guid: a7882c718d905024ea97f4ac8bb3d061, type: 3}
       propertyPath: m_LocalRotation.y
-      value: 0.9564791
+      value: 0.914859
       objectReference: {fileID: 0}
     - target: {fileID: 5543905690906127840, guid: a7882c718d905024ea97f4ac8bb3d061, type: 3}
       propertyPath: m_LocalRotation.z
-      value: -0.0031753352
+      value: -0.25125518
       objectReference: {fileID: 0}
     - target: {fileID: 5543905691045778987, guid: a7882c718d905024ea97f4ac8bb3d061, type: 3}
       propertyPath: m_FollowOffset.y
@@ -20392,31 +20456,31 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6826329527935379789, guid: a7882c718d905024ea97f4ac8bb3d061, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 32.229343
+      value: 1.8958826
       objectReference: {fileID: 0}
     - target: {fileID: 6826329527935379789, guid: a7882c718d905024ea97f4ac8bb3d061, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 9.475105
+      value: 6.4101458
       objectReference: {fileID: 0}
     - target: {fileID: 6826329527935379789, guid: a7882c718d905024ea97f4ac8bb3d061, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -9.354397
+      value: -0.65849537
       objectReference: {fileID: 0}
     - target: {fileID: 6826329527935379789, guid: a7882c718d905024ea97f4ac8bb3d061, type: 3}
       propertyPath: m_LocalRotation.w
-      value: -0.79984593
+      value: -0.785797
       objectReference: {fileID: 0}
     - target: {fileID: 6826329527935379789, guid: a7882c718d905024ea97f4ac8bb3d061, type: 3}
       propertyPath: m_LocalRotation.x
-      value: -0.0026548537
+      value: -0.21580985
       objectReference: {fileID: 0}
     - target: {fileID: 6826329527935379789, guid: a7882c718d905024ea97f4ac8bb3d061, type: 3}
       propertyPath: m_LocalRotation.y
-      value: 0.6001963
+      value: 0.558916
       objectReference: {fileID: 0}
     - target: {fileID: 6826329527935379789, guid: a7882c718d905024ea97f4ac8bb3d061, type: 3}
       propertyPath: m_LocalRotation.z
-      value: -0.0019920552
+      value: -0.15349965
       objectReference: {fileID: 0}
     - target: {fileID: 8786461966720535811, guid: a7882c718d905024ea97f4ac8bb3d061, type: 3}
       propertyPath: SceneLoad
@@ -20498,6 +20562,8 @@ MonoBehaviour:
   helicopterDistance: 5
   helicopterFallSpeed: 5
   isHelicoptering: 0
+  Armor: {fileID: 0}
+  modelTransform: {fileID: 0}
 --- !u!64 &2136033245
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -20837,20 +20903,26 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4f8cad86b5ea3e643b8677b49c51c038, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  endPoint: {fileID: 1527199192}
-  startPoint: {fileID: 327459508}
+  dropPoint: {fileID: 0}
+  exitWayPoint: {fileID: 0}
   finalTurnDirection: 1
   finalExitDistance: 50
   accelerationRate: 15
   maxExitSpeed: 45
-  moveSpeed: 20
+  entrySpeed: 35
   turnSpeed: 3
   bankingAmount: 35
+  brakeOvershootAmount: 4
+  brakeSettleSpeed: 3
   enemyPrefabs:
   - {fileID: 5140501480939856235, guid: 0fb82c160e41a9743996b13d91e77083, type: 3}
   - {fileID: 5140501480939856235, guid: 0fb82c160e41a9743996b13d91e77083, type: 3}
   spawnPoint: {fileID: 1298009002}
   timeBetweenEnemies: 0.8
+  enemyLaunchForce: 14
+  scaleUpDuration: 0.5
+  startScaleFactor: 0.15
+  thrusterParticles: []
 --- !u!4 &2751663084788799167
 Transform:
   m_ObjectHideFlags: 0
@@ -20899,6 +20971,21 @@ MonoBehaviour:
   ChangeColorTime: 0.2
   damagish: 0
   ExplodeTime: 0
+  DamageHitRange: 0
+  InfectorEffect: {fileID: 0}
+  IsInfector: 0
+  PlayerDetect:
+    serializedVersion: 2
+    m_Bits: 0
+  currentTarget: {fileID: 0}
+  baseInfectionDuration: 15
+  durationIncreasePerLevel: 5
+  edgeCheckDistance: 0.6
+  groundLayer:
+    serializedVersion: 2
+    m_Bits: 0
+  IndexMission: 0
+  IsMissionEnemy: 0
 --- !u!4 &2751663084889659331
 Transform:
   m_ObjectHideFlags: 0
@@ -22018,18 +22105,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4f8cad86b5ea3e643b8677b49c51c038, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  endPoint: {fileID: 0}
-  startPoint: {fileID: 0}
+  dropPoint: {fileID: 0}
+  exitWayPoint: {fileID: 0}
   finalTurnDirection: 1
   finalExitDistance: 150
   accelerationRate: 15
   maxExitSpeed: 45
-  moveSpeed: 20
+  entrySpeed: 35
   turnSpeed: 3
   bankingAmount: 35
+  brakeOvershootAmount: 4
+  brakeSettleSpeed: 3
   enemyPrefabs: []
   spawnPoint: {fileID: 0}
   timeBetweenEnemies: 0.8
+  enemyLaunchForce: 14
+  scaleUpDuration: 0.5
+  startScaleFactor: 0.15
+  thrusterParticles: []
 --- !u!4 &5746806017542219343
 Transform:
   m_ObjectHideFlags: 0
@@ -22082,6 +22175,21 @@ MonoBehaviour:
   ChangeColorTime: 0.2
   damagish: 0
   ExplodeTime: 0
+  DamageHitRange: 0
+  InfectorEffect: {fileID: 0}
+  IsInfector: 0
+  PlayerDetect:
+    serializedVersion: 2
+    m_Bits: 0
+  currentTarget: {fileID: 0}
+  baseInfectionDuration: 15
+  durationIncreasePerLevel: 5
+  edgeCheckDistance: 0.6
+  groundLayer:
+    serializedVersion: 2
+    m_Bits: 0
+  IndexMission: 0
+  IsMissionEnemy: 0
 --- !u!4 &5746806017550759861
 Transform:
   m_ObjectHideFlags: 0
@@ -22262,18 +22370,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4f8cad86b5ea3e643b8677b49c51c038, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  endPoint: {fileID: 0}
-  startPoint: {fileID: 0}
+  dropPoint: {fileID: 0}
+  exitWayPoint: {fileID: 0}
   finalTurnDirection: 1
   finalExitDistance: 150
   accelerationRate: 15
   maxExitSpeed: 45
-  moveSpeed: 20
+  entrySpeed: 35
   turnSpeed: 3
   bankingAmount: 35
+  brakeOvershootAmount: 4
+  brakeSettleSpeed: 3
   enemyPrefabs: []
   spawnPoint: {fileID: 0}
   timeBetweenEnemies: 0.8
+  enemyLaunchForce: 14
+  scaleUpDuration: 0.5
+  startScaleFactor: 0.15
+  thrusterParticles: []
 --- !u!4 &5746806017566190887
 Transform:
   m_ObjectHideFlags: 0
@@ -22342,6 +22456,21 @@ MonoBehaviour:
   ChangeColorTime: 0.2
   damagish: 0
   ExplodeTime: 0
+  DamageHitRange: 0
+  InfectorEffect: {fileID: 0}
+  IsInfector: 0
+  PlayerDetect:
+    serializedVersion: 2
+    m_Bits: 0
+  currentTarget: {fileID: 0}
+  baseInfectionDuration: 15
+  durationIncreasePerLevel: 5
+  edgeCheckDistance: 0.6
+  groundLayer:
+    serializedVersion: 2
+    m_Bits: 0
+  IndexMission: 0
+  IsMissionEnemy: 0
 --- !u!4 &5746806017594451078
 Transform:
   m_ObjectHideFlags: 0
@@ -24529,18 +24658,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4f8cad86b5ea3e643b8677b49c51c038, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  endPoint: {fileID: 0}
-  startPoint: {fileID: 0}
+  dropPoint: {fileID: 0}
+  exitWayPoint: {fileID: 0}
   finalTurnDirection: 1
   finalExitDistance: 150
   accelerationRate: 15
   maxExitSpeed: 45
-  moveSpeed: 20
+  entrySpeed: 35
   turnSpeed: 3
   bankingAmount: 35
+  brakeOvershootAmount: 4
+  brakeSettleSpeed: 3
   enemyPrefabs: []
   spawnPoint: {fileID: 0}
   timeBetweenEnemies: 0.8
+  enemyLaunchForce: 14
+  scaleUpDuration: 0.5
+  startScaleFactor: 0.15
+  thrusterParticles: []
 --- !u!4 &5746806018912490499
 Transform:
   m_ObjectHideFlags: 0
@@ -24610,6 +24745,21 @@ MonoBehaviour:
   ChangeColorTime: 0.2
   damagish: 0
   ExplodeTime: 0
+  DamageHitRange: 0
+  InfectorEffect: {fileID: 0}
+  IsInfector: 0
+  PlayerDetect:
+    serializedVersion: 2
+    m_Bits: 0
+  currentTarget: {fileID: 0}
+  baseInfectionDuration: 15
+  durationIncreasePerLevel: 5
+  edgeCheckDistance: 0.6
+  groundLayer:
+    serializedVersion: 2
+    m_Bits: 0
+  IndexMission: 0
+  IsMissionEnemy: 0
 --- !u!1001 &5746806018925954583
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -224,14 +224,16 @@ MonoBehaviour:
   isMoving: 0
   enemie: {fileID: 0}
   shootPoint: {fileID: 6182868428528511838}
-  ParticlePrefab: {fileID: 4294359134417830299, guid: 8179fafddc70f944e91cbe2cdd9cb191, type: 3}
+  ParticlePrefab: {fileID: 3375718356752416505, guid: 676001abfaf17c243899b63fb102e5c8, type: 3}
   IsShooting: 0
-  ShootTime: 0.32
+  ShootTime: 3
   ContinueMove: 0
   ShootSpeed: 20
   TakeDamage: 1
   ShootDis: 40
   Crouching: 0
+  StandBeforeCrouchTime: 2
+  CrouchDuration: 3
   wallLayer:
     serializedVersion: 2
     m_Bits: 0
@@ -240,7 +242,6 @@ MonoBehaviour:
   movementSpeed: 5
   WalkSpeed: 2
   PatrolTime: 0
-  patrols: 0
   WalkPoint: []
   IstWalking: 0
   Gravity: 9
@@ -262,8 +263,11 @@ MonoBehaviour:
   MAX_SPLINE_WAIT_TIME: 10
   IsFreefall: 0
   ContinueWalk: 0
+  IsRunWithoutShootEnemie: 0
   targetSplineContainer: {fileID: 0}
   splineIntervalPauseTimer: 0
+  WaitForRun: 0
+  findShootScript: {fileID: 0}
   targetSplines: []
   currentTargetSplineIndex: 0
   isWaitingForSignal: 1
@@ -1222,6 +1226,7 @@ MonoBehaviour:
   head: {fileID: 8082594728401315589}
   headrot: {fileID: 2985540595453114385}
   IsPatrol: 1
+  ISRun: 0
   RangerGame: {fileID: 0}
 --- !u!4 &2291697295089475664 stripped
 Transform:

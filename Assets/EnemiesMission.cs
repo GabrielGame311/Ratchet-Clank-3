@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -28,12 +29,18 @@ public class EnemiesMission : MonoBehaviour
     private int activeEnemiesCount = 0;
     public bool ISEnemiesAdd = false;
     public Transform enemyParent;
+
+    public List<ScrewMission> ScrewMission_ = new List<ScrewMission>();
+
     void Start()
     {
         instance = this;
+
+        if (ScrewMission_ == null) ScrewMission_ = new List<ScrewMission>();
+        ScrewMission_.AddRange(FindObjectsOfType<ScrewMission>());
+
         player = GameObject.FindGameObjectWithTag("Player");
 
-        // Om du har satt upp fiender i listan via Editorn, aktivera/inaktivera dem h�r baserat p� din inst�llning
         if (SetactiveEnemies)
         {
             foreach (GameObject enemy in EnemiesList)
@@ -41,10 +48,18 @@ public class EnemiesMission : MonoBehaviour
                 if (enemy != null) enemy.SetActive(false);
             }
         }
-        if(ISEnemiesAdd)
+
+        if (ISEnemiesAdd)
         {
             FindAllEnemiesIncludeInactive();
             ISEnemiesAdd = false;
+        }
+
+        // MARKEN FÖR UPPDRAGSSTART:
+        // Om det finns fiender eller skruv-uppdrag vid start markerar vi att uppdraget är igång!
+        if (EnemiesList.Count > 0 || ScrewMission_.Count > 0)
+        {
+            hasProcessedEnemies = true;
         }
     }
 
@@ -55,21 +70,32 @@ public class EnemiesMission : MonoBehaviour
 
     void Update()
     {
-
-
-
-        
-
-        // 1. Om listanr helt tom frn brjan (inte instlld i Inspector), gr ingenting fr att frhindra direkt vinst
-        if (EnemiesList.Count == 0 && !hasProcessedEnemies)
+        // 1. Om uppdraget inte har startats ännu (listorna var tomma från början), förhindra vinst på Frame 1
+        if (!hasProcessedEnemies)
         {
-            return;
+            if (EnemiesList.Count > 0 || ScrewMission_.Count > 0)
+            {
+                hasProcessedEnemies = true;
+            }
+            else
+            {
+                return; // Vänta tills uppdraget får objekt
+            }
         }
 
-        // 2. Nollst�ll r�knaren f�r aktiva fiender denna frame
+        // 2. RENSA SKRUVMISSIONER (Ta bort klara/inaktiverade skruv-uppdrag)
+        for (int i = ScrewMission_.Count - 1; i >= 0; i--)
+        {
+            if (ScrewMission_[i] == null || ScrewMission_[i].isScrowed || !ScrewMission_[i].enabled)
+            {
+                ScrewMission_.RemoveAt(i);
+            }
+        }
+
+        // 3. Nollställ räknaren för aktiva fiender denna frame
         activeEnemiesCount = 0;
 
-        // 3. G� igenom listan bakl�nges f�r att rensa bort helt f�rst�rda (null) objekt
+        // 4. Gå igenom fiendelistan baklänges för att rensa bort förstörda (null) objekt
         for (int i = EnemiesList.Count - 1; i >= 0; i--)
         {
             if (EnemiesList[i] == null)
@@ -78,28 +104,27 @@ public class EnemiesMission : MonoBehaviour
             }
             else if (EnemiesList[i].activeSelf)
             {
-                // R�kna endast fiender som �r aktiva och lever i scenen just nu
                 activeEnemiesCount++;
             }
         }
 
-        // 4. V�G-LOGIK: Trigga n�sta spline n�r nuvarande aktiva v�g �r d�d (alla blivit inaktiverade/SetActive(false))
-        if (activeEnemiesCount <= 0 && !isWaitingForNextWave && EnemiesList.Count > 0)
+        // 5. VÅG-LOGIK: Trigga nästa spline när BÅDE fiender och skruvuppdrag är tomma
+        if (activeEnemiesCount <= 0 && !isWaitingForNextWave && EnemiesList.Count == 0 && ScrewMission_.Count == 0)
         {
             if (GalacticRangers.instance != null)
             {
                 GalacticRangers.instance.AdvanceToNextSpline();
-                isWaitingForNextWave = true; // Pausa signaler tills Rangers n�tt n�sta spline-slut
+                isWaitingForNextWave = true;
             }
         }
 
-        // 5. VINST-LOGIK: Trigga vinst ENDAST n�r hela listan �r helt tom (alla fiender i hela uppdraget �r Destroyed/null)
-        if (EnemiesList.Count <= 0 && !IsWin)
+        // 6. VINST-LOGIK: Trigga vinst när alla fiender OCH skruvuppdrag är borta
+        if (EnemiesList.Count == 0 && ScrewMission_.Count == 0 && !IsWin)
         {
             IsWin = true;
         }
 
-        // 6. HANTERA VINST OCH SCENBYTE
+        // 7. HANTERA VINST OCH SCENBYTE
         if (IsWin)
         {
             if (isfalse)
@@ -111,43 +136,50 @@ public class EnemiesMission : MonoBehaviour
             MissionCompleteUI.MissionComplete.gameObject.SetActive(true);
             loadsceneTime -= Time.deltaTime;
 
-            if (loadsceneTime < 0)
+            if (loadsceneTime < 0 && !GetComponent<MissionSound>().sound.isPlaying)
             {
-                
-                
-                    SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
-                
+                SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
                 loadsceneTime = 10;
             }
         }
 
-        // 7. ROCKET MISSION KONTROLLER
-        
-            MissionCompleteUI.MissionComplete.Mission = Mission;
-            EnemiesCount = EnemiesList.Count;
+        // 8. ROCKET MISSION KONTROLLER
+        MissionCompleteUI.MissionComplete.Mission = Mission;
+        EnemiesCount = EnemiesList.Count;
 
-            if (IS == false)
+        if (IS == false)
+        {
+            if (EnemiesList.Count <= 0 && ScrewMission_.Count == 0)
             {
-                if (EnemiesList.Count <= 0)
+                Bolts.Bolt.BoltCount += MissionCompleteUI.MissionComplete.Bolts[MissionCompleteUI.MissionComplete.Mission];
+                
+                MissionSound missionSound = GetComponent<MissionSound>();
+                if (missionSound != null)
                 {
-                    Bolts.Bolt.BoltCount += MissionCompleteUI.MissionComplete.Bolts[MissionCompleteUI.MissionComplete.Mission];
-                    GetComponent<MissionSound>().i = NumberMusic;
-                    GetComponent<MissionSound>().Mission4(NumberMusic);
-                    MissionCompleteUI.MissionComplete.gameObject.SetActive(true);
-                    IS = true;
+                    missionSound.i = NumberMusic;
+                    missionSound.Mission4(NumberMusic);
                 }
+
+                MissionCompleteUI.MissionComplete.gameObject.SetActive(true);
+                IS = true;
             }
-            if(IS)
+        }
+
+        if (IS)
+        {
+            loadsceneTime -= Time.deltaTime;
+            if (loadsceneTime < 0 && !GetComponent<MissionSound>().sound.isPlaying)
             {
-                loadsceneTime -= Time.deltaTime;
-                if (loadsceneTime < 0)
-                {
+
+               
                     SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
                     loadsceneTime = 10;
-                }
+                
+
+
+                
             }
-           
-        
+        }
     }
 
     void FindAllEnemiesIncludeInactive()
@@ -160,18 +192,17 @@ public class EnemiesMission : MonoBehaviour
             return;
         }
 
-        // 'true' gör att GetComponentsInChildren även hämtar inaktiva barnobjekt under parent!
         Transform[] allChildren = enemyParent.GetComponentsInChildren<Transform>(true);
 
         foreach (Transform t in allChildren)
         {
-            if (t.CompareTag("Enemie")) // Kontrollera taggen
+            if (t.CompareTag("Enemie"))
             {
                 EnemiesList.Add(t.gameObject);
             }
         }
     }
-    // Publik funktion f�r att dynamiskt l�gga till fiender till uppdraget fr�n andra skript (t.ex. spawner-system)
+
     public void AddEnemyToMission(GameObject newEnemy)
     {
         if (newEnemy != null && !EnemiesList.Contains(newEnemy))

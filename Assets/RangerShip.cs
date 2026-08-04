@@ -8,7 +8,7 @@ public class RangerShip : MonoBehaviour
 {
     public GameObject RangerShipMenu_;
     public PlayableDirector playableDirector_;
-    GameObject Player_;
+    public GameObject Player_;
     public Transform SpawnPoint;
     MonoBehaviour[] allPlayerScripts;
     public AudioSource Music;
@@ -37,50 +37,54 @@ public class RangerShip : MonoBehaviour
             Cursor.lockState = CursorLockMode.None;
             Time.timeScale = 0;
             RangerShipMenu_.SetActive(true);
-            GameObject.FindObjectOfType<CinemachineFreeLook>().enabled = false;
-            // Få alla MonoBehaviour-komponenter från Player och dess barn
-            
-
-            // Gå igenom alla hittade komponenter och sätt enabled till false
-            foreach (MonoBehaviour script in allPlayerScripts)
+             foreach (MonoBehaviour script in allPlayerScripts)
             {
                 script.enabled = false;
                 
             }
+            Player_.GetComponent<CharacterController>().enabled = false;
+            GameObject.FindObjectOfType<CinemachineFreeLook>().enabled = false;
+            // Fï¿½ alla MonoBehaviour-komponenter frï¿½n Player och dess barn
+            
 
-            Debug.Log("Alla skript på spelaren inaktiverade!");
+            // Gï¿½ igenom alla hittade komponenter och sï¿½tt enabled till false
+           
+
+            Debug.Log("Alla skript pï¿½ spelaren inaktiverade!");
         }
         else
         {
-            Debug.LogWarning("Player_ är inte tilldelad eller kunde inte hittas!");
+            Debug.LogWarning("Player_ ï¿½r inte tilldelad eller kunde inte hittas!");
         }
     }
     public void EnableAllScriptsOnPlayer()
     {
         if (Player_ != null)
         {
-            Cursor.lockState = CursorLockMode.Locked;
-            Time.timeScale = 1;
-            RangerShipMenu_.SetActive(false);
-            GameObject.FindObjectOfType<CinemachineFreeLook>().enabled = true;
-            Player_.transform.position = SpawnPoint.transform.position;
-            CurrentSong = 1;
-            Music.clip = Songs[CurrentSong];
-            Music.Play();
-            // Få alla MonoBehaviour-komponenter från Player och dess barn
-
-            // Gå igenom alla hittade komponenter och sätt enabled till false
-            foreach (MonoBehaviour script in allPlayerScripts)
+              foreach (MonoBehaviour script in allPlayerScripts)
             {
                 script.enabled = true;
                 
             }
+            Cursor.lockState = CursorLockMode.Locked;
+            Time.timeScale = 1;
+            RangerShipMenu_.SetActive(false);
+            Player_.transform.position = SpawnPoint.transform.position;
+            GameObject.FindObjectOfType<CinemachineFreeLook>().enabled = true;
+             Player_.GetComponent<CharacterController>().enabled = true;
+            CurrentSong = 1;
+            Music.clip = Songs[CurrentSong];
+            Music.Play();
+            // Fï¿½ alla MonoBehaviour-komponenter frï¿½n Player och dess barn
 
-            Debug.Log("Alla skript på spelaren inaktiverade!");
+            // Gï¿½ igenom alla hittade komponenter och sï¿½tt enabled till false
+          
+
+            Debug.Log("Alla skript pï¿½ spelaren inaktiverade!");
         }
         else
         {
-            Debug.LogWarning("Player_ är inte tilldelad eller kunde inte hittas!");
+            Debug.LogWarning("Player_ ï¿½r inte tilldelad eller kunde inte hittas!");
         }
     }
 

@@ -39,9 +39,9 @@ public class MissionSound : MonoBehaviour
 
     public void Mission4(int iss)
     {
-        // Säkerhetskontroll så att vi inte försöker spela utanför arrayens gränser
+        // Sï¿½kerhetskontroll sï¿½ att vi inte fï¿½rsï¿½ker spela utanfï¿½r arrayens grï¿½nser
         if (Music == null || Music.Length == 0 || i >= Music.Length) return;
-
+        i = iss;
         sound.clip = Music[i];
         sound.Play();
 
@@ -54,10 +54,10 @@ public class MissionSound : MonoBehaviour
         {
             if (ranger != null)
             {
-                // Vi sätter robotens spline-index till att matcha musikens index (i)
+                // Vi sï¿½tter robotens spline-index till att matcha musikens index (i)
                 ranger.currentTargetSplineIndex = i;
 
-                // Avbryt vänteläget så att roboten börjar springa på sin nya spline direkt!
+                // Avbryt vï¿½ntelï¿½get sï¿½ att roboten bï¿½rjar springa pï¿½ sin nya spline direkt!
                 ranger.isWaitingForSignal = false;
 
                 Debug.Log($"MissionSound: Matchar Rangers Spline Index till {i} och skickar startsignal!");
@@ -69,11 +69,11 @@ public class MissionSound : MonoBehaviour
     }
 
     /// <summary>
-    /// Anropa denna metod från andra skript (t.ex. EnemiesMission) när du vill byta låt/våg
+    /// Anropa denna metod frï¿½n andra skript (t.ex. EnemiesMission) nï¿½r du vill byta lï¿½t/vï¿½g
     /// </summary>
     public void NextMissionWave()
     {
-        i++; // Gå till nästa låtindex (1, 2, 3...)
+        i++; // Gï¿½ till nï¿½sta lï¿½tindex (1, 2, 3...)
         IsPlay = true;
         IsPlays = true;
     }
