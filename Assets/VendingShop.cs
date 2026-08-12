@@ -1,120 +1,255 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using TMPro;
-using UnityEngine.Audio;
 using UnityEngine.UI;
+using TMPro;
 
 public class VendingShop : MonoBehaviour
 {
-    public int Bolt;
+    public static VendingShop Instance;
 
-    public TMP_Text Bolt_Text;
-    public TMP_Text Price_Text;
-    public int WeaponID;
-    public AudioClip SoundShop;
-    public AudioSource sound_;
-    public GameObject ShopVendor_Button;
-    public Image WeaponIcone;
-    public TMP_Text WeaponAmmoText;
-    public static VendingShop VendingShop_;
+    [Header("UI References - Selected Weapon Preview")]
+    public TMP_Text boltText;
+    public TMP_Text priceText;
+    public Image weaponIcon;
+    public TMP_Text weaponAmmoText;
+
+    [Header("UI References - Container & Panels")]
+    public Transform contentContainer;
+    public GameObject shopVendorButtonPrefab;
+    public GameObject weaponAmmoAllPanel;
+
+    [Header("Audio & Settings")]
+    public AudioSource soundSource;
+    public AudioClip soundShop;
+    public AudioClip soundError;
+
+    [Header("Data")]
     public List<WeaponAmmos> weaponAmmosList = new List<WeaponAmmos>();
-    public Transform Content_;
-    bool buttonInstantiated = false;
-    public int Price;
-    public GameObject WeaponAmmoAll;
 
-    // Start is called before the first frame update
-    void Start()
+    private Bolts playerBolts;
+    private WeaponAmmos currentlySelectedWeapon;
+
+    private void Awake()
     {
-        sound_ = GetComponent<AudioSource>();
-        VendingShop_ = GetComponent<VendingShop>();
+        Instance = this;
+    }
 
-        foreach (WeaponAmmos wp in Resources.FindObjectsOfTypeAll<WeaponAmmos>())
+    private void OnEnable()
+    {
+        playerBolts = FindObjectOfType<Bolts>();
+        if (soundSource == null) soundSource = GetComponent<AudioSource>();
+
+        RefreshWeaponList();
+    }
+
+    public void RefreshWeaponList()
+    {
+        weaponAmmosList.Clear();
+        
+        // Hittar alla unika vapen i scenen
+        WeaponAmmos[] foundWeapons = FindObjectsOfType<WeaponAmmos>(true);
+        HashSet<string> addedNames = new HashSet<string>();
+
+        foreach (WeaponAmmos wp in foundWeapons)
         {
-            weaponAmmosList.Add(wp);
+            if (wp == null) continue;
+
+            if (!addedNames.Contains(wp.name))
+            {
+                addedNames.Add(wp.name);
+                weaponAmmosList.Add(wp);
+            }
         }
+
+        BuildShopButtons();
+        UpdateShopUI();
     }
 
-
-
-
-    // Update is called once per frame
-    void Update()
+    public void BuildShopButtons()
     {
+        if (contentContainer == null || shopVendorButtonPrefab == null) return;
 
-        GameObject.FindObjectOfType<VendingShop>().CheckWeaponAmmo();
-        Bolt_Text.text = Bolt.ToString();
-        Price_Text.text = "Cost:   " + Price; //GameObject.FindObjectOfType<WeaponAmmos>().havePrice.ToString();
-       
-        WeaponIcone.sprite = GameObject.FindObjectOfType<WeaponsUI>().WeaponImg;
-        
+        // Rensa alla gamla knappar
+        foreach (Transform child in contentContainer)
+        {
+            Destroy(child.gameObject);
+        }
 
-        Bolt = GameObject.FindObjectOfType<Bolts>().bolt;
-     
-
-
-        
-    }
-
-    public void CheckWeaponAmmo()
-    {
-
-
+        bool anyWeaponNeedsAmmo = false;
+        WeaponAmmos firstValidWeapon = null;
 
         foreach (WeaponAmmos wp in weaponAmmosList)
         {
-            // Kontrollera om knappen redan har skapats
-            if (wp.Ammo < wp.MaxAmmo && !wp.buttonInstantiated)
+            if (wp == null) continue;
+
+            // FELSÃ–KNING: Skriver ut vÃ¤rdena i Console i Unity!
+            Debug.Log($"[VendingShop] Kollar {wp.name}: Ammo = {wp.Ammo} / MaxAmmo = {wp.MaxAmmo}");
+
+            // â­ HOPPA Ã–VER VAPNET OM DET HAR FULL AMMO ELLER MaxAmmo = 0 â­
+            if (wp.MaxAmmo <= 0 || wp.Ammo >= wp.MaxAmmo)
             {
-               
-               
-                if(WeaponAmmoAll != null)
-                {
-                    WeaponAmmoAll.SetActive(true);
-                }
-
-                // Skapa en knapp för detta specifika vapen
-                GameObject newButton = Instantiate(ShopVendor_Button, Content_);
-               
-                // Spara referensen till knappen så att den kan tas bort senare
-                wp.buttonInstance = newButton;
-                wp.buttonInstantiated = true;
-                newButton.GetComponent<Shop_UI>().Icone.sprite = wp.GetComponent<WeaponsUI>().WeaponImg;
-                // Anpassa ikonen och texten på knappen
-
-                newButton.GetComponentInChildren<Text>().text = wp.name;
-
-                newButton.SetActive(true);
+                continue; 
             }
-            // Om ammot är fullt och knappen redan har skapats
-            else if (wp.Ammo >= wp.MaxAmmo && wp.buttonInstantiated)
+
+            anyWeaponNeedsAmmo = true;
+            if (firstValidWeapon == null) firstValidWeapon = wp;
+
+            // Skapa endast knapp om vapnet faktiskt behÃ¶ver ammo
+            GameObject newButton = Instantiate(shopVendorButtonPrefab, contentContainer);
+            newButton.SetActive(true);
+
+            var shopUI = newButton.GetComponent<Shop_UI>();
+            var weaponUI = wp.GetComponent<WeaponsUI>();
+
+            if (shopUI != null && shopUI.Icone != null && weaponUI != null)
             {
-                // Förstör knappen och sätt flaggan till false
-                if (wp.buttonInstance != null)
-                {
-                    Destroy(wp.buttonInstance);
-                    wp.buttonInstance = null;
-                }
+                shopUI.Icone.sprite = weaponUI.WeaponImg;
+                shopUI.Icone.enabled = weaponUI.WeaponImg != null;
+            }
 
-                wp.buttonInstantiated = false;
+            TMP_Text btnText = newButton.GetComponentInChildren<TMP_Text>();
+            if (btnText != null)
+            {
+                btnText.text = wp.name;
+            }
 
-                // Om `WeaponAmmoAll` är aktiv och det är dags att inaktivera den
-                if (WeaponAmmoAll != null)
-                {
-                    WeaponAmmoAll.SetActive(false);
-                }
+            Button btnComp = newButton.GetComponent<Button>();
+            if (btnComp != null)
+            {
+                btnComp.onClick.RemoveAllListeners();
+                WeaponAmmos localWp = wp;
+                btnComp.onClick.AddListener(() => SelectWeapon(localWp));
             }
         }
 
+        if (firstValidWeapon != null)
+        {
+            SelectWeapon(firstValidWeapon);
+        }
+        else
+        {
+            ClearPreview();
+        }
+
+        if (weaponAmmoAllPanel != null)
+        {
+            weaponAmmoAllPanel.SetActive(anyWeaponNeedsAmmo);
+        }
     }
 
-
-
-    public void Shop()
+    public void SelectWeapon(WeaponAmmos weapon)
     {
-       
-        sound_.PlayOneShot(SoundShop);
-        GameObject.FindObjectOfType<VendingMenu>().ShopAmmo();
+        if (weapon == null) return;
+
+        currentlySelectedWeapon = weapon;
+        var weaponUI = weapon.GetComponent<WeaponsUI>();
+
+        if (weaponIcon != null && weaponUI != null)
+        {
+            weaponIcon.sprite = weaponUI.WeaponImg;
+            weaponIcon.enabled = weaponUI.WeaponImg != null;
+        }
+
+        if (priceText != null)
+        {
+            priceText.text = $"Cost: {weapon.havePrice}";
+        }
+
+        if (weaponAmmoText != null)
+        {
+            weaponAmmoText.text = $"{weapon.Ammo:D2}/{weapon.MaxAmmo:D2}";
+        }
+    }
+
+    private void ClearPreview()
+    {
+        currentlySelectedWeapon = null;
+        if (weaponIcon != null) weaponIcon.enabled = false;
+        if (priceText != null) priceText.text = "Cost: 0";
+        if (weaponAmmoText != null) weaponAmmoText.text = "FULL";
+    }
+
+    public void UpdateShopUI()
+    {
+        if (playerBolts == null) playerBolts = FindObjectOfType<Bolts>();
+
+        if (playerBolts != null && boltText != null)
+        {
+            boltText.text = playerBolts.bolt.ToString();
+        }
+    }
+
+    public void BuySelectedWeapon()
+    {
+        if (currentlySelectedWeapon == null) return;
+        BuySingleWeaponAmmo(currentlySelectedWeapon);
+    }
+
+    public void BuySingleWeaponAmmo(WeaponAmmos weapon)
+    {
+        if (weapon == null) return;
+        if (playerBolts == null) playerBolts = FindObjectOfType<Bolts>();
+
+        if (weapon.Ammo < weapon.MaxAmmo && playerBolts != null && playerBolts.bolt >= weapon.havePrice)
+        {
+            playerBolts.bolt -= weapon.havePrice;
+            weapon.RefillAmmo();
+
+            PlaySound(soundShop);
+
+            BuildShopButtons();
+            UpdateShopUI();
+        }
+        else
+        {
+            PlaySound(soundError);
+        }
+    }
+
+    public void BuyAllAmmo()
+    {
+        if (playerBolts == null) playerBolts = FindObjectOfType<Bolts>();
+        if (playerBolts == null) return;
+
+        int totalCost = 0;
+        List<WeaponAmmos> weaponsToRefill = new List<WeaponAmmos>();
+
+        foreach (WeaponAmmos wp in weaponAmmosList)
+        {
+            if (wp != null && wp.Ammo < wp.MaxAmmo)
+            {
+                totalCost += wp.havePrice;
+                weaponsToRefill.Add(wp);
+            }
+        }
+
+        if (weaponsToRefill.Count == 0) return;
+
+        if (playerBolts.bolt >= totalCost)
+        {
+            playerBolts.bolt -= totalCost;
+
+            foreach (WeaponAmmos wp in weaponsToRefill)
+            {
+                wp.RefillAmmo();
+            }
+
+            PlaySound(soundShop);
+
+            BuildShopButtons();
+            UpdateShopUI();
+        }
+        else
+        {
+            PlaySound(soundError);
+        }
+    }
+
+    private void PlaySound(AudioClip clip)
+    {
+        if (soundSource != null && clip != null)
+        {
+            soundSource.PlayOneShot(clip);
+        }
     }
 }

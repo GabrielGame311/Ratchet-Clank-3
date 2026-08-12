@@ -19,10 +19,12 @@ public class Shoutgun : MonoBehaviour
     public InputAction fire;
      PlayerControlls controls;
 
+     private WeaponAmmos weaponAmmo;
+
     private void Start()
     {
 
-
+        weaponAmmo = GetComponent<WeaponAmmos>();
         controls = new PlayerControlls();
         anime = GameObject.FindGameObjectWithTag("Ratchet").GetComponent<Animator>();
        
@@ -53,16 +55,7 @@ public class Shoutgun : MonoBehaviour
 
     void Update()
     {
-        if(GameObject.FindObjectOfType<WeaponAmmos>().GetComponent<WeaponAmmos>().Ammo > 0)
-        {
-
-            
-            IsAmmo = true;
-        }
-        else
-        {
-            IsAmmo = false;
-        }
+       
 
        
 
@@ -75,11 +68,12 @@ public class Shoutgun : MonoBehaviour
             {
                 if (isfiring == true)
                 {
-                    GameObject.FindObjectOfType<WeaponAmmos>().GetComponent<WeaponAmmos>().Ammo -= 1;
-                    anime.SetTrigger("Shoot");
-
-                    particle.Play();
-                    StartCoroutine(shoot());
+                    if (weaponAmmo != null && weaponAmmo.TryShoot())
+                    {
+                        anime.SetTrigger("Shoot");
+                        particle.Play();
+                        StartCoroutine(shoot());
+                    }
                 }
 
             }
@@ -122,14 +116,14 @@ public class Shoutgun : MonoBehaviour
 
         if (isfiring == true)
         {
-            GameObject.FindObjectOfType<WeaponAmmos>().GetComponent<WeaponAmmos>().Ammo -= 1;
-            anime.SetTrigger("Shoot");
-                if (GetComponent<WeaponAmmos>().Ammo < GetComponent<WeaponAmmos>().MaxAmmo)
-                {
-                    GameObject.FindObjectOfType<VendingMenu>().Price += GetComponent<WeaponAmmos>().havePrice;
-                }
+            if (weaponAmmo != null && weaponAmmo.TryShoot())
+            {
+                anime.SetTrigger("Shoot");
+                
                 particle.Play();
-            StartCoroutine(shoot());
+                StartCoroutine(shoot());
+            }
+
         }
     }
 
@@ -143,11 +137,12 @@ public class Shoutgun : MonoBehaviour
             if (isfiring == true)
             {
                 Debug.Log("We fired");
-                GameObject.FindObjectOfType<WeaponAmmos>().GetComponent<WeaponAmmos>().Ammo -= 1;
-                anime.SetTrigger("Shoot");
-
-                particle.Play();
-                StartCoroutine(shoot());
+                if (weaponAmmo != null && weaponAmmo.TryShoot())
+                {
+                    anime.SetTrigger("Shoot");
+                    particle.Play();
+                    StartCoroutine(shoot());
+                }
             }
         
 

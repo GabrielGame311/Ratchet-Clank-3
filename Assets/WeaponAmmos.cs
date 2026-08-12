@@ -1,59 +1,105 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class WeaponAmmos : MonoBehaviour
 {
-    public int Ammo;
-    public int MaxAmmo;
-    public bool Gun = true;
-    public int WeaponID;
-    Animator anime;
+    [Header("Ammo Settings")]
+    public int maxAmmo;
+    public int ammo; // Sätts till maxAmmo som standard
     public int havePrice;
-    public bool buttonInstantiated = false;
-    public string names;
-    public GameObject buttonInstance;
-  
-    // Start is called before the first frame update
-    void Start()
-    {
 
-       // MaxAmmo = PlayerPrefs.GetInt("MaxAmmo" + GetComponent<WeaponsUI>().WeaponID, MaxAmmo);
-      //  Ammo = PlayerPrefs.GetInt("Ammo" + GetComponent<WeaponsUI>().WeaponID, Ammo);
-        MaxAmmo = Ammo;
+    [Header("Weapon Type")]
+    public bool isGun = true;
+
+    // Egenskaper för bakåtkompatibilitet
+    public int Ammo { get => ammo; set => ammo = value; }
+    public int MaxAmmo { get => maxAmmo; set => maxAmmo = value; }
+
+    private Animator anime;
+    private WeaponsUI weaponsUI;
+
+    private void Awake()
+    {
         anime = GetComponentInParent<Animator>();
-    }
+        weaponsUI = GetComponent<WeaponsUI>();
 
-    public void RefillAmmo()
-    {
-        Ammo += MaxAmmo;
-        if (Ammo > MaxAmmo)
+        // Ladda sparad ammo från PlayerPrefs eller sätt till MaxAmmo
+        LoadAmmoData();
+
+        if (anime != null)
         {
-            Ammo = MaxAmmo;
+            anime.SetBool("Gun", isGun);
         }
     }
 
-
-    // Update is called once per frame
-    void Update()
+    /// <summary>
+    /// Laddar sparad ammo från PlayerPrefs vid start
+    /// </summary>
+    public void LoadAmmoData()
     {
-        if (Ammo > MaxAmmo)
+        if (weaponsUI != null)
         {
-            Ammo = MaxAmmo; // Limit Ammo to MaxAmmo
-            PlayerPrefs.SetInt("MaxAmmo" + GetComponent<WeaponsUI>().WeaponID, MaxAmmo);
-            PlayerPrefs.SetInt("Ammo" + GetComponent<WeaponsUI>().WeaponID, Ammo);
-        }
-        
-
-        if (Gun)
-        {
-            anime.SetBool("Gun", true);
+            if (PlayerPrefs.HasKey($"Ammo_{weaponsUI.weaponID}"))
+            {
+                ammo = PlayerPrefs.GetInt($"Ammo_{weaponsUI.weaponID}");
+                maxAmmo = PlayerPrefs.GetInt($"MaxAmmo_{weaponsUI.weaponID}", maxAmmo);
+            }
+            else
+            {
+                // Om inget finns sparat startar vapnet med fullt magasin
+                ammo = maxAmmo;
+            }
         }
         else
         {
-            anime.SetBool("Gun", false);
+            // Säkerhetskoll om WeaponsUI saknas
+            if (ammo <= 0 && maxAmmo > 0)
+            {
+                ammo = maxAmmo;
+            }
         }
     }
 
-    
+    /// <summary>
+    /// Fyller på alla skott till MaxAmmo
+    /// </summary>
+    public void RefillAmmo()
+    {
+        ammo = maxAmmo;
+        SaveAmmoData();
+    }
+
+    /// <summary>
+    /// Avfyrar ett skott om det finns ammunition kvar
+    /// </summary>
+    public bool TryShoot()
+    {
+        if (ammo <= 0)
+        {
+            Debug.Log("Slut på ammo!");
+            return false;
+        }
+
+        ammo--;
+
+        if (anime != null)
+        {
+            anime.SetTrigger("Shoot");
+        }
+
+        SaveAmmoData();
+        return true;
+    }
+
+    /// <summary>
+    /// Sparar ammo säkert i PlayerPrefs
+    /// </summary>
+    public void SaveAmmoData()
+    {
+        if (weaponsUI != null)
+        {
+            PlayerPrefs.SetInt($"MaxAmmo_{weaponsUI.weaponID}", maxAmmo);
+            PlayerPrefs.SetInt($"Ammo_{weaponsUI.weaponID}", ammo);
+            PlayerPrefs.Save();
+        }
+    }
 }

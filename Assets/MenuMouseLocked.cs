@@ -21,10 +21,13 @@ public class MenuMouseLocked : MonoBehaviour
     public void Locked()
     {
         Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
         Time.timeScale = 1;
     }
     public void Unlocked()
     {
+        
+        Cursor.visible = true;
         Cursor.lockState = CursorLockMode.None;
         Time.timeScale = 0;
     }

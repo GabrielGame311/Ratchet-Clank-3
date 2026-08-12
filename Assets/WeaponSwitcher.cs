@@ -1,212 +1,132 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using System.Linq;
-
 
 public class WeaponSwitcher : MonoBehaviour
 {
-    
+    public static WeaponSwitcher Instance;
+    public static WeaponSwitcher WeaponSwitcher_ => Instance; // Bakåtkompatibilitet
+
+    [Header("Weapon List")]
     public List<Transform> Weapons = new List<Transform>();
+    public List<WeaponsUI> WeaponsUI_ = new List<WeaponsUI>();
     public int WeaponSelecter = 0;
 
-    public static WeaponSwitcher WeaponSwitcher_;
-    public List<WeaponsUI> WeaponsUI_ = new List<WeaponsUI>();
+    [Header("Special Tools")]
     public Transform Wrench_;
-
     public Transform HackerItem;
-
     public Transform Hypershot_;
 
-
-    private bool isInitialized = false;
-    // Start is called before the first frame update
-    void Start()
+    private void Awake()
     {
-        WeaponSwitcher_ = GetComponent<WeaponSwitcher>();
+        Instance = this;
+    }
 
-
-
-
-       
-
-
-
-        GameObject handObject = gameObject;
-
-        if (handObject != null)
-        {
-            // H�mta alla WeaponsUI-komponenter som �r kopplade till "Hand" och dess barn
-            WeaponsUI[] weaponsUIComponents = handObject.GetComponentsInChildren<WeaponsUI>(true);
-            
-            // L�gg till dessa komponenter till WeaponsUI_-listan
-            WeaponsUI_.AddRange(weaponsUIComponents);
-            foreach (WeaponsUI weaponsUI in WeaponsUI_)
-            {
-                if (weaponsUI != null)
-                {
-                    Weapons.Add(weaponsUI.transform);
-                }
-            }
-
-
-        }
-      
-
-
+    private void Start()
+    {
+        InitializeWeapons();
         WeaponSwitch();
-
-        UpdateWeaponUI();
     }
 
-
-
-    void UpdateWeaponUI()
+    private void InitializeWeapons()
     {
-        // H�mta WeaponUICanvas-objektet
-        WeaponUICanvas weaponUICanvas = GameObject.FindObjectOfType<WeaponUICanvas>();
+        Weapons.Clear();
+        WeaponsUI_.Clear();
 
-        if (weaponUICanvas == null)
+        // Hämta alla WeaponsUI i spelarens hand/barnobjekt (även inaktiva)
+        WeaponsUI[] foundUI = GetComponentsInChildren<WeaponsUI>(true);
+
+        foreach (WeaponsUI wUI in foundUI)
         {
-            Debug.LogError("WeaponUICanvas not found!");
-            return;
-        }
-
-        // T�m UI-bilderna
-        foreach (var image in weaponUICanvas.images)
-        {
-           // image.enabled = false;
-        }
-
-        // Uppdatera UI-bilder baserat p� vapnens ordning
-        for (int i = 0; i < WeaponsUI_.Count; i++)
-        {
-            WeaponsUI wp = WeaponsUI_[i];
-
-            if (wp.WeaponImg != null && i < weaponUICanvas.images.Count)
+            if (wUI != null)
             {
-                // Aktivera och uppdatera UI-bilden f�r vapnet
-                weaponUICanvas.img.Add(wp);
-                weaponUICanvas.images[i].enabled = true;
-                weaponUICanvas.images[i].sprite = wp.WeaponImg;
+                WeaponsUI_.Add(wUI);
+                Weapons.Add(wUI.transform);
             }
         }
     }
 
-    // Update is called once per frame
-    void Update()
+    private void Update()
     {
+        // Vapenval via siffertangenter (1-4)
+        if (Input.GetKeyDown(KeyCode.Alpha1)) SelectWeaponIndex(0);
+        else if (Input.GetKeyDown(KeyCode.Alpha2)) SelectWeaponIndex(1);
+        else if (Input.GetKeyDown(KeyCode.Alpha3)) SelectWeaponIndex(2);
+        else if (Input.GetKeyDown(KeyCode.Alpha4)) SelectWeaponIndex(3);
 
-
-       
-
-
-        if (Input.GetKeyDown(KeyCode.Alpha1))
-        {
-            WeaponSelecter = 0;
-            WeaponSwitch();
-        }
-        else if (Input.GetKeyDown(KeyCode.Alpha2))
-        {
-            WeaponSelecter = 1;
-            WeaponSwitch();
-        }
-        else if (Input.GetKeyDown(KeyCode.Alpha3))
-        {
-            WeaponSelecter = 2;
-            WeaponSwitch();
-        }
-        else if (Input.GetKeyDown(KeyCode.Alpha4))
-        {
-            WeaponSelecter = 3;
-            WeaponSwitch();
-        }
-
-        // Handle wrench activation input
+        // Aktivera skiftnyckel (F)
         if (Input.GetKeyDown(KeyCode.F))
         {
             WrenchEnable();
         }
-
-       
-           
-            
-
-           
-        
-
     }
+
+    public void SelectWeaponIndex(int index)
+    {
+        if (index >= 0 && index < Weapons.Count)
+        {
+            WeaponSelecter = index;
+            WeaponSwitch();
+        }
+    }
+
+    public void WeaponSwitch()
+    {
+        // Dölj specialverktyg
+        if (Wrench_ != null) Wrench_.gameObject.SetActive(false);
+        if (HackerItem != null) HackerItem.gameObject.SetActive(false);
+        if (Hypershot_ != null) Hypershot_.gameObject.SetActive(false);
+
+        // Aktivera endast det valda vapnet
+        for (int i = 0; i < Weapons.Count; i++)
+        {
+            if (Weapons[i] != null)
+            {
+                bool isSelected = (i == WeaponSelecter);
+                Weapons[i].gameObject.SetActive(isSelected);
+            }
+        }
+
+        // Uppdatera sikte om UISight3D finns i scenen
+        UISight3D sight = FindObjectOfType<UISight3D>();
+        if (sight != null)
+        {
+            sight.UseSight(WeaponSelecter);
+        }
+    }
+
+    // --- Specialverktyg ---
 
     public void WrenchEnable()
     {
-
-        Wrench_.gameObject.SetActive(true);
         DeactivateWeapons();
+        if (Wrench_ != null) Wrench_.gameObject.SetActive(true);
     }
 
     public void HackerItemEnable()
     {
-
-        HackerItem.gameObject.SetActive(true);
         DeactivateWeapons();
+        if (HackerItem != null) HackerItem.gameObject.SetActive(true);
     }
 
     public void HypershotEnable()
     {
-
-        Hypershot_.gameObject.SetActive(true);
         DeactivateWeapons();
+        if (Hypershot_ != null) Hypershot_.gameObject.SetActive(true);
     }
-
 
     public void DeactivateWeapons()
     {
         foreach (Transform weapon in Weapons)
         {
-            weapon.gameObject.SetActive(false);
+            if (weapon != null)
+            {
+                weapon.gameObject.SetActive(false);
+            }
         }
     }
-
 
     public void ActivateWeapons()
     {
-        foreach (Transform weapon in Weapons)
-        {
-            WeaponSwitch();
-        }
+        WeaponSwitch();
     }
-
-    
-    public void WeaponSwitch()
-    {
-        // Deactivate the wrench
-        Wrench_.gameObject.SetActive(false);
-        if(HackerItem != null)
-        {
-            HackerItem.gameObject.SetActive(false);
-        }
-        if (Hypershot_ != null)
-        {
-            Hypershot_.gameObject.SetActive(false);
-        }
-
-        // Activate the selected weapon and deactivate others
-        for (int i = 0; i < Weapons.Count; i++)
-        {
-            if (i == WeaponSelecter)
-            {
-                Weapons[i].gameObject.SetActive(true);
-            }
-            else
-            {
-                Weapons[i].gameObject.SetActive(false);
-            }
-
-            
-        }
-
-        GameObject.FindObjectOfType<UISight3D>().UseSight(WeaponSelecter);
-    }
-
-
 }

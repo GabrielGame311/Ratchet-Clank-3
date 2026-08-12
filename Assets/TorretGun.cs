@@ -1,121 +1,98 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class TorretGun : MonoBehaviour
 {
-
+    [Header("Prefabs")]
     public GameObject ball;
-    public GameObject torret;
-    public GameObject Torretv5;
+    public GameObject torretv5;
+
+    [Header("Settings & References")]
     public Transform ballpos;
-    public Transform UISpawn;
-   
+    public float bulletSpeed = 10f;
     public Animator anime;
 
-    public float BulletSpeed = 10;
-    public int AmmoShoot;
-    
-    bool shoot = true;
-   
-    bool destroy = false;
-    // Start is called before the first frame update
-    void Start()
+    private WeaponAmmos weaponAmmo;
+    private WeaponsUI weaponUI;
+
+    private void Awake()
     {
-
-        anime = GameObject.FindGameObjectWithTag("Ratchet").GetComponent<Animator>();
-
+        weaponAmmo = GetComponent<WeaponAmmos>();
+        weaponUI = GetComponent<WeaponsUI>();
     }
 
-    // Update is called once per frame
-    void Update()
+    private void Start()
     {
-        if (GetComponent<WeaponAmmos>().Ammo > 0)
+        // Försök hitta Animator om den inte redan tilldelats i Inspector
+        if (anime == null)
         {
-
-
-            shoot = true;
-        }
-        else
-        {
-            shoot = false;
-        }
-
-        if(GetComponent<WeaponAmmos>().enabled)
-        {
-            if (IOSController.IosController_ == null)
+            GameObject ratchet = GameObject.FindGameObjectWithTag("Ratchet");
+            if (ratchet != null)
             {
-                if (Input.GetKeyDown(KeyCode.Mouse0))
-                {
-                    Fire();
-                }
+                anime = ratchet.GetComponent<Animator>();
             }
         }
-
-        
-      
-       
-
-       
-
     }
 
+    private void Update()
+    {
+        if (weaponAmmo == null || !weaponAmmo.enabled) return;
+
+        // Om vi inte kör via mobil/iOS-kontroller
+        if (IOSController.IosController_ == null)
+        {
+            if (Input.GetKeyDown(KeyCode.Mouse0))
+            {
+                Fire();
+            }
+        }
+    }
 
     public void Fire()
     {
-        if (shoot == true)
+        if (weaponAmmo != null && weaponAmmo.Ammo > 0 && weaponAmmo.TryShoot())
         {
-            GetComponent<WeaponAmmos>().Ammo -= 1;
-
-            anime.SetTrigger("Throw");
-            if (GetComponent<WeaponAmmos>().Ammo < GetComponent<WeaponAmmos>().MaxAmmo)
-            {
-                GameObject.FindObjectOfType<VendingMenu>().Price += GetComponent<WeaponAmmos>().havePrice;
-            }
+            TriggerThrowAnimation();
         }
-
-       
     }
 
-
-    public void shoots()
+    public void Shoots()
     {
-        anime.SetTrigger("Throw");
+        TriggerThrowAnimation();
     }
+
+    private void TriggerThrowAnimation()
+    {
+        if (anime != null)
+        {
+            anime.SetTrigger("Throw");
+        }
+    }
+
+    /// <summary>
+    /// Anropas från Animation Event på kast-animationen
+    /// </summary>
     public void ThrowBalls()
     {
+        if (ballpos == null) return;
 
-        
-        
+        int currentLevel = weaponUI != null ? weaponUI.level : 1;
+        GameObject prefabToSpawn = (currentLevel >= 5 && torretv5 != null) ? torretv5 : ball;
 
-           
+        if (prefabToSpawn == null) return;
 
+        // Skapa boll/torn-projektil
+        GameObject spawnedBall = Instantiate(prefabToSpawn, ballpos.position, ballpos.rotation);
 
-        if (GetComponent<WeaponsUI>().Level == 5)
+        // Skjut iväg projektilen med fysik
+        if (spawnedBall.TryGetComponent<Rigidbody>(out Rigidbody rb))
         {
-            var balls = GameObject.Instantiate(Torretv5, ballpos.transform.position, Quaternion.identity);
-            balls.GetComponent<Rigidbody>().AddForce(ballpos.transform.forward * BulletSpeed);
-           
-            balls.transform.rotation = Quaternion.identity;
-            balls.GetComponent<Ball>().torret = Torretv5;
-
-
+            rb.AddForce(ballpos.forward * bulletSpeed, ForceMode.Impulse);
         }
-        else
+
+        // Tilldela referens om det är en Level 5-torret
+        if (currentLevel >= 5 && spawnedBall.TryGetComponent<Ball>(out Ball ballScript))
         {
-            var balls = GameObject.Instantiate(ball, ballpos.transform.position, ballpos.transform.rotation);
-            balls.GetComponent<Rigidbody>().AddForce(ballpos.transform.forward * BulletSpeed);
+            ballScript.torret = torretv5;
         }
- 
-
-
-
-
     }
-
-    
-   
-
-
-  
 }

@@ -7,8 +7,7 @@ public class SpawnTrigger : MonoBehaviour
 
     public Transform SpawnPoint;
     public GameObject DisableEneimes;
-    public AudioSource music;
-    public AudioClip MusicClip;
+   public int MusciClipIndex;
     // Start is called before the first frame update
     void Start()
     {
@@ -31,13 +30,20 @@ public class SpawnTrigger : MonoBehaviour
         if(other.tag == "Player")
         {
 
-            other.GetComponentInChildren<CharacterController>().enabled = false;
-            other.gameObject.transform.position = SpawnPoint.transform.position;
-            other.GetComponentInChildren<CharacterController>().enabled = true;
+            GameObject.FindObjectOfType<MusicPlay>().AudioPlay = MusciClipIndex;
 
-            music.clip = MusicClip;
-            music.Play();
-            Destroy(gameObject, 2);
+            if(SpawnPoint != null)
+            {
+                other.GetComponentInChildren<CharacterController>().enabled = false;
+                other.gameObject.transform.position = SpawnPoint.transform.position;
+                other.GetComponentInChildren<CharacterController>().enabled = true;
+                Destroy(gameObject);
+            }
+
+           
+
+           
+            
         }
     }
 

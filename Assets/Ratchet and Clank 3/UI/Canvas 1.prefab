@@ -585,9 +585,9 @@ RectTransform:
   - {fileID: 1709646007309637426}
   m_Father: {fileID: 1545937172111533784}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 244.9143, y: -75}
   m_SizeDelta: {x: 491.6199, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &8655935747956000196
@@ -1010,9 +1010,9 @@ RectTransform:
   - {fileID: 3403618229872149644}
   m_Father: {fileID: 1545937172111533784}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 244.9143, y: -105}
   m_SizeDelta: {x: 491.6199, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &3767678793363897138
@@ -2624,9 +2624,9 @@ MonoBehaviour:
   - {fileID: 5931864087508590421}
   - {fileID: 3938866533505539254}
   - {fileID: 9015213303808165956}
-  img: []
+  weaponsInWheel: []
   weaponHolder: {fileID: 0}
-  WeaponSelect: 0
+  weaponSelect: 0
 --- !u!1 &459291803908572021
 GameObject:
   m_ObjectHideFlags: 0
@@ -3728,7 +3728,7 @@ MonoBehaviour:
   m_linkedTextComponent: {fileID: 0}
   parentLinkedComponent: {fileID: 0}
   m_enableKerning: 1
-  m_ActiveFontFeatures: 00000000
+  m_ActiveFontFeatures: 6e72656b
   m_enableExtraPadding: 0
   checkPaddingRequired: 0
   m_isRichText: 1
@@ -4062,19 +4062,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d541c7b552570764faf84977cf45adbd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Bolt: 0
-  Bolt_Text: {fileID: 1641190963542833809}
-  Price_Text: {fileID: 211344228043740967}
-  WeaponID: 0
-  SoundShop: {fileID: 8300000, guid: 404bc3515b91f6645894b16cba9166f1, type: 3}
-  sound_: {fileID: 968938788876551347}
-  ShopVendor_Button: {fileID: 9104031793627733460, guid: aa02fa9c284a3ca4782993e29fd7e82f, type: 3}
-  WeaponIcone: {fileID: 3634170663279918780}
-  WeaponAmmoText: {fileID: 5537694670537993573}
+  boltText: {fileID: 1641190963542833809}
+  priceText: {fileID: 211344228043740967}
+  weaponIcon: {fileID: 3634170663279918780}
+  weaponAmmoText: {fileID: 5537694670537993573}
+  contentContainer: {fileID: 2382996673810583845}
+  shopVendorButtonPrefab: {fileID: 9104031793627733460, guid: aa02fa9c284a3ca4782993e29fd7e82f, type: 3}
+  weaponAmmoAllPanel: {fileID: 2301021822146073107}
+  soundSource: {fileID: 968938788876551347}
+  soundShop: {fileID: 0}
+  soundError: {fileID: 0}
   weaponAmmosList: []
-  Content_: {fileID: 2382996673810583845}
-  Price: 0
-  WeaponAmmoAll: {fileID: 4269885451697924459}
 --- !u!82 &968938788876551347
 AudioSource:
   m_ObjectHideFlags: 0
@@ -4472,7 +4470,7 @@ MonoBehaviour:
   m_linkedTextComponent: {fileID: 0}
   parentLinkedComponent: {fileID: 0}
   m_enableKerning: 1
-  m_ActiveFontFeatures: 00000000
+  m_ActiveFontFeatures: 6e72656b
   m_enableExtraPadding: 0
   checkPaddingRequired: 0
   m_isRichText: 1
@@ -7463,9 +7461,9 @@ RectTransform:
   - {fileID: 1806348232195078981}
   m_Father: {fileID: 1545937172111533784}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 244.9143, y: -45}
   m_SizeDelta: {x: 491.6199, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &3724247451350407314
@@ -9953,8 +9951,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Level_Slider: {fileID: 6438769412386644129}
-  upgrade: {fileID: 7558166008214955413}
   levelcount: {fileID: 7790054808214027640}
+  upgrade: {fileID: 7558166008214955413}
 --- !u!1 &2738198679146868132
 GameObject:
   m_ObjectHideFlags: 0
@@ -10757,8 +10755,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d6d26ae4643a91443a7ee16066f105d2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Ammo_Text: {fileID: 793050358263378799}
-  weaponIcone: {fileID: 6747247624582955374}
+  ammoText: {fileID: 793050358263378799}
+  weaponIcon: {fileID: 6747247624582955374}
+  currentWeapon: {fileID: 0}
 --- !u!1 &3221184677690493812
 GameObject:
   m_ObjectHideFlags: 0
@@ -10778,7 +10777,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &6069846857576520275
 RectTransform:
   m_ObjectHideFlags: 0
@@ -16512,7 +16511,7 @@ MonoBehaviour:
   m_linkedTextComponent: {fileID: 0}
   parentLinkedComponent: {fileID: 0}
   m_enableKerning: 1
-  m_ActiveFontFeatures: 00000000
+  m_ActiveFontFeatures: 6e72656b
   m_enableExtraPadding: 0
   checkPaddingRequired: 0
   m_isRichText: 1
@@ -18185,7 +18184,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0.0009556585, y: -0.00001711904}
-  m_SizeDelta: {x: -234.7, y: 44}
+  m_SizeDelta: {x: -234.6094, y: 44}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &740359969919454478
 MonoBehaviour:
@@ -18200,7 +18199,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Padding:
-    m_Left: 0
+    m_Left: 203
     m_Right: 0
     m_Top: 0
     m_Bottom: 0
@@ -18663,8 +18662,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 96.639, y: -121.1}
-  m_SizeDelta: {x: 234.7, y: 44.8324}
+  m_AnchoredPosition: {x: -4.8157, y: -121.1}
+  m_SizeDelta: {x: 437.6094, y: 44.8324}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &7153363527595516648
 CanvasRenderer:
@@ -19900,7 +19899,7 @@ MonoBehaviour:
   m_linkedTextComponent: {fileID: 0}
   parentLinkedComponent: {fileID: 0}
   m_enableKerning: 1
-  m_ActiveFontFeatures: 00000000
+  m_ActiveFontFeatures: 6e72656b
   m_enableExtraPadding: 0
   checkPaddingRequired: 0
   m_isRichText: 1
@@ -28309,7 +28308,7 @@ Animator:
   m_Avatar: {fileID: 0}
   m_Controller: {fileID: 9100000, guid: 497b8b1c4a5ef6a49a8ce73f9454678c, type: 2}
   m_CullingMode: 0
-  m_UpdateMode: 0
+  m_UpdateMode: 2
   m_ApplyRootMotion: 0
   m_LinearVelocityBlending: 0
   m_StabilizeFeet: 0
@@ -28446,16 +28445,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 86d205753526dbd40a92f5670af8b2c4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  WeaponID: 0
-  VendingUI: {fileID: 8182311112022254744}
-  Ios_UI: {fileID: 8764797690183841097}
-  ActiveVendor: {fileID: 5237585427841284957}
-  Price: 5
-  HavePrice: 0
+  vendingUI: {fileID: 8182311112022254744}
+  iosUI: {fileID: 0}
+  activeVendor: {fileID: 5237585427841284957}
   anime: {fileID: 5827261748203426376}
-  selectedWeaponIndex: 0
-  maxWeaponIndex: 0
-  weaponAmmosList: []
 --- !u!1 &8355235016994074440
 GameObject:
   m_ObjectHideFlags: 0
@@ -28878,9 +28871,9 @@ RectTransform:
   - {fileID: 1854031189705993689}
   m_Father: {fileID: 1545937172111533784}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 244.9143, y: -15}
   m_SizeDelta: {x: 491.6199, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &8410341589886120398
@@ -29187,7 +29180,7 @@ MonoBehaviour:
   m_linkedTextComponent: {fileID: 0}
   parentLinkedComponent: {fileID: 0}
   m_enableKerning: 1
-  m_ActiveFontFeatures: 00000000
+  m_ActiveFontFeatures: 6e72656b
   m_enableExtraPadding: 0
   checkPaddingRequired: 0
   m_isRichText: 1
@@ -30670,7 +30663,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 4612113609378801123}
         m_TargetAssemblyTypeName: VendingShop, Assembly-CSharp
-        m_MethodName: Shop
+        m_MethodName: BuyAllAmmo
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -33112,7 +33105,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4817446944516457642, guid: aa02fa9c284a3ca4782993e29fd7e82f, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 21.905
+      value: 224.905
       objectReference: {fileID: 0}
     - target: {fileID: 4817446944516457642, guid: aa02fa9c284a3ca4782993e29fd7e82f, type: 3}
       propertyPath: m_AnchoredPosition.y
@@ -33129,6 +33122,10 @@ PrefabInstance:
     - target: {fileID: 4817446944516457642, guid: aa02fa9c284a3ca4782993e29fd7e82f, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5378109878422831888, guid: aa02fa9c284a3ca4782993e29fd7e82f, type: 3}
+      propertyPath: 'm_ActiveFontFeatures.Array.data[0]'
+      value: 1801810542
       objectReference: {fileID: 0}
     - target: {fileID: 5504836427078334309, guid: aa02fa9c284a3ca4782993e29fd7e82f, type: 3}
       propertyPath: Icone
@@ -33159,11 +33156,6 @@ PrefabInstance:
 --- !u!224 &559195003288219669 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 4817446944516457642, guid: aa02fa9c284a3ca4782993e29fd7e82f, type: 3}
-  m_PrefabInstance: {fileID: 4979198451487814847}
-  m_PrefabAsset: {fileID: 0}
---- !u!1 &4269885451697924459 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 9104031793627733460, guid: aa02fa9c284a3ca4782993e29fd7e82f, type: 3}
   m_PrefabInstance: {fileID: 4979198451487814847}
   m_PrefabAsset: {fileID: 0}
 --- !u!114 &7215361966956089907 stripped

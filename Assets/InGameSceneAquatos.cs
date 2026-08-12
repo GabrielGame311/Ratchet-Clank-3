@@ -31,8 +31,7 @@ public class InGameSceneAquatos : MonoBehaviour
 
             for (int i = 0; i < enemies.Length; i++)
             {
-                if (enemies[i].destroy == true)
-                {
+                
 
 
 
@@ -40,7 +39,7 @@ public class InGameSceneAquatos : MonoBehaviour
 
                     hack = true;
 
-                }
+                
             }
 
 

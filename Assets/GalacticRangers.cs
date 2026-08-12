@@ -265,7 +265,7 @@ public class GalacticRangers : MonoBehaviour
                     lastEnemie = enemie;
                 }
 
-                if (isTurningToEnemy)
+                if (isTurningToEnemy && enemie == null)
                 {
                     HeadAnime.SetBool("ShootPos", false);
                     FootAnime.SetBool("ShootPos", false);
@@ -631,7 +631,7 @@ public class GalacticRangers : MonoBehaviour
     {
         if (enemie != null && other.CompareTag("Sight") && other.gameObject == enemie)
         {
-            enemie = null;
+            //enemie = null;
             IsShooting = false;
         }
     }

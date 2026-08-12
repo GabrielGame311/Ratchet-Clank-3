@@ -1,97 +1,98 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class WeaponUICanvas : MonoBehaviour
 {
+    public static WeaponUICanvas Instance;
+    public static WeaponUICanvas weaponcanvas_ => Instance; // Bakåtkompatibilitet
+
+    [Header("UI Wheel Elements")]
     public List<Image> images = new List<Image>();
-    public List<WeaponsUI> img = new List<WeaponsUI>();
+    public List<WeaponsUI> weaponsInWheel = new List<WeaponsUI>();
 
     [Header("Referens till Spelarens Vapen-objekt")]
     [Tooltip("Dra in 'Weapons' eller 'Hand' från Hierarchy här!")]
     public Transform weaponHolder;
 
-    public int WeaponSelect = 0;
-    public static WeaponUICanvas weaponcanvas_;
+    public int weaponSelect = 0;
     private int lastSelectedWeapon = -1;
 
-    void Awake()
+    private void Awake()
     {
-        weaponcanvas_ = this;
+        Instance = this;
     }
 
-    void Start()
+    private void Start()
     {
         SetupWeaponWheel();
     }
 
     public void SetupWeaponWheel()
-{
-    img.Clear();
-
-    // 1. Dölj alla platser i hjulet från början
-    for (int i = 0; i < images.Count; i++)
     {
-        if (images[i] != null) images[i].enabled = false;
-    }
+        weaponsInWheel.Clear();
 
-    // Om weaponHolder inte är tilldelad, försök hitta spelarens WeaponSwitcher
-    if (weaponHolder == null && WeaponSwitcher.WeaponSwitcher_ != null)
-    {
-        weaponHolder = WeaponSwitcher.WeaponSwitcher_.transform;
-    }
-
-    if (weaponHolder == null)
-    {
-        Debug.LogError("[WeaponUICanvas] Du måste dra in ditt 'Weapons'-objekt till 'Weapon Holder' i Inspector!");
-        return;
-    }
-
-    // 2. Hämta BARA vapen som ligger under spelaren (även inaktiva)
-    WeaponsUI[] playerWeapons = weaponHolder.GetComponentsInChildren<WeaponsUI>(true);
-
-    // 3. Lägg till vapnen i hjulet och koppla klick-funktion automatiskt
-    foreach (WeaponsUI ui in playerWeapons)
-    {
-        img.Add(ui);
-
-        if (ui.WeaponImg != null && ui.WeaponID >= 0 && ui.WeaponID < images.Count)
+        // 1. Dölj alla platser i hjulet från början
+        for (int i = 0; i < images.Count; i++)
         {
-            int targetID = ui.WeaponID; // Spara ID för knappen
-
-            images[targetID].sprite = ui.WeaponImg;
-            images[targetID].enabled = true;
-
-            // Gör bilden klickbar automatiskt
-            Button btn = images[targetID].GetComponent<Button>();
-            if (btn == null)
-            {
-                btn = images[targetID].gameObject.AddComponent<Button>();
-            }
-
-            // Koppla klicket till SwitchWeapon
-            btn.onClick.RemoveAllListeners();
-            btn.onClick.AddListener(() => SwitchWeapon(targetID));
+            if (images[i] != null) images[i].enabled = false;
         }
-    }
-}
 
-    void Update()
-    {
-        if (WeaponSelect >= 0 && WeaponSelect <= 7)
+        // Försök hitta weaponHolder automatiskt om den inte är manuellt insatt
+        if (weaponHolder == null && WeaponSwitcher.WeaponSwitcher_ != null)
         {
-            if (WeaponSwitcher.WeaponSwitcher_ != null && WeaponSelect != lastSelectedWeapon)
+            weaponHolder = WeaponSwitcher.WeaponSwitcher_.transform;
+        }
+
+        if (weaponHolder == null)
+        {
+            Debug.LogError("[WeaponUICanvas] Du måste dra in ditt 'Weapons'-objekt till 'Weapon Holder' i Inspector!");
+            return;
+        }
+
+        // 2. Hämta BARA vapen som ligger under spelaren (även inaktiva)
+        WeaponsUI[] playerWeapons = weaponHolder.GetComponentsInChildren<WeaponsUI>(true);
+
+        // 3. Lägg till vapnen i hjulet och koppla klick-funktioner
+        foreach (WeaponsUI ui in playerWeapons)
+        {
+            weaponsInWheel.Add(ui);
+
+            Sprite icon = ui.weaponImg;
+            int targetID = ui.weaponID;
+
+            if (icon != null && targetID >= 0 && targetID < images.Count)
             {
-                WeaponSwitcher.WeaponSwitcher_.WeaponSelecter = WeaponSelect;
-                WeaponSwitcher.WeaponSwitcher_.WeaponSwitch();
-                lastSelectedWeapon = WeaponSelect;
+                images[targetID].sprite = icon;
+                images[targetID].enabled = true;
+
+                Button btn = images[targetID].GetComponent<Button>();
+                if (btn == null)
+                {
+                    btn = images[targetID].gameObject.AddComponent<Button>();
+                }
+
+                // Koppla klicket direkt till SwitchWeapon
+                btn.onClick.RemoveAllListeners();
+                btn.onClick.AddListener(() => SwitchWeapon(targetID));
             }
         }
     }
 
-    public void SwitchWeapon(int wp)
+    /// <summary>
+    /// Byter till vald vapen-slot och meddelar WeaponSwitcher
+    /// </summary>
+    public void SwitchWeapon(int wpIndex)
     {
-        WeaponSelect = wp;
+        if (wpIndex < 0 || wpIndex >= images.Count) return;
+
+        weaponSelect = wpIndex;
+
+        if (weaponSelect != lastSelectedWeapon && WeaponSwitcher.WeaponSwitcher_ != null)
+        {
+            WeaponSwitcher.WeaponSwitcher_.WeaponSelecter = weaponSelect;
+            WeaponSwitcher.WeaponSwitcher_.WeaponSwitch();
+            lastSelectedWeapon = weaponSelect;
+        }
     }
 }

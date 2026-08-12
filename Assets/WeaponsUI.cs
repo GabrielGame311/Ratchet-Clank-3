@@ -1,105 +1,118 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class WeaponsUI : MonoBehaviour
 {
-    public Sprite WeaponImg;
-    public WeaponUICanvas weaponUI;
-    public int WeaponID;
-    public static WeaponsUI WeaponsUI_;
+    [Header("Weapon Info")]
+    public string weaponName;
+    public int weaponID;
+    public Sprite weaponImg;
 
     [Header("Level Settings")]
-    public int Level = 1;
-    public float levelAmount;
-    public int MaxAmmolvl;
-    private int textlvl;
-    
-    public string[] UpgradeInfoLevel;
-    public string WeaponName;
+    public int level = 1;
+    public int maxLevel = 5;
+    public float currentXP;
+    public float xpRequiredForNextLevel = 100f;
+    public Sprite WeaponImg => weaponImg;
+    [Header("Upgrade Bonuses")]
+    public int maxAmmoPerLevel = 20;
+    public int ammoBonusOnLevelUp = 80;
+    public string[] upgradeInfoLevel;
 
+    private int textlvl;
     private WeaponAmmos weaponAmmos;
 
-    void Awake()
+    private void Awake()
     {
-        WeaponsUI_ = this;
         weaponAmmos = GetComponent<WeaponAmmos>();
     }
 
-    void Start()
+    private void Start()
     {
-        WeaponName = gameObject.name;
-        textlvl = PlayerPrefs.GetInt("Textlv" + WeaponID, 0);
+        if (string.IsNullOrEmpty(weaponName))
+        {
+            weaponName = gameObject.name;
+        }
+
+        // Ladda sparad progresstext och level
+        level = PlayerPrefs.GetInt($"WeaponLevel_{weaponID}", 1);
+        textlvl = PlayerPrefs.GetInt($"Textlv_{weaponID}", 0);
     }
 
     private void OnEnable()
     {
-        if (WeaponUICanvas.weaponcanvas_ != null)
+        // Registrera detta vapen som det aktiva i HUD:en när det tas fram
+        if (WeaponAmmoCount.Instance != null && weaponAmmos != null)
         {
-            weaponUI = WeaponUICanvas.weaponcanvas_;
-        }
-        else
-        {
-            weaponUI = FindObjectOfType<WeaponUICanvas>();
-        }
-
-        // BARA när detta specifika vapen AKTIVERAS (tas fram) sätter vi dess ikon i ammunitionsfönstret:
-        if (WeaponAmmoCount.WeaponAmmoCount_ != null && WeaponImg != null)
-        {
-            WeaponAmmoCount.WeaponAmmoCount_.weaponIcone.sprite = WeaponImg;
+            WeaponAmmoCount.Instance.SetActiveWeapon(weaponAmmos);
         }
     }
 
-    private void Update()
+    /// <summary>
+    /// Anropas när vapnet delar ut skada eller dödar fiender för att ge XP.
+    /// </summary>
+    public void AddXP(float amount)
     {
-        // Level-up logik
-        if (LevelWeapon.levelWeapon_ != null)
+        if (level >= maxLevel) return;
+
+        currentXP += amount;
+
+        // Uppdatera Level-slidern i UI om den finns
+        if (LevelWeapon.levelWeapon_ != null && LevelWeapon.levelWeapon_.Level_Slider != null)
         {
-            if (LevelWeapon.levelWeapon_.Level_Slider.fillAmount >= 1f)
-            {
-                if (Level < 5)
-                {
-                    LevelWeapon.levelWeapon_.Level_Slider.fillAmount = 0;
-                    Level += 1;
-                    levelAmount = 0;
+            LevelWeapon.levelWeapon_.Level_Slider.fillAmount = currentXP / xpRequiredForNextLevel;
+        }
 
-                    if (weaponAmmos != null)
-                    {
-                        weaponAmmos.MaxAmmo += MaxAmmolvl;
-                        weaponAmmos.Ammo += 80;
-                    }
-
-                    StartCoroutine(Wait());
-                }
-                else
-                {
-                    LevelWeapon.levelWeapon_.Level_Slider.fillAmount = 1f;
-                }
-            }
-
-            if (Level >= 5)
-            {
-                LevelWeapon.levelWeapon_.Level_Slider.fillAmount = 1f;
-            }
+        // Kontrollera om vapnet går upp i level
+        if (currentXP >= xpRequiredForNextLevel)
+        {
+            LevelUp();
         }
     }
 
-    IEnumerator Wait()
+    private void LevelUp()
+    {
+        if (level >= maxLevel) return;
+
+        level++;
+        currentXP = 0f;
+
+        // Återställ XP-slidern
+        if (LevelWeapon.levelWeapon_ != null && LevelWeapon.levelWeapon_.Level_Slider != null)
+        {
+            LevelWeapon.levelWeapon_.Level_Slider.fillAmount = (level >= maxLevel) ? 1f : 0f;
+        }
+
+        // Höj max ammo och ge bonusammunition
+        if (weaponAmmos != null)
+        {
+            weaponAmmos.MaxAmmo += maxAmmoPerLevel;
+            weaponAmmos.Ammo = Mathf.Min(weaponAmmos.Ammo + ammoBonusOnLevelUp, weaponAmmos.MaxAmmo);
+        }
+
+        // Spara ny level
+        PlayerPrefs.SetInt($"WeaponLevel_{weaponID}", level);
+        PlayerPrefs.Save();
+
+        // Visa uppgraderingsnotifikation
+        StartCoroutine(ShowUpgradeInfoRoutine());
+    }
+
+    private IEnumerator ShowUpgradeInfoRoutine()
     {
         yield return new WaitForSeconds(3f);
 
         if (UpgradeInfo.UpgradeInfo_ != null)
         {
             UpgradeInfo.UpgradeInfo_.UpgradeObj.SetActive(true);
-            
-            if (textlvl < UpgradeInfoLevel.Length)
+
+            if (upgradeInfoLevel != null && textlvl < upgradeInfoLevel.Length)
             {
-                UpgradeInfo.UpgradeInfo_.UpgradeText.text = UpgradeInfoLevel[textlvl] + " V" + Level + " !";
+                UpgradeInfo.UpgradeInfo_.UpgradeText.text = $"{upgradeInfoLevel[textlvl]} V{level} !";
             }
 
-            textlvl += 1;
-            PlayerPrefs.SetInt("Textlv" + WeaponID, textlvl);
+            textlvl++;
+            PlayerPrefs.SetInt($"Textlv_{weaponID}", textlvl);
             PlayerPrefs.Save();
         }
     }

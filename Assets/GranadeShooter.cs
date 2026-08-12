@@ -13,12 +13,13 @@ public class GranadeShooter : MonoBehaviour
     public bool shoot = false;
     PlayerControlls controlls;
     public Transform Sight_;
+    private WeaponAmmos weaponAmmo;
+
     // Start is called before the first frame update
     void Start()
     {
+        weaponAmmo = GetComponent<WeaponAmmos>();
         sound = GameObject.FindGameObjectWithTag("Bolt").GetComponent<AudioSource>();
-
-       
     }
 
     private void Awake()
@@ -43,13 +44,9 @@ public class GranadeShooter : MonoBehaviour
     void Update()
     {
 
-        if (GameObject.FindObjectOfType<WeaponAmmos>().GetComponent<WeaponAmmos>().Ammo > 0)
+        if (weaponAmmo != null && weaponAmmo.Ammo > 0)
         {
-           
-                shoot = true;
-            
-
-            
+            shoot = true;
         }
         else
         {
@@ -82,35 +79,18 @@ public class GranadeShooter : MonoBehaviour
 
     public void ThrowBall()
     {
-        if(shoot == true)
+        if (shoot == true && weaponAmmo != null && weaponAmmo.TryShoot())
         {
             GameObject ball = Instantiate(GranadeBall, Spawn.transform.position, Spawn.transform.rotation);
-            //ball.GetComponent<Rigidbody>().AddForce(Spawn.transform.forward * ForceBall);
             Vector3 direction = (Sight_.position - Spawn.position).normalized;
-
-            // Skjut granaten i en b�ge genom att l�gga till en upp�tkomponent
             Vector3 launchVelocity = direction * ForceBall + Vector3.up * (ForceBall / 2f);
             ball.GetComponent<Rigidbody>().linearVelocity = launchVelocity;
-
-            // Aktivera gravitation s� att den faller naturligt
             ball.GetComponent<Rigidbody>().useGravity = true;
 
-
             sound.PlayOneShot(ThrowSound);
-            GameObject.FindObjectOfType<WeaponAmmos>().GetComponent<WeaponAmmos>().Ammo -= 1;
             Destroy(ball, 2);
-
-            if (GetComponent<WeaponAmmos>().Ammo < GetComponent<WeaponAmmos>().MaxAmmo)
-            {
-                GameObject.FindObjectOfType<VendingMenu>().Price += GetComponent<WeaponAmmos>().havePrice;
-            }
             shoot = false;
         }
-
-       
-
-
-
     }
 
     IEnumerator wait()

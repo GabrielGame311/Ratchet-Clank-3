@@ -4,196 +4,213 @@ using UnityEngine;
 
 public class EnemiesHealth : MonoBehaviour, IInfectable
 {
-    public float colorChangeDuration = 0.2f;
-
-    public Renderer[] MaterialRed;
+    [Header("Health Settings")]
     public int health = 1;
-    public int maxHealth = 0;
-    private GameObject enemie;
-    public Animator anime;
-    private AudioSource sound;
-    public AudioClip clipsound;
-    public bool destroy = false;
-    public GameObject Bolt;
-    public float knockbackForce = 2;
-    public Transform ExplodePrefab;
-    bool play = false;
-    public AudioClip SoundDamage;
+    public int maxHealth;
     public bool BossHealth = false;
     public float LevelXp = 0.5f;
     public static EnemiesHealth EnemieHealth_;
-    public Color damageColor = Color.red;         // Färg för skada (röd)
-    public Color startColor = Color.white;        // Ursprunglig färg
+
+    [Header("Visual & Damage Effects")]
+    public Color damageColor = Color.red;
+    public Color startColor = Color.white;
+    public float colorChangeDuration = 0.2f;
+    public Renderer[] MaterialRed;
+    public Animator anime;
     public Animator animes;
-
+    public Transform ExplodePrefab;
     public bool DamageExplode = false;
-    public float ChangeColorTime = 0.2f;
-    public bool damagish = false;
-
     public float ExplodeTime;
-    public float DamageHitRange;
-    public GameObject InfectorEffect;
-    Rigidbody rb;
+    public float DamageHitRange = 5f;
+
+    [Header("Audio")]
+    private AudioSource sound;
+    public AudioClip clipsound;
+    public AudioClip SoundDamage;
+
+    [Header("Drops & Interactions")]
+    public GameObject Bolt;
 
     [Header("Infector & Targeting System")]
     public bool IsInfector = false;
     public LayerMask PlayerDetect;
-    
-    [Tooltip("Detta är målet som dina andra skript (rörelse/skytte) ska jaga!")]
+    [Tooltip("Target for movement/shooting scripts to follow")]
     public Transform currentTarget; 
+    public GameObject InfectorEffect;
+    [Tooltip("Base duration of infection at Level 1 (seconds)")]
+    public float baseInfectionDuration = 15f; 
+    [Tooltip("Extra seconds per level above Level 1")]
+    public float durationIncreasePerLevel = 5f; 
 
+    [Header("Edge Protection (Non-NavMesh)")]
+    [Tooltip("Distance ahead to check for floor")]
+    public float edgeCheckDistance = 0.6f;
+    [Tooltip("Ground/Bridge LayerMask")]
+    public LayerMask groundLayer;
+
+    [Header("Mission Data")]
+    public int IndexMission;
+    public bool IsMissionEnemy = false;
+
+    // Private Runtime State
+    private Rigidbody rb;
+    private List<Material> cachedMaterials = new List<Material>();
+    private bool damagish = false;
+    private float changeColorTimeTimer = 0.2f;
+    
     private bool isCurrentlyInfected = false;
     private float targetScanTimer = 0f;
     private float infectionTimer = 0f;
     private float currentInfectionDuration = 15f;
+    private GameObject infectorClone;
 
-    [Tooltip("Hur länge infektionen varar på Level 1")]
-    public float baseInfectionDuration = 15f; 
-    [Tooltip("Hur många extra sekunder man får per nivå över Level 1")]
-    public float durationIncreasePerLevel = 5f; 
-    GameObject InfeCtorClone;
+    private void Awake()
+    {
+        rb = GetComponent<Rigidbody>();
+        sound = GetComponent<AudioSource>();
 
-    [Header("Kantskydd (Utan NavMesh)")]
-    [Tooltip("Hur långt framför fienden vi ska söka efter mark (bör matcha fiendens radie + marginal)")]
-    public float edgeCheckDistance = 0.6f;
-    [Tooltip("Vilket Layer som räknas som mark/broar så att vi inte kliver på tomma intet")]
-    public LayerMask groundLayer;
-
-
-    public int IndexMission;
-    public bool IsMissionEnemy = false;
-
+        // Cache all material instances once to prevent memory leaks in Update
+        MaterialRed = GetComponentsInChildren<Renderer>();
+        foreach (Renderer rend in MaterialRed)
+        {
+            foreach (Material mat in rend.materials)
+            {
+                cachedMaterials.Add(mat);
+            }
+        }
+    }
 
     private void Start()
     {
-        MaterialRed = GetComponentsInChildren<Renderer>();
-        rb = GetComponent<Rigidbody>();
-
         if (BossHealth)
         {
             EnemieHealth_ = this;
         }
 
-        StartCoroutine(Wait());
-        anime = GetComponentInChildren<Animator>();
+        if (anime == null) anime = GetComponentInChildren<Animator>();
         maxHealth = health;
-        enemie = gameObject;
-        sound = GetComponent<AudioSource>();
 
-        // Kör en första sökning direkt vid start
+        StartCoroutine(LaserInitializationWait());
         FindTarget();
     }
 
     private void FixedUpdate()
     {
-        // --- 1. PROAKTIVT KANTSKYDD (STOPPAR RÖRELSEN INNAN DE KLIVER AV) ---
-        if (rb != null)
-        {
-            // Ta reda på vilken riktning fienden faktiskt försöker röra sig i
-            Vector3 moveDirection = rb.linearVelocity;
-            moveDirection.y = 0; // Vi bryr oss bara om rörelse på X- och Z-axeln
-
-            // Om de rör på sig, gör en koll framåt
-            if (moveDirection.magnitude > 0.05f)
-            {
-                Vector3 normalizedDir = moveDirection.normalized;
-                
-                // Positionen framför fienden där de är på väg att sätta sin fot
-                Vector3 checkPosition = transform.position + (normalizedDir * edgeCheckDistance);
-                
-                // Vi startar Raycasten en bit ovanför fötterna och skjuter neråt
-                Vector3 rayOrigin = checkPosition + Vector3.up * 1.0f; 
-                
-                // Skjut en stråle rakt ner för att se om det finns mark framför oss
-                if (!Physics.Raycast(rayOrigin, Vector3.down, 1.5f, groundLayer))
-                {
-                    // OJ! Det finns ingen mark framför oss! 
-                    // Vi stoppar omedelbart all fart i rörelseriktningen så att de "krockar" med kanten
-                    rb.linearVelocity = new Vector3(0, rb.linearVelocity.y, 0);
-                    
-                    // Knuffa tillbaka dem ytterst lite så att de inte "hänger" över kanten
-                    rb.position -= normalizedDir * 0.05f;
-                }
-            }
-        }
+        HandleEdgeProtection();
     }
 
     private void Update()
     {
+        HandleDamageColorBlink();
+        HandleInfectionTimer();
 
-       
-
-
-        // Hantera färgblinkning vid skada
-        if (damagish)
-        {
-            ChangeColorTime -= Time.deltaTime;
-            if (ChangeColorTime < 0)
-            {
-                damagish = false;
-                ChangeColorTime = 0.2f;
-                foreach (Renderer renderer in MaterialRed)
-                {
-                    foreach (Material mat in renderer.materials)
-                    {
-                        mat.color = startColor;
-                    }
-                }
-            }
-            else
-            {
-                foreach (Renderer renderer in MaterialRed)
-                {
-                    foreach (Material mat in renderer.materials)
-                    {
-                        mat.color = damageColor;
-                    }
-                }
-            }
-        }
-
-        // --- INFECTOR: Nedräkning av tid ---
-        if (isCurrentlyInfected)
-        {
-            infectionTimer += Time.deltaTime;
-            if (infectionTimer >= currentInfectionDuration)
-            {
-                Destroy(InfeCtorClone);
-                Infect(false);
-                Debug.Log($"{gameObject.name} är inte längre infekterad.");
-            }
-        }
-
-        // Sök efter mål med jämna mellanrum
+        // Throttle target scanning (5 times per second)
         targetScanTimer += Time.deltaTime;
         if (targetScanTimer > 0.2f)
         {
             targetScanTimer = 0f;
             FindTarget();
         }
+    }
 
-        // --- GEMENSAMT KROCK-SKYDD FÖR ALLA FIENDER ---
-        if (!isCurrentlyInfected && currentTarget != null && !currentTarget.CompareTag("Enemie"))
+    // --- EDGE PROTECTION ---
+    private void HandleEdgeProtection()
+    {
+        if (rb == null) return;
+
+        Vector3 moveDirection = rb.linearVelocity;
+        moveDirection.y = 0;
+
+        if (moveDirection.magnitude > 0.05f)
         {
-            float distanceFromEnemy = 5f; 
-            GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemie");
-            
-            foreach (GameObject enemy in enemies)
-            {
-                if (enemy == this.gameObject || enemy == null) continue;
+            Vector3 normalizedDir = moveDirection.normalized;
+            Vector3 checkPosition = transform.position + (normalizedDir * edgeCheckDistance);
+            Vector3 rayOrigin = checkPosition + Vector3.up * 1.0f;
 
-                float distances = Vector3.Distance(transform.position, enemy.transform.position);
-                if (distances < distanceFromEnemy)
-                {
-                    Vector3 direction = (enemy.transform.position - transform.position).normalized;
-                    Vector3 newPosition = transform.position + direction * distanceFromEnemy;
-                    enemy.transform.position = newPosition;
-                }
+            if (!Physics.Raycast(rayOrigin, Vector3.down, 1.5f, groundLayer))
+            {
+                rb.linearVelocity = new Vector3(0, rb.linearVelocity.y, 0);
+                rb.position -= normalizedDir * 0.05f;
             }
         }
     }
 
-    // --- MÅLSÖKNINGSLOGIK ---
+    // --- VISUAL EFFECTS ---
+    private void HandleDamageColorBlink()
+    {
+        if (!damagish) return;
+
+        changeColorTimeTimer -= Time.deltaTime;
+        Color targetColor = (changeColorTimeTimer < 0) ? startColor : damageColor;
+
+        foreach (Material mat in cachedMaterials)
+        {
+            mat.color = targetColor;
+        }
+
+        if (changeColorTimeTimer < 0)
+        {
+            damagish = false;
+            changeColorTimeTimer = colorChangeDuration;
+        }
+    }
+
+    // --- INFECT SYSTEM ---
+    private void HandleInfectionTimer()
+    {
+        if (!isCurrentlyInfected) return;
+
+        infectionTimer += Time.deltaTime;
+        if (infectionTimer >= currentInfectionDuration)
+        {
+            Infect(false);
+            Debug.Log($"{gameObject.name} is no longer infected.");
+        }
+    }
+
+    public void Infect(bool state) => Infect(state, 1);
+
+    public void Infect(bool state, int level)
+    {
+        isCurrentlyInfected = state;
+        IsInfector = state;
+
+        if (state)
+        {
+            if (infectorClone == null && InfectorEffect != null)
+            {
+                infectorClone = Instantiate(InfectorEffect, transform.position, transform.rotation, transform);
+                infectorClone.transform.localPosition = Vector3.zero;
+
+                SkinnedMeshRenderer enemyMesh = GetComponentInChildren<SkinnedMeshRenderer>();
+                ParticleSystem ps = infectorClone.GetComponent<ParticleSystem>();
+
+                if (enemyMesh != null && ps != null)
+                {
+                    var shape = ps.shape;
+                    shape.shapeType = ParticleSystemShapeType.SkinnedMeshRenderer;
+                    shape.skinnedMeshRenderer = enemyMesh;
+                }
+            }
+
+            int clampedLevel = Mathf.Clamp(level, 1, 5);
+            currentInfectionDuration = baseInfectionDuration + ((clampedLevel - 1) * durationIncreasePerLevel);
+            infectionTimer = 0f;
+        }
+        else
+        {
+            if (infectorClone != null)
+            {
+                Destroy(infectorClone);
+                infectorClone = null;
+            }
+            currentTarget = null;
+        }
+
+        FindTarget();
+    }
+
+    // --- TARGETING LOGIC ---
     private void FindTarget()
     {
         if (isCurrentlyInfected)
@@ -203,105 +220,41 @@ public class EnemiesHealth : MonoBehaviour, IInfectable
         else
         {
             Collider[] colliders = Physics.OverlapSphere(transform.position, 50f, PlayerDetect);
-            if (colliders.Length > 0 && colliders[0] != null)
-            {
-                currentTarget = colliders[0].transform;
-            }
-            else
-            {
-                currentTarget = null;
-            }
+            currentTarget = (colliders.Length > 0 && colliders[0] != null) ? colliders[0].transform : null;
         }
     }
 
     private Transform FindNearestOtherEnemy()
     {
-        GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemie");
+        EnemiesHealth[] enemies = FindObjectsOfType<EnemiesHealth>();
         float closestDistance = Mathf.Infinity;
         Transform closestEnemy = null;
 
-        foreach (GameObject enemy in enemies)
+        foreach (EnemiesHealth otherHealth in enemies)
         {
-            if (enemy == this.gameObject || enemy == null) continue;
+            if (otherHealth == this || otherHealth == null || otherHealth.isCurrentlyInfected) continue;
 
-            EnemiesHealth otherHealth = enemy.GetComponent<EnemiesHealth>();
-            if (otherHealth != null && otherHealth.isCurrentlyInfected) continue;
-
-            float dist = Vector3.Distance(transform.position, enemy.transform.position);
+            float dist = Vector3.Distance(transform.position, otherHealth.transform.position);
             if (dist < closestDistance)
             {
                 closestDistance = dist;
-                closestEnemy = enemy.transform;
+                closestEnemy = otherHealth.transform;
             }
         }
         return closestEnemy;
     }
 
-    // --- IInfectable Implementering ---
-    public void Infect(bool state)
-    {
-        Infect(state, 1);
-    }
-
-    public void Infect(bool state, int level)
-    {
-        isCurrentlyInfected = state;
-        IsInfector = state; 
-
-        if(InfeCtorClone == null)
-        {
-            GameObject effect = Instantiate(InfectorEffect, transform.position, transform.rotation);
-            InfeCtorClone = effect;
-        }
-        
-       
-
-        InfeCtorClone.transform.SetParent(this.transform);
-        InfeCtorClone.transform.localPosition = Vector3.zero;
-
-        SkinnedMeshRenderer enemyMesh = GetComponentInChildren<SkinnedMeshRenderer>();
-        ParticleSystem ps = InfeCtorClone.GetComponent<ParticleSystem>();
-
-        if (enemyMesh != null && ps != null)
-        { 
-            var shape = ps.shape;
-            shape.shapeType = ParticleSystemShapeType.SkinnedMeshRenderer;
-            shape.skinnedMeshRenderer = enemyMesh;
-        }
-        if (state)
-        {
-            int clampedLevel = Mathf.Clamp(level, 1, 5);
-            currentInfectionDuration = baseInfectionDuration + ((clampedLevel - 1) * durationIncreasePerLevel);
-            infectionTimer = 0f;
-            Debug.Log($"{gameObject.name} infekterad på Lvl {clampedLevel} i {currentInfectionDuration} sekunder!");
-        }
-        else
-        {
-            Destroy(InfeCtorClone);
-            currentTarget = null;
-        }
-        
-        FindTarget(); 
-    }
-
+    // --- DAMAGE & DEATH ---
     public void TakeDamage(int damage)
     {
         health -= damage;
         damagish = true;
+        changeColorTimeTimer = colorChangeDuration;
 
-        if (DamageExplode)
+        if (DamageExplode && ExplodePrefab != null)
         {
-            if (ExplodePrefab != null)
-            {
-                Transform exp = Instantiate(ExplodePrefab, transform.position, transform.rotation);
-                Destroy(exp.gameObject, 4);
-                foreach (Rigidbody gm in exp.GetComponentsInChildren<Rigidbody>())
-                {
-                    gm.AddExplosionForce(10, transform.position, 5);
-                    DamageExplode = false;
-                    ExplodePrefab = null;
-                }
-            }
+            SpawnExplosion();
+            DamageExplode = false;
         }
 
         if (health <= 0)
@@ -329,70 +282,79 @@ public class EnemiesHealth : MonoBehaviour, IInfectable
 
     public void Die()
     {
-        if (anime != null)
-        {
-            anime.SetTrigger("Die");
-        }
+        if (anime != null) anime.SetTrigger("Die");
 
-        if (GetComponent<BloodFly>() != null)
-        {
-            GetComponent<BloodFly>().enabled = true;
-        }
+        BloodFly bloodFly = GetComponent<BloodFly>();
+        if (bloodFly != null) bloodFly.enabled = true;
 
-        Destroy(gameObject, ExplodeTime);
-
+        // Disable scripts other than self and BloodFly
         MonoBehaviour[] allScripts = GetComponents<MonoBehaviour>();
         foreach (MonoBehaviour script in allScripts)
         {
-            if (script != this && script.GetType() != typeof(BloodFly))
+            if (script != this && !(script is BloodFly))
             {
                 script.enabled = false;
             }
+        }
+
+        Destroy(gameObject, ExplodeTime);
+    }
+
+    public void takedamage()
+    {
+        if (sound != null && clipsound != null)
+        {
+            sound.PlayOneShot(clipsound);
+        }
+    }
+
+    private void SpawnExplosion()
+    {
+        Transform exp = Instantiate(ExplodePrefab, transform.position, transform.rotation);
+        Destroy(exp.gameObject, 4f);
+        foreach (Rigidbody expRb in exp.GetComponentsInChildren<Rigidbody>())
+        {
+            expRb.AddExplosionForce(10, transform.position, 5);
         }
     }
 
     private void OnDestroy()
     {
+        // Grant XP
         WeaponsUI ui = FindObjectOfType<WeaponsUI>();
         if (ui != null)
         {
-            ui.levelAmount += LevelXp;
-        }
-        if(InfectorEffect != null)
-        {
-            Destroy(InfectorEffect);
-        }
-        if (!DamageExplode)
-        {
-            if (ExplodePrefab != null)
-            {
-                Transform exp = Instantiate(ExplodePrefab, transform.position, transform.rotation);
-                Destroy(exp.gameObject, 4);
-                foreach (Rigidbody gm in exp.GetComponentsInChildren<Rigidbody>())
-                {
-                    gm.AddExplosionForce(10, transform.position, 5);
-                }
-            }
+            ui.AddXP(LevelXp);
         }
 
-        if(IsMissionEnemy)
-        {
+        // Destroy active particle clone, NOT prefab asset
+        if (infectorClone != null) Destroy(infectorClone);
 
-            foreach(EnemiesHealth en in Object.FindObjectsOfType<EnemiesHealth>())
+        if (!DamageExplode && ExplodePrefab != null)
+        {
+            SpawnExplosion();
+        }
+
+        // Mission Enemy Notification
+        if (IsMissionEnemy)
+        {
+            if (MissionSound.MissionSound_ != null)
             {
                 MissionSound.MissionSound_.Mission4(IndexMission);
-                en.IsMissionEnemy = false;
             }
 
-            
-
-
+            foreach (EnemiesHealth en in FindObjectsOfType<EnemiesHealth>())
+            {
+                en.IsMissionEnemy = false;
+            }
         }
+
         if (Bolt != null)
         {
             Instantiate(Bolt, transform.position, transform.rotation);
         }
 
+        // Cleanup references in managers
         if (RocketMission.RocketMission_ != null && RocketMission.RocketMission_.gameObject.activeSelf)
         {
             RocketMission.RocketMission_.DropShip.Remove(gameObject);
@@ -413,21 +375,13 @@ public class EnemiesHealth : MonoBehaviour, IInfectable
         }
     }
 
-    public void takedamage()
-    {
-        if (sound != null && clipsound != null)
-        {
-            sound.PlayOneShot(clipsound);
-        }
-    }
-
-    IEnumerator Wait()
+    private IEnumerator LaserInitializationWait()
     {
         ThyrranoidLaser laser = GetComponent<ThyrranoidLaser>();
         if (laser != null)
         {
             laser.SePlayer = false;
-            yield return new WaitForSeconds(3);
+            yield return new WaitForSeconds(3f);
             laser.SePlayer = true;
         }
     }

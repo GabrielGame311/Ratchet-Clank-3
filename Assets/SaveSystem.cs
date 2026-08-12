@@ -1,6 +1,6 @@
 using UnityEngine;
 using System.IO;
-using System.Linq;
+using System.Collections.Generic;
 
 public static class SaveSystem
 {
@@ -12,48 +12,54 @@ public static class SaveSystem
             return;
         }
 
-
-
         SaveData data = new SaveData
         {
             SaveSlot = saveSlot,
-
             PlayerArmor = AllGameData.Instance.Armor,
-            SavedMap = LoadingScene.instance.LoadMap,
-            CurrentMap = LoadingScene.instance.MapID,
-            LoadGameCount = LoadMapName.Instance?.LoadGames_.Count ?? 0,
-            //Bolt_ = GameObject.FindObjectOfType<Bolts>().bolt,
-          //  WeaponLvl = GameObject.FindObjectOfType<WeaponsUI>().Level,
+            SavedMap = LoadingScene.instance != null ? LoadingScene.instance.LoadMap : AllGameData.Instance.SavedMap,
+            CurrentMap = LoadingScene.instance != null ? LoadingScene.instance.MapID : AllGameData.Instance.CurrentMapInt,
+            LoadGameCount = LoadMapName.Instance?.LoadGames_?.Count ?? 0,
             health = Player.Player_.maxHealth
         };
 
+        // HÃ¤mta bolts om komponenten finns
+        Bolts boltsObj = Object.FindObjectOfType<Bolts>();
+        if (boltsObj != null)
+        {
+            data.Bolt_ = boltsObj.bolt;
+        }
 
-        // Lägg till vapeninfo korrekt:
-        WeaponsUI[] allWeaponUI = GameObject.FindObjectsOfType<WeaponsUI>(); // Hitta alla vapenobjekt med WeaponsUI
+        // SÃ¤kerstÃ¤ll att vapendatastrukturen Ã¤r initierad
+        EnsureWeaponSaveDataExists(data);
+
+        // HÃ¤mta alla vapen i scenen (Ã¤ven inaktiva)
+        WeaponsUI[] allWeaponUI = Object.FindObjectsOfType<WeaponsUI>(true);
         foreach (var weaponUI in allWeaponUI)
         {
-            // Vi antar att varje WeaponsUI hanterar ett vapen med dess level
             if (weaponUI != null)
             {
+                string wName = string.IsNullOrEmpty(weaponUI.weaponName) ? weaponUI.gameObject.name : weaponUI.weaponName;
+
                 data.weaponSaveData.weapons.Add(new SaveData.WeaponData
                 {
-                    weaponName = weaponUI.WeaponName,  // Exempel på hur du får vapennamn
-                    weaponLevel = weaponUI.Level      // Exempel på hur du får vapennivå
+                    weaponName = wName,
+                    weaponLevel = weaponUI.level
                 });
             }
         }
 
-        string json = JsonUtility.ToJson(data);
+        // Spara till fil
+        string json = JsonUtility.ToJson(data, true);
         File.WriteAllText(SaveUtility.GetSavePath(saveSlot), json);
-        SaveUI saveUI = GameObject.FindObjectOfType<SaveUI>();
+
+        SaveUI saveUI = Object.FindObjectOfType<SaveUI>();
         if (saveUI != null)
         {
             saveUI.ShowSavingMessage();
         }
+
         Debug.Log($"Game saved with {data.LoadGameCount} prefabs in slot {saveSlot}");
     }
-
-
 
     public static void SaveNewGame(int saveSlot)
     {
@@ -65,22 +71,30 @@ public static class SaveSystem
             CurrentMap = 0,
             LoadGameCount = 0,
             SaveSlot = saveSlot,
-            Bolt_ = 0,
-            
-            
+            Bolt_ = 0
         };
 
+        EnsureWeaponSaveDataExists(data);
 
-        // Lägg till ett nytt vapen med level 1
-        data.weaponSaveData.weapons.Add(new SaveData.WeaponData
+        // LÃ¤gg till startvapen frÃ¥n scenen med Level 1
+        WeaponsUI[] allWeaponUI = Object.FindObjectsOfType<WeaponsUI>(true);
+        foreach (var weaponUI in allWeaponUI)
         {
-           
-            weaponLevel = 1
-        });
+            if (weaponUI != null)
+            {
+                string wName = string.IsNullOrEmpty(weaponUI.weaponName) ? weaponUI.gameObject.name : weaponUI.weaponName;
 
-        string json = JsonUtility.ToJson(data);
+                data.weaponSaveData.weapons.Add(new SaveData.WeaponData
+                {
+                    weaponName = wName,
+                    weaponLevel = 1
+                });
+            }
+        }
+
+        string json = JsonUtility.ToJson(data, true);
         File.WriteAllText(SaveUtility.GetSavePath(saveSlot), json);
-       // GameObject.FindObjectOfType<SaveUI>()?.ShowSavingMessage();
+
         Debug.Log($"New game saved to slot {saveSlot}.");
     }
 
@@ -104,7 +118,7 @@ public static class SaveSystem
             }
 
             ApplyGameData(data, saveSlot);
-            if (prefab) ApplyMapData(data, saveSlot); // Only spawn prefabs if explicitly requested
+            if (prefab) ApplyMapData(data, saveSlot);
 
             Debug.Log($"Loaded game from slot {saveSlot}: map = {data.SavedMap}, armor = {data.PlayerArmor}");
         }
@@ -122,53 +136,18 @@ public static class SaveSystem
             return;
         }
 
-        if (Player.Player_ == null)
+        // Ladda vapendatans levels
+        ApplyWeaponsData(data);
+
+        // Ladda Bolts
+        Bolts boltsObj = Object.FindObjectOfType<Bolts>();
+        if (boltsObj != null)
         {
-            Debug.LogError("Player.Player_ is null! Cannot set maxHealth.");
-            return;
+            boltsObj.bolt = data.Bolt_;
         }
 
-
-
-        WeaponsUI[] allWeaponUI = GameObject.FindObjectsOfType<WeaponsUI>();
-
-        if (data.weaponSaveData != null && data.weaponSaveData.weapons.Count > 0)
-        {
-            foreach (var savedWeapon in data.weaponSaveData.weapons)
-            {
-                bool weaponFound = false;
-
-                // Loopar genom alla WeaponsUI för att hitta rätt vapen
-                foreach (var weaponUI in allWeaponUI)
-                {
-                    if (weaponUI.WeaponName == savedWeapon.weaponName)
-                    {
-                        weaponUI.Level = savedWeapon.weaponLevel;  // Uppdatera vapennivån
-                        Debug.Log($"Loaded weapon {savedWeapon.weaponName} with level {savedWeapon.weaponLevel}");
-                        weaponFound = true;
-                        break;  // Stanna när vi hittar rätt vapen
-                    }
-                }
-
-                if (!weaponFound)
-                {
-                    Debug.LogWarning($"Weapon {savedWeapon.weaponName} not found in the scene.");
-                }
-            }
-        }
-        else
-        {
-            Debug.LogWarning("No weapon data found in save file.");
-        }
-
-
-
-        if (GameObject.FindObjectOfType<Bolts>() != null)
-        {
-            GameObject.FindObjectOfType<Bolts>().bolt = data.Bolt_;
-        }
-
-        if(LoadingScene.instance != null)
+        // Ladda Map/Scene instÃ¤llningar
+        if (LoadingScene.instance != null)
         {
             LoadingScene.instance.LoadMap = data.SavedMap;
             LoadingScene.instance.SaveSlot = data.SaveSlot;
@@ -178,17 +157,14 @@ public static class SaveSystem
             AllGameData.Instance.SavedMap = data.SavedMap;
             AllGameData.Instance.CurrentSaveSlot = data.SaveSlot;
         }
+
         AllGameData.Instance.CurrentMapInt = data.CurrentMap;
-
-
-        // Ensure armor visuals update
         AllGameData.Instance.SetArmor(data.PlayerArmor);
-        if (LoadingScene.instance != null)
-        {
-            LoadingScene.instance.SaveSlot = data.SaveSlot;
-        }
-        Player.Player_.maxHealth = (int)data.health;
 
+        if (Player.Player_ != null)
+        {
+            Player.Player_.maxHealth = (int)data.health;
+        }
     }
 
     private static void ApplyMapData(SaveData data, int saveSlot)
@@ -199,80 +175,56 @@ public static class SaveSystem
             return;
         }
 
-        string path = SaveUtility.GetSavePath(saveSlot);
-        if (!File.Exists(path))
-        {
-            Debug.LogWarning($"Save file not found in slot {saveSlot} at path: {path}");
-            return;
-        }
-        if (LoadMapName.Instance != null)
-        {
-            LoadMapName.Instance.SpawnPrefabs();
-        }
-        if (GameObject.FindObjectOfType<Bolts>() != null)
-        {
-            GameObject.FindObjectOfType<Bolts>().bolt = data.Bolt_;
-        }
+        LoadMapName.Instance.mapid = data.CurrentMap;
+        LoadMapName.Instance.SpawnPrefabs();
 
+        ApplyGameData(data, saveSlot);
+    }
 
-        WeaponsUI[] allWeaponUI = GameObject.FindObjectsOfType<WeaponsUI>();
-
-        if (data.weaponSaveData != null && data.weaponSaveData.weapons.Count > 0)
-        {
-            foreach (var savedWeapon in data.weaponSaveData.weapons)
-            {
-                bool weaponFound = false;
-
-                // Loopar genom alla WeaponsUI för att hitta rätt vapen
-                foreach (var weaponUI in allWeaponUI)
-                {
-                    if (weaponUI.WeaponName == savedWeapon.weaponName)
-                    {
-                        weaponUI.Level = savedWeapon.weaponLevel;  // Uppdatera vapennivån
-                        Debug.Log($"Loaded weapon {savedWeapon.weaponName} with level {savedWeapon.weaponLevel}");
-                        weaponFound = true;
-                        break;  // Stanna när vi hittar rätt vapen
-                    }
-                }
-
-                if (!weaponFound)
-                {
-                    Debug.LogWarning($"Weapon {savedWeapon.weaponName} not found in the scene.");
-                }
-            }
-        }
-        else
+    private static void ApplyWeaponsData(SaveData data)
+    {
+        if (data.weaponSaveData == null || data.weaponSaveData.weapons == null || data.weaponSaveData.weapons.Count == 0)
         {
             Debug.LogWarning("No weapon data found in save file.");
+            return;
         }
 
-        if (Player.Player_ == null)
+        // HÃ¤mta alla vapen (inklusive inaktiva)
+        WeaponsUI[] allWeaponUI = Object.FindObjectsOfType<WeaponsUI>(true);
+
+        foreach (var savedWeapon in data.weaponSaveData.weapons)
         {
-            Player.Player_.maxHealth = (int)data.health;
-        }
-        AllGameData.Instance.Armor = data.PlayerArmor;
+            bool weaponFound = false;
 
-        if (LoadingScene.instance != null)
+            foreach (var weaponUI in allWeaponUI)
+            {
+                string wName = string.IsNullOrEmpty(weaponUI.weaponName) ? weaponUI.gameObject.name : weaponUI.weaponName;
+
+                if (wName == savedWeapon.weaponName)
+                {
+                    weaponUI.level = savedWeapon.weaponLevel;
+                    Debug.Log($"Loaded weapon {savedWeapon.weaponName} with level {savedWeapon.weaponLevel}");
+                    weaponFound = true;
+                    break;
+                }
+            }
+
+            if (!weaponFound)
+            {
+                Debug.LogWarning($"Weapon {savedWeapon.weaponName} not found in the scene.");
+            }
+        }
+    }
+
+    private static void EnsureWeaponSaveDataExists(SaveData data)
+    {
+        if (data.weaponSaveData == null)
         {
-            LoadingScene.instance.LoadMap = data.SavedMap;
-            LoadingScene.instance.SaveSlot = data.SaveSlot;
+            data.weaponSaveData = new SaveData.WeaponSaveData();
         }
-        else
+        if (data.weaponSaveData.weapons == null)
         {
-            AllGameData.Instance.SavedMap = data.SavedMap;
-            AllGameData.Instance.CurrentSaveSlot = data.SaveSlot;
+            data.weaponSaveData.weapons = new List<SaveData.WeaponData>();
         }
-
-
-        AllGameData.Instance.CurrentMapInt = data.CurrentMap;
-        
-
-        AllGameData.Instance.SetArmor(data.PlayerArmor);
-        
-        LoadMapName.Instance.mapid = data.CurrentMap;
-
-
-
-
     }
 }

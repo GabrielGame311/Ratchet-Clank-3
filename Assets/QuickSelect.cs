@@ -94,7 +94,7 @@ public class QuickSelect : MonoBehaviour
                 {
                     GameObject.FindObjectOfType<WeaponAmmos>().enabled = false;
                 }
-                Cursor.lockState = CursorLockMode.None;
+                 
                 QuickSelects.SetActive(true);
                // Time.timeScale = 0;
                 IsSelect = true;

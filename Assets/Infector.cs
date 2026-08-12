@@ -9,19 +9,20 @@ public class Infector : MonoBehaviour
     public GameObject sludgePrefab;
     public Transform shootPoint;
     public float BallSpeed;
-    public  bool shoot = true;
-   
+    public bool shoot = true;
+    private WeaponAmmos weaponAmmo;
+
     // Start is called before the first frame update
     void Start()
     {
-       
+        weaponAmmo = GetComponent<WeaponAmmos>();
     }
 
     // Update is called once per frame
     void Update()
     {
 
-        if (GameObject.FindObjectOfType<WeaponAmmos>().GetComponent<WeaponAmmos>().Ammo > 0)
+        if (weaponAmmo != null && weaponAmmo.Ammo > 0)
         {
             shoot = true;
         }
@@ -52,22 +53,11 @@ public class Infector : MonoBehaviour
 
     public void ThrowBall()
     {
-       
-        
-
-
-        if(shoot == true)
+        if (shoot == true && weaponAmmo != null && weaponAmmo.TryShoot())
         {
-            GameObject.FindObjectOfType<WeaponAmmos>().GetComponent<WeaponAmmos>().Ammo  -= 1;
-            if (GetComponent<WeaponAmmos>().Ammo < GetComponent<WeaponAmmos>().MaxAmmo)
-            {
-                GameObject.FindObjectOfType<VendingMenu>().Price += GetComponent<WeaponAmmos>().havePrice;
-            }
             GameObject ball = Instantiate(sludgePrefab, shootPoint.position, shootPoint.rotation);
             Rigidbody ballRb = ball.GetComponent<Rigidbody>();
-            // Skjut framåt och snett uppåt
             ballRb.AddForce((shootPoint.forward + Vector3.up * 0.5f).normalized * 15f, ForceMode.Impulse);
-            //shoot = false;
             StartCoroutine(wait());
         }
     }

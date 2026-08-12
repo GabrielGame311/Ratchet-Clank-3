@@ -1,80 +1,82 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
 public class LevelWeapon : MonoBehaviour
 {
+    public static LevelWeapon Instance;
+    public static LevelWeapon levelWeapon_ => Instance; // Bakåtkompatibilitet
 
+    [Header("UI Elements")]
     public Image Level_Slider;
-    public GameObject upgrade;
-   
     public TMP_Text levelcount;
-    public static LevelWeapon levelWeapon_;
-    
-    
-    // Start is called before the first frame update
-    void Start()
-    {
-        Level_Slider.fillAmount = 0;
+    public GameObject upgrade;
 
-        levelWeapon_ = GetComponent<LevelWeapon>();
-        
+    private void Awake()
+    {
+        Instance = this;
     }
 
-    // Update is called once per frame
-    void Update()
+    private void Start()
     {
-        levelcount.text = "V" + GameObject.FindObjectOfType<WeaponsUI>().Level.ToString();
-
-        Level_Slider.fillAmount = GameObject.FindObjectOfType<WeaponsUI>().levelAmount;
-
-
-        if (GameObject.FindObjectOfType<WeaponsUI>().Level < 5)
+        if (Level_Slider != null)
         {
-            if (Level_Slider.fillAmount == 1)
-            {
-                upgrade.SetActive(true);
-                //WeaponsUI.WeaponsUI_.Level += 1;
-
-                //Level_Slider.fillAmount = 0;
-                //WeaponsUI.WeaponsUI_.levelAmount = 0;
-                StartCoroutine(wait());
-            }
+            Level_Slider.fillAmount = 0f;
         }
 
-
-             
-        
-        
-        
-          
-        
+        if (upgrade != null)
+        {
+            upgrade.SetActive(false);
+        }
     }
 
-    IEnumerator wait()
+    private void Update()
     {
-        Time.timeScale = 0;
-
-        yield return new WaitForSecondsRealtime(3);
-        //Level_Slider.fillAmount += WeaponsUI.WeaponsUI_.levelAmount;
-        Time.timeScale = 1;
-        upgrade.SetActive(false);
-        
+        UpdateLevelUI();
     }
 
-
-    public void levelWeapon()
+    /// <summary>
+    /// Uppdaterar UI-stapeln och texten för det aktuella aktivt valda vapnet
+    /// </summary>
+    private void UpdateLevelUI()
     {
-       
-           // Level_Slider.fillAmount += WeaponsUI.WeaponsUI_.levelAmount;
-        
+        // Hämta det aktiva vapnet från HUD-hanteraren
+        if (WeaponAmmoCount.Instance == null || WeaponAmmoCount.Instance.currentWeapon == null)
+            return;
 
+        WeaponsUI activeWeaponUI = WeaponAmmoCount.Instance.currentWeapon.GetComponent<WeaponsUI>();
+        if (activeWeaponUI == null) return;
 
-       
-           
+        // Uppdatera level-text (t.ex. "V1", "V2")
+        if (levelcount != null)
+        {
+            levelcount.text = $"V{activeWeaponUI.level}";
+        }
+
+        // Uppdatera XP-slidern
+        if (Level_Slider != null && activeWeaponUI.xpRequiredForNextLevel > 0)
+        {
+            Level_Slider.fillAmount = activeWeaponUI.currentXP / activeWeaponUI.xpRequiredForNextLevel;
+        }
     }
-     
-    
+
+    /// <summary>
+    /// Visar uppgraderings-popup och pausar spelet tillfälligt
+    /// </summary>
+    public void TriggerUpgradeEffect()
+    {
+        StartCoroutine(UpgradeRoutine());
+    }
+
+    private IEnumerator UpgradeRoutine()
+    {
+        if (upgrade != null) upgrade.SetActive(true);
+
+        Time.timeScale = 0f;
+        yield return new WaitForSecondsRealtime(3f);
+        Time.timeScale = 1f;
+
+        if (upgrade != null) upgrade.SetActive(false);
+    }
 }

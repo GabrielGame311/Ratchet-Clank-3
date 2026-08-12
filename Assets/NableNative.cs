@@ -18,6 +18,12 @@ public class NableNative : MonoBehaviour
     float StartAttack;
     public LayerMask groundLayer;
 
+    [Header("Wall & Obstacle Avoidance")]
+    [Tooltip("Layer för väggar och hinder som fienden inte ska gå in i.")]
+    public LayerMask obstacleLayer;
+    [Tooltip("Hur långt framför sig fienden känner av väggar.")]
+    public float wallCheckDistance = 1.0f;
+
     public Animator anime;
     public float PlayerDistance;
     public AudioClip[] SoundFx;
@@ -122,9 +128,16 @@ public class NableNative : MonoBehaviour
                 // 3. SPRING MOT KANTEN
                 else
                 {
-                    transform.position = Vector3.MoveTowards(transform.position, HangAble.transform.position, RunSpeed * Time.deltaTime);
-                    anime.SetBool("Run", true);
-                    anime.SetBool("Walking", false);
+                    if (!IsWallAhead())
+                    {
+                        transform.position = Vector3.MoveTowards(transform.position, HangAble.transform.position, RunSpeed * Time.deltaTime);
+                        anime.SetBool("Run", true);
+                        anime.SetBool("Walking", false);
+                    }
+                    else
+                    {
+                        anime.SetBool("Run", false);
+                    }
                 }
             }
             else
@@ -159,9 +172,10 @@ public class NableNative : MonoBehaviour
                             {
                                 if (IsPatroling)
                                 {
-                                    if (IsGroundAhead())
+                                    // KONTROLLERA BÅDE MARK OCH VÄGG
+                                    if (IsGroundAhead() && !IsWallAhead())
                                     {
-                                        // Mark finns! Spring mot målet (spelaren eller infekterad fiende)
+                                        // Mark finns & ingen vägg! Spring mot målet
                                         transform.position = Vector3.MoveTowards(transform.position, currentTarget.position, RunSpeed * Time.deltaTime);
                                         anime.SetBool("Run", true);
 
@@ -171,9 +185,9 @@ public class NableNative : MonoBehaviour
                                     }
                                     else
                                     {
-                                        // STUP!
+                                        // STUP ELLER VÄGG!
                                         anime.SetBool("Run", false);
-                                        anime.SetBool("Walking", true);
+                                        anime.SetBool("Walking", false);
                                     }
                                 }
                             }
@@ -229,11 +243,17 @@ public class NableNative : MonoBehaviour
                     
                     if (AttackDistance < dis)
                     {
-                        if (IsGroundAhead())
+                        // KONTROLLERA BÅDE MARK OCH VÄGG
+                        if (IsGroundAhead() && !IsWallAhead())
                         {
                             // Spring mot målet
                             transform.position = Vector3.MoveTowards(transform.position, currentTarget.position, RunSpeed * Time.deltaTime);
                             anime.SetBool("Run", true);
+                        }
+                        else if (IsWallAhead())
+                        {
+                            // Stanna om det är en vägg ivägen
+                            anime.SetBool("Run", false);
                         }
                         else
                         {
@@ -266,6 +286,11 @@ public class NableNative : MonoBehaviour
                 }
             }
         }
+
+
+        // Tvinga rotationen att enbart vara runt Y-axeln (ingen lutning framåt/bakåt)
+        Vector3 currentEuler = transform.eulerAngles;
+        transform.eulerAngles = new Vector3(0f, currentEuler.y, 0f);
     }
 
     bool IsGroundAhead()
@@ -273,6 +298,18 @@ public class NableNative : MonoBehaviour
         Vector3 forwardPos = transform.position + transform.forward * 0.5f;
         return Physics.Raycast(forwardPos + Vector3.up, Vector3.down, 2f, groundLayer);
     }
+
+    // känner av om en vägg/ett hinder är direkt framför karaktären
+   bool IsWallAhead()
+   {
+        Vector3 rayStart = transform.position + Vector3.up * 0.8f; // Höjd från marken (brösthöjd)
+        bool hit = Physics.Raycast(rayStart, transform.forward, wallCheckDistance, obstacleLayer);
+
+        // Ritar en linje i Scene-vyn så du ser strålen: GRÖN = Tomt, RÖD = Träffar vägg
+        Debug.DrawRay(rayStart, transform.forward * wallCheckDistance, hit ? Color.red : Color.green);
+
+        return hit;
+   }
 
     void Patrol()
     {
@@ -289,7 +326,8 @@ public class NableNative : MonoBehaviour
             return;
         }
 
-        if (!IsGroundAhead())
+        // Vänd om ifall det saknas mark ELLER om det står en vägg ivägen
+        if (!IsGroundAhead() || IsWallAhead())
         {
             isWaiting = true;
             patrolTimer = 0f;

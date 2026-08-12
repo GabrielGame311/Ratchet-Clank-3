@@ -4,65 +4,77 @@ using UnityEngine;
 
 public class VendorTrigger : MonoBehaviour
 {
+    public static VendorTrigger Instance;
 
-    public bool Istrigger = false;
+    [Header("Settings & Animations")]
+    public bool isTrigger = false;
     public Animator anime;
-    public static VendorTrigger vendortrigger_;
-    // Start is called before the first frame update
-    void Start()
+    public GameObject promptUI; // UI-text/ikon för "Tryck E"
+
+    private void Awake()
     {
-        vendortrigger_ = GetComponent<VendorTrigger>();
+        Instance = this;
     }
 
-    // Update is called once per frame
-    void Update()
+    private void Update()
     {
-
-
-        if (Istrigger)
+        if (isTrigger && Input.GetKeyDown(KeyCode.E))
         {
-            if (Input.GetKeyDown(KeyCode.E))
+            if (VendingMenu.Instance != null && !VendingMenu.Instance.isVendingOpen)
             {
-                VendingMenu.VendingMenu_.EnterVending();
-                anime.SetBool("Hide", true);
+                VendingMenu.Instance.EnterVending();
+
+                if (anime != null)
+                {
+                    anime.SetBool("Hide", true);
+                }
+
+                if (promptUI != null)
+                {
+                    promptUI.SetActive(false);
+                }
             }
         }
-
-
-
-
     }
-
 
     private void OnTriggerEnter(Collider other)
     {
-        if(other.tag == "Player")
+        if (other.CompareTag("Player"))
         {
-           
-            Istrigger = true;
+            isTrigger = true;
             UpdateVendingMenu();
+
+            if (promptUI != null)
+            {
+                promptUI.SetActive(true);
+            }
         }
     }
 
     private void OnTriggerExit(Collider other)
     {
-        if (other.tag == "Player")
+        if (other.CompareTag("Player"))
         {
-            
-            Istrigger = false;
+            isTrigger = false;
             UpdateVendingMenu();
+
+            if (promptUI != null)
+            {
+                promptUI.SetActive(false);
+            }
+
+            if (anime != null)
+            {
+                anime.SetBool("Hide", false);
+            }
         }
     }
 
-
-    void UpdateVendingMenu()
+    private void UpdateVendingMenu()
     {
-        if(VendingMenu.VendingMenu_.ActiveVendor.gameObject != null)
+        if (VendingMenu.Instance != null && VendingMenu.Instance.activeVendor != null)
         {
-            
-            VendingMenu.VendingMenu_.ActiveVendor.SetActive(Istrigger);
-            
-           // anime.SetBool("Hide", Istrigger);
+            VendingMenu.Instance.activeVendor.SetActive(isTrigger);
         }
     }
 }

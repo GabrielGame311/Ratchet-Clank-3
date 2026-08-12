@@ -17,12 +17,11 @@ public class GunShooter : MonoBehaviour
     bool Isshoot = false;
     PlayerControlls controlls;
     bool shoots = true;
+    private WeaponAmmos weaponAmmo;
     private void Start()
     {
-
+        weaponAmmo = GetComponent<WeaponAmmos>();
         startShoot = shootTime;
-
-       
     }
 
     private void Awake()
@@ -45,10 +44,8 @@ public class GunShooter : MonoBehaviour
     {
 
 
-        if (GameObject.FindObjectOfType<WeaponAmmos>().GetComponent<WeaponAmmos>().Ammo > 0)
+        if (weaponAmmo != null && weaponAmmo.Ammo > 0)
         {
-
-
             shoots = true;
         }
         else
@@ -106,93 +103,55 @@ public class GunShooter : MonoBehaviour
 
     public void shoot()
     {
-
-
-        if (shoots == true)
+        if (shoots == true && weaponAmmo != null && weaponAmmo.TryShoot())
         {
-            
-               GameObject.FindObjectOfType<WeaponAmmos>().GetComponent<WeaponAmmos>().Ammo -= 1;
-
-          
-            if(SightUI.SightUI_.Sight.activeSelf)
+            if (SightUI.SightUI_.Sight.activeSelf)
             {
-              
-                if(shootcount == 0)
+                if (shootcount == 0)
                 {
                     Vector3 targetPosition = Camera.main.ScreenToWorldPoint(SightUI.SightUI_.Sight.transform.position);
                     Vector3 direction = (targetPosition - ProjectileSpawn.position).normalized;
 
-
                     GameObject bullet = Instantiate(particle, ProjectileSpawn.position, ProjectileSpawn.transform.rotation);
                     Rigidbody bulletRigidbody = bullet.GetComponent<Rigidbody>();
                     bulletRigidbody.linearVelocity = direction * ShootSpeed;
-                    
+
                     Quaternion rotation = Quaternion.LookRotation(direction);
                     bullet.transform.rotation = rotation;
                     shootcount = 1;
                 }
-                else if(shootcount == 1)
+                else if (shootcount == 1)
                 {
-
                     Vector3 targetPosition2 = Camera.main.ScreenToWorldPoint(SightUI.SightUI_.Sight.transform.position);
                     Vector3 direction2 = (targetPosition2 - Projectile2Spawn.position).normalized;
-
 
                     GameObject bullet2 = Instantiate(particle, Projectile2Spawn.position, Projectile2Spawn.transform.rotation);
                     Rigidbody bulletRigidbody2 = bullet2.GetComponent<Rigidbody>();
                     bulletRigidbody2.linearVelocity = direction2 * ShootSpeed;
-                    
+
                     Quaternion rotation2 = Quaternion.LookRotation(direction2);
                     bullet2.transform.rotation = rotation2;
                     shootcount = 0;
                 }
-
-
-               
-
-               
-
-
             }
             else
             {
-
-
                 if (shootcount == 0)
                 {
-
                     var projectile = Instantiate(particle, ProjectileSpawn.transform.position, ProjectileSpawn.transform.rotation);
                     projectile.GetComponent<Rigidbody>().linearVelocity = ProjectileSpawn.transform.forward * ShootSpeed;
                     projectile.transform.localScale = ProjectileSpawn.transform.localScale;
-                   
                     shootcount = 1;
                 }
                 else if (shootcount == 1)
                 {
-
                     var projectile2 = Instantiate(particle, Projectile2Spawn.transform.position, Projectile2Spawn.transform.rotation);
                     projectile2.GetComponent<Rigidbody>().linearVelocity = Projectile2Spawn.transform.forward * ShootSpeed;
                     projectile2.transform.localScale = Projectile2Spawn.transform.localScale;
                     shootcount = 0;
                 }
             }
-
-
-
-
-
-
-            if (GetComponent<WeaponAmmos>().Ammo < GetComponent<WeaponAmmos>().MaxAmmo)
-            {
-                GameObject.FindObjectOfType<VendingMenu>().Price += GetComponent<WeaponAmmos>().havePrice;
-            }
         }
-
-       
-
-
-
-        
     }
 
     

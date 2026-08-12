@@ -1,51 +1,65 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using TMPro;
 using UnityEngine.UI;
+using TMPro;
 
 public class WeaponAmmoCount : MonoBehaviour
 {
+    public static WeaponAmmoCount Instance;
+    public static WeaponAmmoCount WeaponAmmoCount_ => Instance; // Bakåtkompatibilitet för äldre skript
 
-    public TMP_Text Ammo_Text;
-    public Image weaponIcone;
-    public static WeaponAmmoCount WeaponAmmoCount_;
-    // Start is called before the first frame update
-    void Start()
+    [Header("UI References")]
+    public TMP_Text ammoText;
+    public Image weaponIcon;
+
+    [Header("Current Weapon")]
+    public WeaponAmmos currentWeapon;
+
+    private WeaponsUI currentWeaponUI;
+
+    private void Awake()
     {
-        WeaponAmmoCount_ = GetComponent<WeaponAmmoCount>();
-
-
-
+        Instance = this;
     }
 
-    // Update is called once per frame
-    void Update()
+    private void Update()
     {
+        UpdateHUD();
+    }
 
+    /// <summary>
+    /// Uppdaterar ammunitionsräknaren i HUD:en varje bildruta
+    /// </summary>
+    public void UpdateHUD()
+    {
+        if (currentWeapon == null) return;
 
+        if (ammoText != null)
+        {
+            ammoText.text = $"{currentWeapon.Ammo:D2} / {currentWeapon.MaxAmmo:D2}";
+        }
+    }
 
-        int currentAmmo = GameObject.FindObjectOfType<WeaponAmmos>().GetComponent<WeaponAmmos>().Ammo;
-        int maxAmmo = GameObject.FindObjectOfType<WeaponAmmos>().GetComponent<WeaponAmmos>().MaxAmmo;
+    /// <summary>
+    /// Anropas när spelaren byter vapen
+    /// </summary>
+    public void SetActiveWeapon(WeaponAmmos newWeapon)
+    {
+        currentWeapon = newWeapon;
 
-        string ammoText = currentAmmo.ToString("D2"); // Format to two digits
-        string maxAmmoText = maxAmmo.ToString("D2"); // Format to two digits
+        if (currentWeapon != null)
+        {
+            // Cacha WeaponsUI en gång vid vapenbyte
+            currentWeaponUI = currentWeapon.GetComponent<WeaponsUI>();
 
-        Ammo_Text.text = ammoText + "/" + maxAmmoText;
-        VendingShop.VendingShop_.WeaponAmmoText.text = ammoText + "/" + maxAmmoText;
+            if (weaponIcon != null && currentWeaponUI != null)
+            {
+                if (currentWeaponUI.weaponImg != null)
+                {
+                    weaponIcon.sprite = currentWeaponUI.weaponImg;
+                }
+            }
+        }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+        UpdateHUD();
     }
 }

@@ -7,19 +7,20 @@ public class GunBall : MonoBehaviour
     public GameObject ball;
     public Transform spawn;
     public float BallSpeed;
-    public  bool shoot = true;
-   
+    public bool shoot = true;
+    private WeaponAmmos weaponAmmo;
+
     // Start is called before the first frame update
     void Start()
     {
-       
+        weaponAmmo = GetComponent<WeaponAmmos>();
     }
 
     // Update is called once per frame
     void Update()
     {
 
-        if (GameObject.FindObjectOfType<WeaponAmmos>().GetComponent<WeaponAmmos>().Ammo > 0)
+        if (weaponAmmo != null && weaponAmmo.Ammo > 0)
         {
             shoot = true;
         }
@@ -50,20 +51,10 @@ public class GunBall : MonoBehaviour
 
     public void ThrowBall()
     {
-       
-        
-
-
-        if(shoot == true)
+        if (shoot == true && weaponAmmo != null && weaponAmmo.TryShoot())
         {
-            GameObject.FindObjectOfType<WeaponAmmos>().GetComponent<WeaponAmmos>().Ammo  -= 1;
-            if (GetComponent<WeaponAmmos>().Ammo < GetComponent<WeaponAmmos>().MaxAmmo)
-            {
-                GameObject.FindObjectOfType<VendingMenu>().Price += GetComponent<WeaponAmmos>().havePrice;
-            }
             var banger = Instantiate(ball, spawn.transform.position, spawn.transform.rotation);
             banger.GetComponent<Rigidbody>().AddForce(spawn.transform.forward * BallSpeed);
-
             shoot = false;
         }
     }
