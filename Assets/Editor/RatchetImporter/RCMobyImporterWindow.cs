@@ -59,6 +59,7 @@ namespace RatchetImport
         private double lastUpdate;
         private float playbackSpeed = 1f;
         private bool showBackfaces;
+        private Vector2 settingsScroll;
 
         // Shared across every preview and thumbnail built from the loaded level.
         private readonly RCPreviewCache previewCache = new RCPreviewCache();
@@ -135,8 +136,12 @@ namespace RatchetImport
                 using (new EditorGUILayout.VerticalScope(GUILayout.Width(listWidth)))
                 {
                     DrawFilters();
-                    DrawList();
+
+                    // Above the list, not below it: the list expands to fill whatever
+                    // room is left, so anything after it can be pushed off the bottom
+                    // of the window where it cannot be reached.
                     DrawActions();
+                    DrawList();
                 }
 
                 DrawSplitter();
@@ -418,6 +423,21 @@ namespace RatchetImport
 
                 GUILayout.FlexibleSpace();
 
+                // The model on screen is the one the user is thinking about, so give it
+                // its own export rather than sending them off to find its checkbox.
+                using (new EditorGUI.DisabledScope(previewRow == null || previewRow.error != null))
+                {
+                    Color previousBackground = GUI.backgroundColor;
+                    GUI.backgroundColor = new Color(0.40f, 0.72f, 0.42f);
+
+                    if (GUILayout.Button("Export this moby", EditorStyles.toolbarButton, GUILayout.Width(112f)))
+                        ExportRows(new List<MobyRow> { previewRow });
+
+                    GUI.backgroundColor = previousBackground;
+                }
+
+                GUILayout.Space(8f);
+
                 bool wantBackfaces = GUILayout.Toggle(showBackfaces, "Backfaces", EditorStyles.toolbarButton, GUILayout.Width(72f));
                 if (wantBackfaces != showBackfaces)
                 {
@@ -562,7 +582,17 @@ namespace RatchetImport
 
         private void DrawSettings()
         {
-            EditorGUILayout.LabelField("Import settings", EditorStyles.boldLabel);
+            // Fixed height with its own scrollbar. Left to size itself these rows
+            // compete with the list and preview for space, and lose.
+            EditorGUILayout.Space(2f);
+            settingsScroll = EditorGUILayout.BeginScrollView(settingsScroll, GUILayout.Height(168f));
+            DrawSettingsBody();
+            EditorGUILayout.EndScrollView();
+        }
+
+        private void DrawSettingsBody()
+        {
+            EditorGUILayout.LabelField("Export settings", EditorStyles.boldLabel);
 
             using (new EditorGUILayout.HorizontalScope())
             {
@@ -630,11 +660,31 @@ namespace RatchetImport
                     selected++;
             }
 
-            using (new EditorGUI.DisabledScope(selected == 0))
+            // Kept enabled even with an empty selection. A greyed-out button reads as
+            // a caption rather than a control, so it explains itself on click instead.
+            Color previousBackground = GUI.backgroundColor;
+            if (selected > 0)
+                GUI.backgroundColor = new Color(0.40f, 0.72f, 0.42f);
+
+            string label = (selected > 0)
+                ? string.Format("Export {0} ticked moby(s)", selected)
+                : "Export ticked mobies...";
+
+            bool pressed = GUILayout.Button(label, GUILayout.Height(26f));
+            GUI.backgroundColor = previousBackground;
+
+            if (!pressed)
+                return;
+
+            if (selected == 0)
             {
-                if (GUILayout.Button(string.Format("Import {0} selected", selected), GUILayout.Height(26f)))
-                    ImportSelected();
+                status = "Nothing is ticked. Use the checkbox on the left of each row, or the "
+                         + "\"Export this moby\" button above the preview to export just the one you are looking at.";
+                statusType = MessageType.Info;
+                return;
             }
+
+            ImportSelected();
         }
 
         private void DrawStatus()
@@ -786,19 +836,31 @@ namespace RatchetImport
 
         private void ImportSelected()
         {
+            var ticked = new List<MobyRow>();
+            for (int i = 0; i < rows.Count; i++)
+            {
+                if (rows[i].selected)
+                    ticked.Add(rows[i]);
+            }
+
+            ExportRows(ticked);
+        }
+
+        private void ExportRows(List<MobyRow> requested)
+        {
             EditorPrefs.SetString(OutputFolderKey, settings.outputFolder);
             EditorPrefs.SetFloat(ImportScaleKey, settings.importScale);
 
             var queue = new List<MobyRow>();
-            for (int i = 0; i < rows.Count; i++)
+            for (int i = 0; i < requested.Count; i++)
             {
-                if (rows[i].selected && rows[i].error == null)
-                    queue.Add(rows[i]);
+                if (requested[i] != null && requested[i].error == null)
+                    queue.Add(requested[i]);
             }
 
             if (queue.Count == 0)
             {
-                status = "Every selected moby is unreadable or empty.";
+                status = "Nothing to export - the chosen mobies are unreadable or have no geometry.";
                 statusType = MessageType.Warning;
                 return;
             }
