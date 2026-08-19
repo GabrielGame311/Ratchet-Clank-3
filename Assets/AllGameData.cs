@@ -26,21 +26,21 @@ public class AllGameData : MonoBehaviour
     public int CurrentSaveSlot = 0;
     public bool IsSave = false;
     public bool IsPlayer = false;
+
+
+    [Header("Checkpoint Data")]
+    public Vector3 lastCheckpointPos;
+    public Quaternion lastCheckpointRot;
+    public bool hasCheckpoint = false;
+
+
+
+
     void Start()
     {
 
-        if(!IsPlayer)
-        {
-            data = FindObjectsOfType<AllGameData>();
-
-
-            foreach (AllGameData pl in data)
-            {
-                Armor = pl.Armor;
-            }
-        }
-
         Instance = this;
+        CurrentSaveSlot = LoadMapName.NextSaveSlot;
 
         
 
@@ -51,33 +51,65 @@ public class AllGameData : MonoBehaviour
         
     }
 
+    /// <summary>
+    /// SÃ¤tter ny checkpoint-position
+    /// </summary>
+    public void SetCheckpoint(Vector3 pos, Quaternion rot)
+    {
+        lastCheckpointPos = pos;
+        lastCheckpointRot = rot;
+        hasCheckpoint = true;
+    }
+
+    /// <summary>
+    /// Anropa denna nÃ¤r spelaren dÃ¶r fÃ¶r att spawna om vid senast sparade checkpoint
+    /// </summary>
+    public void RespawnPlayer()
+    {
+        if (Player_ == null) return;
+
+        if (hasCheckpoint)
+        {
+            // Inaktivera CharacterController tillfÃ¤lligt fÃ¶r att tillÃ¥ta fÃ¶rflyttning
+            CharacterController cc = Player_.GetComponent<CharacterController>();
+            if (cc != null) cc.enabled = false;
+
+            Player_.transform.position = lastCheckpointPos;
+            Player_.transform.rotation = lastCheckpointRot;
+
+            if (cc != null) cc.enabled = true;
+
+            // Ã…teraktivera spelarkontrollen och nollstÃ¤ll hÃ¤lsa/tillstÃ¥nd hÃ¤r vid behov
+            EnablePlayerDo();
+        }
+        else
+        {
+            // A new game has no checkpoint yet. Keep the scene start position.
+            return;
+        }
+    }
+
+
     private void InitializeGame()
     {
         
 
-        SavedMap = LoadingScene.instance.LoadMap;
+        if (LoadingScene.instance != null && !string.IsNullOrEmpty(LoadingScene.instance.LoadMap))
+        {
+            SavedMap = LoadingScene.instance.LoadMap;
+        }
         CurrentMapInt = SceneManager.GetActiveScene().buildIndex;
-
-        string path = SaveUtility.GetSavePath(CurrentSaveSlot);
-        if (!File.Exists(path))
+        if (!SaveUtility.TryReadSave(CurrentSaveSlot, out SaveData data))
         {
             Debug.LogWarning("Save not found in slot " + CurrentSaveSlot);
             return;
         }
 
-        string json = File.ReadAllText(path);
-        SaveData data = JsonUtility.FromJson<SaveData>(json);
-
         if (IsSave == false)
         {
             
             SaveSystem.LoadGame(CurrentSaveSlot, false);
-            SaveSystem.SaveGame(CurrentSaveSlot);
-            SaveUI saveUI = GameObject.FindObjectOfType<SaveUI>();
-            if (saveUI != null)
-            {
-                saveUI.ShowSavingMessage();
-            }
+            RespawnPlayer();
         }
 
         Debug.Log($"Loading game from slot {CurrentSaveSlot}");
@@ -140,28 +172,30 @@ public class AllGameData : MonoBehaviour
 
     public void SetArmor(int setting)
     {
-        // 1. Säkerhetskoll för index (så vi inte går utanför arrayernas storlek)
+        Armor = setting;
+
+        // 1. Sï¿½kerhetskoll fï¿½r index (sï¿½ vi inte gï¿½r utanfï¿½r arrayernas storlek)
         if (setting < 0 ||
             setting >= meshMaterial_Armor1.Length ||
             setting >= meshMaterial_Armor2.Length ||
             setting >= MeshArmor.Length)
         {
-            Debug.LogWarning($"SetArmor index {setting} är out of bounds!");
+            Debug.LogWarning($"SetArmor index {setting} ï¿½r out of bounds!");
             return;
         }
 
-        // 2. Kolla så att inte objekten i arrayen är tomma (Null)
+        // 2. Kolla sï¿½ att inte objekten i arrayen ï¿½r tomma (Null)
         if (meshMaterial_Armor1[setting] == null ||
             meshMaterial_Armor2[setting] == null ||
             MeshArmor[setting] == null)
         {
-            Debug.LogWarning($"Någon tillgång saknas i inspektorn för index {setting}.");
+            Debug.LogWarning($"Nï¿½gon tillgï¿½ng saknas i inspektorn fï¿½r index {setting}.");
             return;
         }
 
         Material[] mats;
 
-        // 3. Bestäm hur många material den aktuella rustningen har
+        // 3. Bestï¿½m hur mï¿½nga material den aktuella rustningen har
         if (setting == 3)
         {
             mats = new Material[5];
@@ -173,7 +207,7 @@ public class AllGameData : MonoBehaviour
         }
         else if (setting == 4)
         {
-            // HÄR HANTERAS NIVÅ 4: Den får också 5 material (eller ändra till 6 om du la till ännu ett)
+            // Hï¿½R HANTERAS NIVï¿½ 4: Den fï¿½r ocksï¿½ 5 material (eller ï¿½ndra till 6 om du la till ï¿½nnu ett)
             mats = new Material[5];
             mats[0] = meshMaterial_Armor1[setting];
             mats[1] = meshMaterial_Armor2[setting];
@@ -181,7 +215,7 @@ public class AllGameData : MonoBehaviour
             mats[3] = meshMaterial_Armor2[setting];
             mats[4] = meshMaterial_Armor1[setting]; // Ditt nya 5:e material
         }
-        else // Gäller för 0, 1 och 2 (som bara har 4 material)
+        else // Gï¿½ller fï¿½r 0, 1 och 2 (som bara har 4 material)
         {
             mats = new Material[4];
             mats[0] = meshMaterial_Armor1[setting];
@@ -190,7 +224,7 @@ public class AllGameData : MonoBehaviour
             mats[3] = meshMaterial_Armor2[setting];
         }
 
-        // 4. Hantera hjälmen
+        // 4. Hantera hjï¿½lmen
         if (setting == 4)
         {
             Helmet.SetActive(false);

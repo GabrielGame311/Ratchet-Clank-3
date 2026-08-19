@@ -94,45 +94,54 @@ public class SaveManager : MonoBehaviour
 
     public void SaveGameDataToJsonFile(AllGameData gameData, int slotNumber)
     {
-
-        string json = JsonUtility.ToJson(gameData);
-
-        string encrypted = EncryptionDecryption(json);
-
-        using (StreamWriter writer = new StreamWriter(jsonPathProject))
+        if (gameData == null || slotNumber < 0)
         {
+            Debug.LogError("Cannot save legacy game data: invalid data or slot.");
+            return;
+        }
 
-            writer.Write(encrypted);
-            print("Saved Game to Json file at :" + jsonPathProject + slotNumber + ".json");
+        try
+        {
+            string path = GetLegacySavePath(slotNumber);
+            Directory.CreateDirectory(Application.persistentDataPath);
+            string json = JsonUtility.ToJson(gameData);
+            string encrypted = EncryptionDecryption(json);
+            File.WriteAllText(path, encrypted);
 
-        };
-
-
-        
-
-
-
-
-
-
-
+            Debug.Log("Saved legacy game data to: " + path);
+        }
+        catch (System.Exception exception)
+        {
+            Debug.LogError("Could not save legacy game data: " + exception.Message);
+        }
 
     }
 
     public AllGameData LoadGameDataFromJsonFile(int slotNumber)
     {
-        using(StreamReader reader = new StreamReader (jsonPathProject))
+        string path = GetLegacySavePath(slotNumber);
+        if (!File.Exists(path))
         {
+            Debug.LogWarning("Legacy save not found in slot " + slotNumber);
+            return null;
+        }
 
-            string json = reader.ReadToEnd();
+        try
+        {
+            string encrypted = File.ReadAllText(path);
+            string decrypted = EncryptionDecryption(encrypted);
+            return JsonUtility.FromJson<AllGameData>(decrypted);
+        }
+        catch (System.Exception exception)
+        {
+            Debug.LogError("Could not load legacy game data: " + exception.Message);
+            return null;
+        }
+    }
 
-            string decrypted = EncryptionDecryption(json);
-
-            AllGameData data = JsonUtility.FromJson<AllGameData>(decrypted);
-            return data;
-
-        };
-
+    private string GetLegacySavePath(int slotNumber)
+    {
+        return Path.Combine(Application.persistentDataPath, "SaveGame_" + slotNumber + ".json");
 
     }
 

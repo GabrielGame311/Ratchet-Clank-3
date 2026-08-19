@@ -8,9 +8,9 @@ public class SaveUI : MonoBehaviour
     public void ShowSavingMessage()
     {
 
-        if(AllGameData.Instance != null)
+        if (savingPanel == null)
         {
-            SaveSystem.LoadGame(AllGameData.Instance.CurrentSaveSlot, false);
+            return;
         }
 
         savingPanel.SetActive(true);

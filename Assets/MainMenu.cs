@@ -15,6 +15,18 @@ public class MainMenu : MonoBehaviour
 
     private void Start()
     {
+        Time.timeScale = 1f;
+        global::Menu.IsMenu = false;
+        Cursor.visible = true;
+        Cursor.lockState = CursorLockMode.None;
+        LoadMapName.NextMapToLoad = "";
+        LoadMapName.NextSaveSlot = 0;
+        LoadMapName.NextMapId = 0;
+        LoadMapName.LoadingExistingSave = false;
+        LoadMapName.DirectMapNavigation = false;
+        LoadingScene.PendingLoadMap = "";
+        LoadingScene.PendingMapId = 0;
+        LoadingScene.HasPendingDirectMap = false;
         StartTime = FloatTime;
     }
 

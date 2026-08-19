@@ -49,6 +49,9 @@ public class MenuShip : MonoBehaviour
     public void SceneLoad()
     {
         Time.timeScale = 1f;
+        LoadMapName.SetDirectMap(SceneName, Scenes);
+        LoadMapName.NextSaveSlot = 0;
+
         Button_.interactable = false;
         ShipMenu.ShipMenu_.Menu.SetActive(false);
         ShipMenuTrigger.shipmenutrigger_.Flytime.enabled = true;
@@ -56,22 +59,26 @@ public class MenuShip : MonoBehaviour
         ShipMenuTrigger.shipmenutrigger_.Flytime.stopped += OnDirectorStopped;
 
         ShipMenu.ShipMenu_.loadScene = SceneName;
-        // LoadingScene.LoadScene.LoadMap = SceneName;
-
-
+        // LoadingScene reads NextMapToLoad after the scene transition.
 
     }
 
     private void OnDirectorStopped(PlayableDirector director)
     {
         // Check if the stopped PlayableDirector is the one we're interested in.
-        if (director == ShipMenuTrigger.shipmenutrigger_.Flytime)
+        if (director == ShipMenuTrigger.shipmenutrigger_.Flytime &&
+            ShipMenu.ShipMenu_.loadScene == SceneName)
         {
             // Perform your action when the timeline playback is completed.
             Debug.Log("Director playback completed!");
+            director.stopped -= OnDirectorStopped;
+            LoadMapName.SetDirectMap(SceneName, Scenes);
 
-            LoadMapName.Instance.LoadMap = SceneName;
-            LoadMapName.Instance.mapid = Scenes;
+            if (LoadMapName.Instance != null)
+            {
+                LoadMapName.Instance.LoadMap = SceneName;
+                LoadMapName.Instance.mapid = Scenes;
+            }
             ShipMenuTrigger.LoadShipScene();
              SceneManager.LoadScene("LoadingMap 1");
             

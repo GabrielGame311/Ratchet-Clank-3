@@ -40,6 +40,10 @@ public class TriggerMap : MonoBehaviour
             // Perform your action when the timeline playback is completed.
             Debug.Log("Director playback completed!");
 
+            LoadMapName.NextMapToLoad = LoadMap;
+            LoadMapName.NextMapId = LoadMapName.Instance != null ? LoadMapName.Instance.mapid : 0;
+            LoadMapName.LoadingExistingSave = false;
+            LoadMapName.DirectMapNavigation = true;
             LoadMapName.Instance.LoadMap = LoadMap;
             SceneManager.LoadScene("LoadingMap 1");
            // LoadingScene.LoadScene.LoadMap = LoadMap;

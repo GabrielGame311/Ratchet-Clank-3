@@ -12,10 +12,25 @@ public class SaveData
     public float health;
     public string SavedMap;
     public int CurrentMap;
+    public int ImageMapIndex;
     public int LoadGameCount;
     public int SaveSlot;
     public int Bolt_;
     public int Ammo;
+    public string timePlayed;
+    public int bolts;
+    public int challengeMode;
+    public string saveDate;
+
+    public int currentSaveSlot;
+    public int currentMapInt;
+    public int armor;
+
+    // Position och rotation
+    public float posX, posY, posZ;
+    public float rotX, rotY, rotZ, rotW;
+    public bool hasCheckpoint;
+
 
     [System.Serializable]
     public class WeaponData
@@ -32,7 +47,9 @@ public class SaveData
 
     }
 
-    public WeaponSaveData weaponSaveData = new WeaponSaveData(); // <-- Lägg till detta!
+    
+
+    public WeaponSaveData weaponSaveData = new WeaponSaveData(); // <-- Lï¿½gg till detta!
 
     public bool IsValid()
     {

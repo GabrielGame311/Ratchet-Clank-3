@@ -6,27 +6,55 @@ public static class SaveSystem
 {
     public static void SaveGame(int saveSlot)
     {
-        if (AllGameData.Instance == null || Player.Player_ == null)
+        if (saveSlot < 0)
         {
-            Debug.LogError("Cannot save: AllGameData.Instance or Player.Player_ is null!");
+            Debug.LogError($"Cannot save invalid slot {saveSlot}.");
             return;
+        }
+
+        if (AllGameData.Instance == null)
+        {
+            Debug.LogError("Cannot save: AllGameData.Instance is null.");
+            return;
+        }
+
+        int health = Player.Player_ != null ? Player.Player_.maxHealth : 10;
+        int armor = AllGameData.Instance.Armor;
+        if (Player.Player_ == null && SaveUtility.TryReadSave(saveSlot, out SaveData previousData))
+        {
+            armor = previousData.PlayerArmor;
+            health = (int)previousData.health;
         }
 
         SaveData data = new SaveData
         {
             SaveSlot = saveSlot,
-            PlayerArmor = AllGameData.Instance.Armor,
+            PlayerArmor = armor,
             SavedMap = LoadingScene.instance != null ? LoadingScene.instance.LoadMap : AllGameData.Instance.SavedMap,
             CurrentMap = LoadingScene.instance != null ? LoadingScene.instance.MapID : AllGameData.Instance.CurrentMapInt,
             LoadGameCount = LoadMapName.Instance?.LoadGames_?.Count ?? 0,
-            health = Player.Player_.maxHealth
+            health = health,
+            saveDate = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+            posX = AllGameData.Instance.lastCheckpointPos.x,
+            posY = AllGameData.Instance.lastCheckpointPos.y,
+            posZ = AllGameData.Instance.lastCheckpointPos.z,
+            rotX = AllGameData.Instance.lastCheckpointRot.x,
+            rotY = AllGameData.Instance.lastCheckpointRot.y,
+            rotZ = AllGameData.Instance.lastCheckpointRot.z,
+            rotW = AllGameData.Instance.lastCheckpointRot.w,
+            hasCheckpoint = AllGameData.Instance.hasCheckpoint
         };
+        data.ImageMapIndex = GetImageMapIndex(data.SavedMap, data.CurrentMap);
 
         // Hämta bolts om komponenten finns
         Bolts boltsObj = Object.FindObjectOfType<Bolts>();
-        if (boltsObj != null)
+        if (boltsObj != null && Player.Player_ != null)
         {
             data.Bolt_ = boltsObj.bolt;
+        }
+        else if (SaveUtility.TryReadSave(saveSlot, out SaveData previousSave))
+        {
+            data.Bolt_ = previousSave.Bolt_;
         }
 
         // Säkerställ att vapendatastrukturen är initierad
@@ -49,8 +77,10 @@ public static class SaveSystem
         }
 
         // Spara till fil
-        string json = JsonUtility.ToJson(data, true);
-        File.WriteAllText(SaveUtility.GetSavePath(saveSlot), json);
+        if (!SaveUtility.TryWriteSave(saveSlot, data))
+        {
+            return;
+        }
 
         SaveUI saveUI = Object.FindObjectOfType<SaveUI>();
         if (saveUI != null)
@@ -63,16 +93,34 @@ public static class SaveSystem
 
     public static void SaveNewGame(int saveSlot)
     {
+        string newMap = "Veldins";
+        int newMapId = 0;
+        if (LoadMapName.Instance != null)
+        {
+            if (!string.IsNullOrEmpty(LoadMapName.Instance.LoadMap))
+            {
+                newMap = LoadMapName.Instance.LoadMap;
+            }
+
+            newMapId = LoadMapName.Instance.mapid;
+        }
+        else if (!string.IsNullOrEmpty(LoadMapName.NextMapToLoad))
+        {
+            newMap = LoadMapName.NextMapToLoad;
+        }
+
         SaveData data = new SaveData
         {
             PlayerArmor = 0,
             health = 10,
-            SavedMap = "Veldins",
-            CurrentMap = 0,
+            SavedMap = newMap,
+            CurrentMap = newMapId,
             LoadGameCount = 0,
             SaveSlot = saveSlot,
-            Bolt_ = 0
+            Bolt_ = 0,
+            saveDate = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
         };
+        data.ImageMapIndex = GetImageMapIndex(data.SavedMap, data.CurrentMap);
 
         EnsureWeaponSaveDataExists(data);
 
@@ -92,31 +140,24 @@ public static class SaveSystem
             }
         }
 
-        string json = JsonUtility.ToJson(data, true);
-        File.WriteAllText(SaveUtility.GetSavePath(saveSlot), json);
+        if (!SaveUtility.TryWriteSave(saveSlot, data))
+        {
+            return;
+        }
 
         Debug.Log($"New game saved to slot {saveSlot}.");
     }
 
     public static void LoadGame(int saveSlot, bool prefab)
     {
-        string path = SaveUtility.GetSavePath(saveSlot);
-        if (!File.Exists(path))
+        if (!SaveUtility.TryReadSave(saveSlot, out SaveData data))
         {
-            Debug.LogWarning($"Save file not found in slot {saveSlot} at path: {path}");
+            Debug.LogWarning($"Save file could not be loaded from slot {saveSlot}.");
             return;
         }
 
         try
         {
-            string json = File.ReadAllText(path);
-            SaveData data = JsonUtility.FromJson<SaveData>(json);
-            if (data == null)
-            {
-                Debug.LogError($"Failed to deserialize save data from slot {saveSlot}");
-                return;
-            }
-
             ApplyGameData(data, saveSlot);
             if (prefab) ApplyMapData(data, saveSlot);
 
@@ -150,16 +191,25 @@ public static class SaveSystem
         if (LoadingScene.instance != null)
         {
             LoadingScene.instance.LoadMap = data.SavedMap;
+            LoadingScene.instance.MapID = data.CurrentMap;
             LoadingScene.instance.SaveSlot = data.SaveSlot;
         }
-        else
+
+        AllGameData.Instance.SavedMap = data.SavedMap;
+        AllGameData.Instance.CurrentSaveSlot = data.SaveSlot;
+
+        if (LoadMapName.Instance != null)
         {
-            AllGameData.Instance.SavedMap = data.SavedMap;
-            AllGameData.Instance.CurrentSaveSlot = data.SaveSlot;
+            LoadMapName.Instance.LoadMap = data.SavedMap;
+            LoadMapName.Instance.mapid = data.CurrentMap;
+            LoadMapName.NextMapToLoad = data.SavedMap;
         }
 
         AllGameData.Instance.CurrentMapInt = data.CurrentMap;
         AllGameData.Instance.SetArmor(data.PlayerArmor);
+        AllGameData.Instance.hasCheckpoint = data.hasCheckpoint;
+        AllGameData.Instance.lastCheckpointPos = new Vector3(data.posX, data.posY, data.posZ);
+        AllGameData.Instance.lastCheckpointRot = new Quaternion(data.rotX, data.rotY, data.rotZ, data.rotW);
 
         if (Player.Player_ != null)
         {
@@ -177,8 +227,6 @@ public static class SaveSystem
 
         LoadMapName.Instance.mapid = data.CurrentMap;
         LoadMapName.Instance.SpawnPrefabs();
-
-        ApplyGameData(data, saveSlot);
     }
 
     private static void ApplyWeaponsData(SaveData data)
@@ -198,6 +246,11 @@ public static class SaveSystem
 
             foreach (var weaponUI in allWeaponUI)
             {
+                if (weaponUI == null)
+                {
+                    continue;
+                }
+
                 string wName = string.IsNullOrEmpty(weaponUI.weaponName) ? weaponUI.gameObject.name : weaponUI.weaponName;
 
                 if (wName == savedWeapon.weaponName)
@@ -226,5 +279,15 @@ public static class SaveSystem
         {
             data.weaponSaveData.weapons = new List<SaveData.WeaponData>();
         }
+    }
+
+    private static int GetImageMapIndex(string mapName, int mapIndex)
+    {
+        if (string.Equals(mapName, "Phinix", System.StringComparison.OrdinalIgnoreCase))
+        {
+            return 2;
+        }
+
+        return mapIndex;
     }
 }

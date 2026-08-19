@@ -1,77 +1,87 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
-
-
 public class LoadingMenu : MonoBehaviour
 {
-
     public TMP_Text LoadProcentText;
-
     public Slider SliderLoading;
-
     public float LoadingTime = 5.0f;
-
-    float startTime;
 
     public static LoadingMenu Instance;
     public string LoadScene;
-
     public int StartMap;
-   
 
+    private float startTime;
+    private bool isLoadingComplete = false; // Förhindrar att laddningen körs flera gånger
 
-    // Start is called before the first frame update
     void Start()
     {
-
-      
-
         Instance = this;
         startTime = Time.time;
     }
 
-    // Update is called once per frame
     void Update()
     {
+        // Om laddningen redan är klar, gör ingenting mer
+        if (isLoadingComplete) return;
 
-        
-            // Calculate the progress as a value between 0 and 1
-            float progress = (Time.time - startTime) / LoadingTime;
+        // Beräkna framsteg (0 till 1)
+        float progress = (Time.time - startTime) / LoadingTime;
+        progress = Mathf.Clamp01(progress);
 
-            // Ensure the progress doesn't exceed 1
-            progress = Mathf.Clamp01(progress);
-
-            // Update the slider value based on the progress
+        // Uppdatera UI
+        if (SliderLoading != null)
+        {
             SliderLoading.value = progress;
+        }
 
-            // Update the text to display the loading percentage
+        if (LoadProcentText != null)
+        {
             LoadProcentText.text = Mathf.Round(progress * 100f) + "%";
+        }
 
-            // Check if loading is complete
-            if (progress >= 1.0f)
-            {
-                // Loading is complete, you can perform any necessary actions here
-                Debug.Log("Loading complete!");
-
-                LoadMapName.Instance.LoadMap = LoadScene;
-                SceneManager.LoadScene("LoadingMap 1");
-
-                LoadMapName.Instance.SpawnNewGame();
-                
-
-
-
-                //LoadingScene.LoadScene.LoadMap = LoadScene;
-            }
-       
-
-       
+        // När timern når 100%
+        if (progress >= 1.0f)
+        {
+            isLoadingComplete = true; // Lås Update
+            CompleteLoading();
+        }
     }
 
-}
+   private void CompleteLoading()
+    {
+        Debug.Log("Loading complete!");
 
+        bool loadingExistingSave = LoadMapName.LoadingExistingSave;
+        bool directMapNavigation = LoadMapName.DirectMapNavigation;
+        bool hasSelectedMap = (loadingExistingSave || directMapNavigation) && !string.IsNullOrEmpty(LoadMapName.NextMapToLoad);
+        if (!hasSelectedMap)
+        {
+            LoadMapName.NextMapToLoad = LoadScene;
+            LoadMapName.LoadingExistingSave = false;
+            LoadMapName.DirectMapNavigation = false;
+            LoadingScene.HasPendingDirectMap = false;
+        }
+
+        LoadMapName.NextSaveSlot = LoadMapName.Instance != null ? LoadMapName.Instance.saveSlot : LoadMapName.NextSaveSlot;
+
+        if (LoadMapName.Instance != null)
+        {
+            if (!hasSelectedMap)
+            {
+                LoadMapName.Instance.LoadMap = LoadScene;
+                LoadMapName.Instance.mapid = StartMap;
+            }
+
+            if (!hasSelectedMap)
+            {
+                LoadMapName.Instance.SpawnNewGame();
+            }
+        }
+
+        SceneManager.LoadScene("LoadingMap 1");
+    }
+}

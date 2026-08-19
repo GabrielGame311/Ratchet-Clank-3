@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class HackerObjekt : MonoBehaviour
 {
@@ -8,12 +9,14 @@ public class HackerObjekt : MonoBehaviour
 
 
 
-    public bool ÄrHackerSpel = false;
-    public Transform PunktAttCirklaRunt; // Detta är din PointGo
-    private GameObject Spelare; // Ratchet i det här fallet
+    [FormerlySerializedAs("\u00E4rHackerSpel")]
+    public bool isHackerGame = false;
+    public Transform PunktAttCirklaRunt; // Detta ï¿½r din PointGo
+    private GameObject Spelare; // Ratchet i det hï¿½r fallet
     public  float cirkelRadie = 3f; // Hur stor cirkeln ska vara
     public float cirkelHastighet = 2f; // Hur snabbt spelaren cirklar
-    public float rörelseHastighet = 5f; // Hastighet för att röra sig mot punkten
+    [FormerlySerializedAs("r\u00F6relseHastighet")]
+    public float movementSpeed = 5f; // Hastighet for att rora sig mot punkten
     public float rotationSpeed = 5f;
     public GameObject Timeline_;
     private Quaternion targetRotation;
@@ -26,7 +29,7 @@ public class HackerObjekt : MonoBehaviour
 
     void Update()
     {
-        if (ÄrHackerSpel)
+        if (isHackerGame)
         {
             if (Input.GetKeyDown(KeyCode.E))
             {
@@ -38,40 +41,40 @@ public class HackerObjekt : MonoBehaviour
     IEnumerator StartaHackerSekvens()
     {
         // Aktivera hacker-verktyget
-        WeaponSwitcher weaponSwitcher = GameObject.FindObjectOfType<WeaponSwitcher>();
+        WeaponSwitcher weaponSwitcher = FindObjectOfType<WeaponSwitcher>();
         if (weaponSwitcher != null) weaponSwitcher.HackerItemEnable();
 
-        // Stänger av spelarens normala rörelse
+        // Stï¿½nger av spelarens normala rï¿½relse
         if (Spelare != null)
         {
             Spelare.GetComponent<CharacterController>().enabled = false;
         }
 
-        RatchetController ratchetController = GameObject.FindObjectOfType<RatchetController>();
+        RatchetController ratchetController = FindObjectOfType<RatchetController>();
         if (ratchetController != null) ratchetController.enabled = false;
 
-        Player ratchet = GameObject.FindObjectOfType<Player>();
+        Player ratchet = FindObjectOfType<Player>();
         if (ratchet != null) ratchet.anime.SetBool("Run", true);
 
         // Cirkla runt punkten
         float vinkel = 0f;
         float cirkelTid = 2f;
-        float förflutenTid = 0f;
+        float elapsedTime = 0f;
 
-        while (förflutenTid < cirkelTid)
+        while (elapsedTime < cirkelTid)
         {
-            förflutenTid += Time.deltaTime;
-            vinkel += (Time.deltaTime / cirkelTid) * Mathf.PI * 2; // Jämnare rotation
+            elapsedTime += Time.deltaTime;
+            vinkel += (Time.deltaTime / cirkelTid) * Mathf.PI * 2; // Jï¿½mnare rotation
 
-            // Beräkna position i cirkeln
+            // Berï¿½kna position i cirkeln
             float x = PunktAttCirklaRunt.position.x + Mathf.Cos(vinkel) * cirkelRadie;
             float z = PunktAttCirklaRunt.position.z + Mathf.Sin(vinkel) * cirkelRadie;
 
-            Vector3 målPosition = new Vector3(x, Spelare.transform.position.y, z);
+            Vector3 targetPosition = new Vector3(x, Spelare.transform.position.y, z);
             Spelare.transform.position = Vector3.MoveTowards(
                 Spelare.transform.position,
-                målPosition,
-                rörelseHastighet * Time.deltaTime
+                targetPosition,
+                movementSpeed * Time.deltaTime
             );
 
             // Smidigare rotation mot mitten
@@ -81,13 +84,13 @@ public class HackerObjekt : MonoBehaviour
             yield return null;
         }
 
-        // Rör sig mot punkten med mjuk rotation
+        // Rï¿½r sig mot punkten med mjuk rotation
         while (Vector3.Distance(Spelare.transform.position, PunktAttCirklaRunt.position) > 0.1f)
         {
             Spelare.transform.position = Vector3.MoveTowards(
                 Spelare.transform.position,
                 PunktAttCirklaRunt.position,
-                rörelseHastighet * Time.deltaTime
+                movementSpeed * Time.deltaTime
             );
 
             Quaternion targetRotation = Quaternion.LookRotation(PunktAttCirklaRunt.position - Spelare.transform.position);
@@ -100,8 +103,8 @@ public class HackerObjekt : MonoBehaviour
         Spelare.transform.position = PunktAttCirklaRunt.position;
 
         // **Mjuk rotation till (0,0,0)**
-        // Mjukare rotation till slutläge under en längre tid
-        float rotationTid = 1.5f; // Hur lång tid rotationen tar
+        // Mjukare rotation till slutlï¿½ge under en lï¿½ngre tid
+        float rotationTid = 1.5f; // Hur lï¿½ng tid rotationen tar
         float tid = 0f;
         Quaternion startRotation = Spelare.transform.rotation;
         Quaternion slutRotation = Quaternion.Euler(0, -155, 0);
@@ -126,7 +129,7 @@ public class HackerObjekt : MonoBehaviour
         yield return new WaitForSeconds(2);
 
         // Aktivera hacker-spelet
-        HackerGameEnable hackerGame = GameObject.FindObjectOfType<HackerGameEnable>();
+        HackerGameEnable hackerGame = FindObjectOfType<HackerGameEnable>();
         Timeline_.SetActive(false);
         if (hackerGame != null) hackerGame.EnableHackerGame();
 
@@ -143,11 +146,21 @@ public class HackerObjekt : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        ÄrHackerSpel = true;
+       
+
+        if(other.CompareTag("Player"))
+        {
+             isHackerGame = true;
+        }
     }
 
     private void OnTriggerExit(Collider other)
     {
-        ÄrHackerSpel = false;
+
+         if(other.CompareTag("Player"))
+        {
+            
+            isHackerGame = false;
+        }
     }
 }
