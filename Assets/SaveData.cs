@@ -1,11 +1,6 @@
-
 using System.Collections.Generic;
 
-
-
 [System.Serializable]
-
-
 public class SaveData
 {
     public int PlayerArmor;
@@ -31,7 +26,6 @@ public class SaveData
     public float rotX, rotY, rotZ, rotW;
     public bool hasCheckpoint;
 
-
     [System.Serializable]
     public class WeaponData
     {
@@ -43,13 +37,9 @@ public class SaveData
     public class WeaponSaveData
     {
         public List<WeaponData> weapons = new List<WeaponData>();
-
-
     }
 
-    
-
-    public WeaponSaveData weaponSaveData = new WeaponSaveData(); // <-- L�gg till detta!
+    public WeaponSaveData weaponSaveData = new WeaponSaveData();
 
     public bool IsValid()
     {

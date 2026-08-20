@@ -6125,11 +6125,6 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: -2887570887253355479, guid: 47377493819654d468cda8ac13aa457b, type: 3}
---- !u!95 &1296683450 stripped
-Animator:
-  m_CorrespondingSourceObject: {fileID: 8328090366979959626, guid: e123eaf0eeb791a4ea59e77e9ded17c9, type: 3}
-  m_PrefabInstance: {fileID: 2139649613}
-  m_PrefabAsset: {fileID: 0}
 --- !u!64 &1297674375
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -13838,6 +13833,18 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 1173076367380631279, guid: e123eaf0eeb791a4ea59e77e9ded17c9, type: 3}
+      propertyPath: m_SceneBindings.Array.size
+      value: 9
+      objectReference: {fileID: 0}
+    - target: {fileID: 1173076367380631279, guid: e123eaf0eeb791a4ea59e77e9ded17c9, type: 3}
+      propertyPath: m_SceneBindings.Array.data[8].key
+      value: 
+      objectReference: {fileID: 9173061555701041596, guid: 6aa7f2b7921635e4bafd88aa69bfc7bf, type: 2}
+    - target: {fileID: 1173076367380631279, guid: e123eaf0eeb791a4ea59e77e9ded17c9, type: 3}
+      propertyPath: m_SceneBindings.Array.data[8].value
+      value: 
+      objectReference: {fileID: 1396771822}
     - target: {fileID: 1887343084874866672, guid: e123eaf0eeb791a4ea59e77e9ded17c9, type: 3}
       propertyPath: m_IsActive
       value: 1
@@ -13885,7 +13892,7 @@ PrefabInstance:
     - target: {fileID: 2679646016549560110, guid: e123eaf0eeb791a4ea59e77e9ded17c9, type: 3}
       propertyPath: m_SceneBindings.Array.data[3].value
       value: 
-      objectReference: {fileID: 1296683450}
+      objectReference: {fileID: 0}
     - target: {fileID: 2679646016549560110, guid: e123eaf0eeb791a4ea59e77e9ded17c9, type: 3}
       propertyPath: m_SceneBindings.Array.data[4].value
       value: 
@@ -13985,7 +13992,7 @@ PrefabInstance:
     - target: {fileID: 7175136012359236251, guid: e123eaf0eeb791a4ea59e77e9ded17c9, type: 3}
       propertyPath: m_SceneBindings.Array.data[4].value
       value: 
-      objectReference: {fileID: 2139649615}
+      objectReference: {fileID: 0}
     - target: {fileID: 7175136012359236251, guid: e123eaf0eeb791a4ea59e77e9ded17c9, type: 3}
       propertyPath: m_SceneBindings.Array.data[5].value
       value: 
@@ -14058,11 +14065,6 @@ PrefabInstance:
 --- !u!95 &2139649614 stripped
 Animator:
   m_CorrespondingSourceObject: {fileID: 8328090367942772566, guid: e123eaf0eeb791a4ea59e77e9ded17c9, type: 3}
-  m_PrefabInstance: {fileID: 2139649613}
-  m_PrefabAsset: {fileID: 0}
---- !u!95 &2139649615 stripped
-Animator:
-  m_CorrespondingSourceObject: {fileID: 7045675197520225008, guid: e123eaf0eeb791a4ea59e77e9ded17c9, type: 3}
   m_PrefabInstance: {fileID: 2139649613}
   m_PrefabAsset: {fileID: 0}
 --- !u!95 &2139649616 stripped

@@ -22,7 +22,7 @@ public class Player : MonoBehaviour
     private void Start()
     {
 
-
+       
 
         Player_ = GetComponent<Player>();
 
@@ -35,10 +35,41 @@ public class Player : MonoBehaviour
 
 
 
-        
+       
         
 
         controller = GetComponent<CharacterController>();
+        CharacterController cc = controller;
+        
+
+        Debug.Log($"[PLAYER START] TempCheckpoint.HasCheckpoint = {TempCheckpoint.HasCheckpoint}");
+
+        if (TempCheckpoint.HasCheckpoint)
+        {
+            if (cc != null) cc.enabled = false;
+            transform.position = TempCheckpoint.CheckpointPos;
+            transform.rotation = TempCheckpoint.CheckpointRot;
+            Debug.Log($"[PLAYER] Flyttad till TempCheckpoint: {TempCheckpoint.CheckpointPos}");
+        }
+        else
+        {
+            // Om du har en SpawnPoint i scenen:
+            GameObject spawnPoint = GameObject.FindWithTag("SpawnPoint");
+            if (spawnPoint != null)
+            {
+                transform.position = spawnPoint.transform.position;
+                transform.rotation = spawnPoint.transform.rotation;
+                Debug.Log($"[PLAYER] Flyttad till Start SpawnPoint: {spawnPoint.transform.position}");
+            }
+            else
+            {
+                Debug.Log($"[PLAYER] Ingen SpawnPoint hittades, stÃ¥r kvar pÃ¥ scenens placering: {transform.position}");
+            }
+        }
+
+        Physics.SyncTransforms();
+
+        if (cc != null) cc.enabled = true;
     }
 
 
@@ -120,7 +151,7 @@ public class Player : MonoBehaviour
                 break;
         }
 
-        // Skadan får aldrig vara mindre än 1
+        // Skadan fï¿½r aldrig vara mindre ï¿½n 1
         reducedDamage = Mathf.Max(reducedDamage, 1);
 
         currentHealth -= reducedDamage;
@@ -130,7 +161,7 @@ public class Player : MonoBehaviour
 
     private int CalculateDamage(int baseDamage, int armorLevel)
     {
-        // Enkel exempel-logik: varje armor-nivå minskar skadan med t.ex. 10%
+        // Enkel exempel-logik: varje armor-nivï¿½ minskar skadan med t.ex. 10%
         float reductionFactor = 1f - (armorLevel * 0.1f); // Armor 1 = 10%, Armor 2 = 20%, osv
         reductionFactor = Mathf.Clamp(reductionFactor, 0.1f, 1f); // undvik att reducera helt till 0
 
@@ -178,7 +209,7 @@ public class Player : MonoBehaviour
 
     IEnumerator dead()
     {
-
+        
         
         yield return new WaitForSeconds(3);
 
@@ -186,14 +217,9 @@ public class Player : MonoBehaviour
         yield return new WaitForSeconds(1.1f);
 
         ShipMenuTrigger.ReloadSceneOnDeath();
-        if (SceneLoad == null)
-        {
-            SceneManager.LoadScene(SceneLoad);
-        }
-        else
-        {
-            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
-        }
+       UnityEngine.SceneManagement.SceneManager.LoadScene(
+            UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex
+        );
         fade.SetBool("Fade", false);
 
     }

@@ -33,7 +33,7 @@ public class AllGameData : MonoBehaviour
     public Quaternion lastCheckpointRot;
     public bool hasCheckpoint = false;
 
-
+   
 
 
     void Start()
@@ -42,13 +42,18 @@ public class AllGameData : MonoBehaviour
         Instance = this;
         CurrentSaveSlot = LoadMapName.NextSaveSlot;
 
-        
-
+       
 
         InitializeGame();
         
         
         
+    }
+    void Awake()
+    {
+        hasCheckpoint = false;
+        
+         
     }
 
     /// <summary>
@@ -59,6 +64,11 @@ public class AllGameData : MonoBehaviour
         lastCheckpointPos = pos;
         lastCheckpointRot = rot;
         hasCheckpoint = true;
+    }
+    void OnApplicationQuit()
+    {
+         TempCheckpoint.Reset();
+         GetComponent<CharacterController>().enabled = true;
     }
 
     /// <summary>

@@ -85,7 +85,32 @@ public class ShipMenu : MonoBehaviour
 
     }
 
+    public void SelectDestination(string sceneName, int mapId)
+    {
+        // 1. Spara vilken bana skeppet ska åka till
+        loadScene = sceneName;
 
+        // 2. Sätt de statiska flaggorna så att LoadingScene förstår att det är en direkt resa
+        LoadingScene.PendingLoadMap = sceneName;
+        LoadingScene.PendingMapId = mapId;
+        LoadingScene.HasPendingDirectMap = true;
+
+        LoadMapName.DirectMapNavigation = true;
+        LoadMapName.NextMapToLoad = sceneName;
+        LoadMapName.NextMapId = mapId;
+
+        // 3. Stäng menyn och starta avfärds-Cutscenen
+        Time.timeScale = 1f;
+        Menu.SetActive(false);
+        ItsMenu = false;
+
+        // Spela cutscene för skeppet som flyger iväg
+        if (ShipMenuTrigger.shipmenutrigger_ != null)
+        {
+            ShipMenuTrigger.shipmenutrigger_.StartShip.enabled = true;
+            ShipMenuTrigger.shipmenutrigger_.StartShip.Play();
+        }
+    }
 
     public void BackButton()
     {
@@ -109,6 +134,7 @@ public class ShipMenu : MonoBehaviour
         {
             // Perform your action when the timeline playback is completed.
             Debug.Log("Director playback completed!");
+            
             Menu.SetActive(true);
            
             // ShipMenuTrigger.shipmenutrigger_.StartShip.enabled = false;
@@ -125,6 +151,7 @@ public class ShipMenu : MonoBehaviour
         {
             // Perform your action when the timeline playback is completed.
             Debug.Log("Director playback completed!");
+           
             ShipMenuTrigger.shipmenutrigger_.player.SetActive(true);
             ShipMenuTrigger.shipmenutrigger_.LandingTimeline.enabled = false;
             

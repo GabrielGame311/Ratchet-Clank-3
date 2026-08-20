@@ -45,33 +45,84 @@ public class MenuShip : MonoBehaviour
     }
 
 
+    public void SelectDestination()
+    {
+        // 1. Spara vilken bana skeppet ska åka till
+       
+
+        // 2. Sätt de statiska flaggorna så att LoadingScene förstår att det är en direkt resa
+        LoadingScene.PendingLoadMap = SceneName;
+        
+        LoadingScene.HasPendingDirectMap = true;
+
+        LoadMapName.DirectMapNavigation = true;
+        LoadMapName.NextMapToLoad = SceneName;
+      
+
+        // 3. Stäng menyn och starta avfärds-Cutscenen
+        Time.timeScale = 1f;
+        
+
+        // Spela cutscene för skeppet som flyger iväg
+        if (ShipMenuTrigger.shipmenutrigger_ != null)
+        {
+            //ShipMenuTrigger.shipmenutrigger_.StartShip.enabled = true;
+            //ShipMenuTrigger.shipmenutrigger_.StartShip.Play();
+        }
+    }
 
     public void SceneLoad()
     {
         Time.timeScale = 1f;
+
+        // 1. Hämta den aktiva sparlådan
+        int activeSlot = AllGameData.Instance != null ? AllGameData.Instance.CurrentSaveSlot : 0;
+
+        // 2. Uppdatera AllGameData med den nya banans information
+        if (AllGameData.Instance != null)
+        {
+            AllGameData.Instance.SavedMap = SceneName;
+            AllGameData.Instance.CurrentMapInt = Scenes;
+            AllGameData.Instance.hasCheckpoint = false; // Nollställ checkpoint inför landning
+        }
+
+        // 3. SPARA TILL save_X.json MED DEN NYA BANAN
+        SaveSystem.SaveGame(activeSlot, SceneName, Scenes);
+
+        // 4. Sätt statiska variabler för LoadingScene
+        LoadingScene.PendingLoadMap = SceneName;
+        LoadingScene.PendingMapId = Scenes;
+        LoadingScene.HasPendingDirectMap = true;
+
         LoadMapName.SetDirectMap(SceneName, Scenes);
-        LoadMapName.NextSaveSlot = 0;
+        LoadMapName.NextSaveSlot = activeSlot;
 
-        Button_.interactable = false;
-        ShipMenu.ShipMenu_.Menu.SetActive(false);
-        ShipMenuTrigger.shipmenutrigger_.Flytime.enabled = true;
-        ShipMenuTrigger.shipmenutrigger_.Flytime.Play();
-        ShipMenuTrigger.shipmenutrigger_.Flytime.stopped += OnDirectorStopped;
+        // 5. Stäng UI och starta flyganimationen
+        if (Button_ != null) Button_.interactable = false;
 
-        ShipMenu.ShipMenu_.loadScene = SceneName;
-        // LoadingScene reads NextMapToLoad after the scene transition.
+        if (ShipMenu.ShipMenu_ != null && ShipMenu.ShipMenu_.Menu != null)
+        {
+            ShipMenu.ShipMenu_.Menu.SetActive(false);
+        }
 
+        if (ShipMenuTrigger.shipmenutrigger_ != null && ShipMenuTrigger.shipmenutrigger_.Flytime != null)
+        {
+            ShipMenuTrigger.shipmenutrigger_.Flytime.stopped -= OnDirectorStopped;
+            ShipMenuTrigger.shipmenutrigger_.Flytime.stopped += OnDirectorStopped;
+
+            ShipMenuTrigger.shipmenutrigger_.Flytime.enabled = true;
+            ShipMenuTrigger.shipmenutrigger_.Flytime.Play();
+        }
     }
 
     private void OnDirectorStopped(PlayableDirector director)
     {
-        // Check if the stopped PlayableDirector is the one we're interested in.
-        if (director == ShipMenuTrigger.shipmenutrigger_.Flytime &&
-            ShipMenu.ShipMenu_.loadScene == SceneName)
+        if (ShipMenuTrigger.shipmenutrigger_ != null && 
+            director == ShipMenuTrigger.shipmenutrigger_.Flytime)
         {
-            // Perform your action when the timeline playback is completed.
-            Debug.Log("Director playback completed!");
             director.stopped -= OnDirectorStopped;
+            Debug.Log("Ship flight completed, loading LoadingMap 1...");
+
             LoadMapName.SetDirectMap(SceneName, Scenes);
 
             if (LoadMapName.Instance != null)
@@ -79,10 +130,9 @@ public class MenuShip : MonoBehaviour
                 LoadMapName.Instance.LoadMap = SceneName;
                 LoadMapName.Instance.mapid = Scenes;
             }
+
             ShipMenuTrigger.LoadShipScene();
-             SceneManager.LoadScene("LoadingMap 1");
-            
-            // You can add your custom logic here.
+            SceneManager.LoadScene("LoadingMap 1");
         }
     }
 

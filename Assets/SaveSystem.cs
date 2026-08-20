@@ -4,7 +4,19 @@ using System.Collections.Generic;
 
 public static class SaveSystem
 {
+    // Överlagrad metod för sparande när man väljer bana i ShipMenu
+    public static void SaveGame(int saveSlot, string overrideMap, int overrideMapId)
+    {
+        SaveGameInternal(saveSlot, overrideMap, overrideMapId);
+    }
+
+    // Standard spar-metod
     public static void SaveGame(int saveSlot)
+    {
+        SaveGameInternal(saveSlot, null, -1);
+    }
+
+    private static void SaveGameInternal(int saveSlot, string overrideMap, int overrideMapId)
     {
         if (saveSlot < 0)
         {
@@ -26,41 +38,61 @@ public static class SaveSystem
             health = (int)previousData.health;
         }
 
+        // Bestäm vilken bana som ska sparas
+        string targetMap = !string.IsNullOrEmpty(overrideMap) ? overrideMap : 
+                           (LoadingScene.instance != null ? LoadingScene.instance.LoadMap : AllGameData.Instance.SavedMap);
+
+        int targetMapId = overrideMapId >= 0 ? overrideMapId : 
+                          (LoadingScene.instance != null ? LoadingScene.instance.MapID : AllGameData.Instance.CurrentMapInt);
+
+        // Nollställ alltid checkpoint vid filsparning så att omstart från menyn alltid laddar vid banans start
         SaveData data = new SaveData
         {
             SaveSlot = saveSlot,
+            currentSaveSlot = saveSlot,
             PlayerArmor = armor,
-            SavedMap = LoadingScene.instance != null ? LoadingScene.instance.LoadMap : AllGameData.Instance.SavedMap,
-            CurrentMap = LoadingScene.instance != null ? LoadingScene.instance.MapID : AllGameData.Instance.CurrentMapInt,
+            armor = armor,
+            SavedMap = targetMap,
+            CurrentMap = targetMapId,
+            currentMapInt = targetMapId,
             LoadGameCount = LoadMapName.Instance?.LoadGames_?.Count ?? 0,
             health = health,
             saveDate = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
-            posX = AllGameData.Instance.lastCheckpointPos.x,
-            posY = AllGameData.Instance.lastCheckpointPos.y,
-            posZ = AllGameData.Instance.lastCheckpointPos.z,
-            rotX = AllGameData.Instance.lastCheckpointRot.x,
-            rotY = AllGameData.Instance.lastCheckpointRot.y,
-            rotZ = AllGameData.Instance.lastCheckpointRot.z,
-            rotW = AllGameData.Instance.lastCheckpointRot.w,
-            hasCheckpoint = AllGameData.Instance.hasCheckpoint
+            
+            // Tvinga checkpoints att ALDRIG sparas permanent till hårddisken
+            posX = 0f,
+            posY = 0f,
+            posZ = 0f,
+            rotX = 0f,
+            rotY = 0f,
+            rotZ = 0f,
+            rotW = 1f,
+            hasCheckpoint = false
         };
+
         data.ImageMapIndex = GetImageMapIndex(data.SavedMap, data.CurrentMap);
 
-        // Hämta bolts om komponenten finns
+        // Hämta bolts om komponenten finns och synka båda fälten
+        int boltsAmount = 0;
         Bolts boltsObj = Object.FindObjectOfType<Bolts>();
         if (boltsObj != null && Player.Player_ != null)
         {
-            data.Bolt_ = boltsObj.bolt;
+            boltsAmount = boltsObj.bolt;
         }
         else if (SaveUtility.TryReadSave(saveSlot, out SaveData previousSave))
         {
-            data.Bolt_ = previousSave.Bolt_;
+            boltsAmount = previousSave.Bolt_;
         }
+        data.Bolt_ = boltsAmount;
+        data.bolts = boltsAmount;
 
-        // Säkerställ att vapendatastrukturen är initierad
+        // Säkerställ att vapendatastrukturen är initierad och rensad från gamla poster
         EnsureWeaponSaveDataExists(data);
+        data.weaponSaveData.weapons.Clear(); // Rensar listan för att förhindra dubbleringar i JSON
 
-        // Hämta alla vapen i scenen (även inaktiva)
+        HashSet<string> addedWeapons = new HashSet<string>();
+
+        // Hämta alla unik vapen i scenen (även inaktiva)
         WeaponsUI[] allWeaponUI = Object.FindObjectsOfType<WeaponsUI>(true);
         foreach (var weaponUI in allWeaponUI)
         {
@@ -68,11 +100,16 @@ public static class SaveSystem
             {
                 string wName = string.IsNullOrEmpty(weaponUI.weaponName) ? weaponUI.gameObject.name : weaponUI.weaponName;
 
-                data.weaponSaveData.weapons.Add(new SaveData.WeaponData
+                // Undvik att spara samma vapennamn flera gånger
+                if (!addedWeapons.Contains(wName))
                 {
-                    weaponName = wName,
-                    weaponLevel = weaponUI.level
-                });
+                    addedWeapons.Add(wName);
+                    data.weaponSaveData.weapons.Add(new SaveData.WeaponData
+                    {
+                        weaponName = wName,
+                        weaponLevel = weaponUI.level
+                    });
+                }
             }
         }
 
@@ -88,7 +125,7 @@ public static class SaveSystem
             saveUI.ShowSavingMessage();
         }
 
-        Debug.Log($"Game saved with {data.LoadGameCount} prefabs in slot {saveSlot}");
+        Debug.Log($"Game saved to slot {saveSlot} | Map: {data.SavedMap} (ID: {data.CurrentMap})");
     }
 
     public static void SaveNewGame(int saveSlot)
@@ -112,19 +149,26 @@ public static class SaveSystem
         SaveData data = new SaveData
         {
             PlayerArmor = 0,
+            armor = 0,
             health = 10,
             SavedMap = newMap,
             CurrentMap = newMapId,
+            currentMapInt = newMapId,
             LoadGameCount = 0,
             SaveSlot = saveSlot,
+            currentSaveSlot = saveSlot,
             Bolt_ = 0,
-            saveDate = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
+            bolts = 0,
+            saveDate = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+            hasCheckpoint = false
         };
         data.ImageMapIndex = GetImageMapIndex(data.SavedMap, data.CurrentMap);
 
         EnsureWeaponSaveDataExists(data);
+        data.weaponSaveData.weapons.Clear();
 
-        // Lägg till startvapen från scenen med Level 1
+        HashSet<string> addedWeapons = new HashSet<string>();
+
         WeaponsUI[] allWeaponUI = Object.FindObjectsOfType<WeaponsUI>(true);
         foreach (var weaponUI in allWeaponUI)
         {
@@ -132,11 +176,15 @@ public static class SaveSystem
             {
                 string wName = string.IsNullOrEmpty(weaponUI.weaponName) ? weaponUI.gameObject.name : weaponUI.weaponName;
 
-                data.weaponSaveData.weapons.Add(new SaveData.WeaponData
+                if (!addedWeapons.Contains(wName))
                 {
-                    weaponName = wName,
-                    weaponLevel = 1
-                });
+                    addedWeapons.Add(wName);
+                    data.weaponSaveData.weapons.Add(new SaveData.WeaponData
+                    {
+                        weaponName = wName,
+                        weaponLevel = 1
+                    });
+                }
             }
         }
 
@@ -177,17 +225,14 @@ public static class SaveSystem
             return;
         }
 
-        // Ladda vapendatans levels
         ApplyWeaponsData(data);
 
-        // Ladda Bolts
         Bolts boltsObj = Object.FindObjectOfType<Bolts>();
         if (boltsObj != null)
         {
             boltsObj.bolt = data.Bolt_;
         }
 
-        // Ladda Map/Scene inställningar
         if (LoadingScene.instance != null)
         {
             LoadingScene.instance.LoadMap = data.SavedMap;
@@ -207,9 +252,11 @@ public static class SaveSystem
 
         AllGameData.Instance.CurrentMapInt = data.CurrentMap;
         AllGameData.Instance.SetArmor(data.PlayerArmor);
-        AllGameData.Instance.hasCheckpoint = data.hasCheckpoint;
-        AllGameData.Instance.lastCheckpointPos = new Vector3(data.posX, data.posY, data.posZ);
-        AllGameData.Instance.lastCheckpointRot = new Quaternion(data.rotX, data.rotY, data.rotZ, data.rotW);
+
+        // Nollställ checkpoint i minnet vid laddning från sparfil/huvudmeny
+        AllGameData.Instance.hasCheckpoint = false;
+        AllGameData.Instance.lastCheckpointPos = Vector3.zero;
+        AllGameData.Instance.lastCheckpointRot = Quaternion.identity;
 
         if (Player.Player_ != null)
         {
@@ -237,7 +284,6 @@ public static class SaveSystem
             return;
         }
 
-        // Hämta alla vapen (inklusive inaktiva)
         WeaponsUI[] allWeaponUI = Object.FindObjectsOfType<WeaponsUI>(true);
 
         foreach (var savedWeapon in data.weaponSaveData.weapons)
@@ -246,17 +292,13 @@ public static class SaveSystem
 
             foreach (var weaponUI in allWeaponUI)
             {
-                if (weaponUI == null)
-                {
-                    continue;
-                }
+                if (weaponUI == null) continue;
 
                 string wName = string.IsNullOrEmpty(weaponUI.weaponName) ? weaponUI.gameObject.name : weaponUI.weaponName;
 
                 if (wName == savedWeapon.weaponName)
                 {
                     weaponUI.level = savedWeapon.weaponLevel;
-                    Debug.Log($"Loaded weapon {savedWeapon.weaponName} with level {savedWeapon.weaponLevel}");
                     weaponFound = true;
                     break;
                 }

@@ -141,7 +141,6 @@ public class LoadGame : MonoBehaviour
             return;
         }
 
-        // Sätt kartnamnet statiskt från sparfilen
         string selectedMap = string.IsNullOrEmpty(data.SavedMap) ? "Veldins" : data.SavedMap;
         LoadMapName.NextMapToLoad = selectedMap;
         LoadMapName.NextSaveSlot = saveSlot;
@@ -154,6 +153,11 @@ public class LoadGame : MonoBehaviour
             LoadMapName.Instance.saveSlot = saveSlot;
             LoadMapName.Instance.LoadMap = selectedMap;
             LoadMapName.Instance.mapid = data.CurrentMap;
+
+            if (LoadMapName.Instance.LoadWait_ != null)
+            {
+                LoadMapName.Instance.LoadWait_.SetActive(true);
+            }
         }
 
         if (AllGameData.Instance != null)
@@ -162,6 +166,18 @@ public class LoadGame : MonoBehaviour
             AllGameData.Instance.CurrentMapInt = data.CurrentMap;
         }
 
-        SceneManager.LoadScene("LoadingMap 1");
+        // STARTA LADDNINGEN I LOADINGMENU
+        if (LoadingMenu.Instance != null)
+        {
+            // Skicka bilden (Sprite) om den finns
+            Sprite currentSprite = (image_ != null) ? image_.sprite : null;
+            
+            // Starta laddningssekvensen
+            LoadingMenu.Instance.StartLoading(selectedMap, currentSprite);
+        }
+        else
+        {
+            Debug.LogError("LoadingMenu.Instance saknas i scenen!");
+        }
     }
 }

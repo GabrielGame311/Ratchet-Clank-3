@@ -1311,6 +1311,10 @@ MonoBehaviour:
   CurrentSaveSlot: 0
   IsSave: 0
   IsPlayer: 0
+  lastCheckpointPos: {x: 0, y: 0, z: 0}
+  lastCheckpointRot: {x: 0, y: 0, z: 0, w: 0}
+  hasCheckpoint: 0
+  MainMenu: 1
 --- !u!33 &17528320220749005
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -2232,6 +2236,10 @@ MonoBehaviour:
   CurrentSaveSlot: 0
   IsSave: 0
   IsPlayer: 0
+  lastCheckpointPos: {x: 0, y: 0, z: 0}
+  lastCheckpointRot: {x: 0, y: 0, z: 0, w: 0}
+  hasCheckpoint: 0
+  MainMenu: 1
 --- !u!23 &2913085234189624819
 MeshRenderer:
   m_ObjectHideFlags: 0

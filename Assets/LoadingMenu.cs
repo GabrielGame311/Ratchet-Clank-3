@@ -13,20 +13,49 @@ public class LoadingMenu : MonoBehaviour
     public static LoadingMenu Instance;
     public string LoadScene;
     public int StartMap;
+    public Image image_;
 
     private float startTime;
-    private bool isLoadingComplete = false; // Förhindrar att laddningen körs flera gånger
+    private bool isLoadingActive = false; // Håller koll på om mätaren ska snurra
 
-    void Start()
+    private void Awake()
     {
         Instance = this;
-        startTime = Time.time;
+       
+        
+            // Skicka bilden (Sprite) om den finns
+            Sprite currentSprite = (image_ != null) ? image_.sprite : null;
+            
+            // Starta laddningssekvensen
+            StartLoading(LoadScene, currentSprite);
+        
     }
 
-    void Update()
+    /// <summary>
+    /// Anropas från LoadGame när en sparlåda klickas på
+    /// </summary>
+    public void StartLoading(string sceneToLoad, Sprite mapSprite)
     {
-        // Om laddningen redan är klar, gör ingenting mer
-        if (isLoadingComplete) return;
+        LoadScene = sceneToLoad;
+        
+        // Sätt bilden på UI:t om den skickades med
+        if (image_ != null && mapSprite != null)
+        {
+            image_.sprite = mapSprite;
+        }
+
+        // Återställ timern
+        startTime = Time.time;
+        isLoadingActive = true;
+
+        // Tänd laddningspanelen om den är släckt
+        gameObject.SetActive(true);
+    }
+
+    private void Update()
+    {
+        // Kör endast om laddningen faktiskt har startats via StartLoading()
+        if (!isLoadingActive) return;
 
         // Beräkna framsteg (0 till 1)
         float progress = (Time.time - startTime) / LoadingTime;
@@ -46,18 +75,19 @@ public class LoadingMenu : MonoBehaviour
         // När timern når 100%
         if (progress >= 1.0f)
         {
-            isLoadingComplete = true; // Lås Update
+            isLoadingActive = false; // Lås Update
             CompleteLoading();
         }
     }
 
-   private void CompleteLoading()
+    private void CompleteLoading()
     {
         Debug.Log("Loading complete!");
 
         bool loadingExistingSave = LoadMapName.LoadingExistingSave;
         bool directMapNavigation = LoadMapName.DirectMapNavigation;
         bool hasSelectedMap = (loadingExistingSave || directMapNavigation) && !string.IsNullOrEmpty(LoadMapName.NextMapToLoad);
+
         if (!hasSelectedMap)
         {
             LoadMapName.NextMapToLoad = LoadScene;
@@ -74,10 +104,6 @@ public class LoadingMenu : MonoBehaviour
             {
                 LoadMapName.Instance.LoadMap = LoadScene;
                 LoadMapName.Instance.mapid = StartMap;
-            }
-
-            if (!hasSelectedMap)
-            {
                 LoadMapName.Instance.SpawnNewGame();
             }
         }

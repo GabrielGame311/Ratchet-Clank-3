@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
+using UnityEngine.SceneManagement;
 
 public class LoadMapName : MonoBehaviour
 {
@@ -16,10 +17,10 @@ public class LoadMapName : MonoBehaviour
     public Transform Content_;
     public GameObject LoadGamePrefab;
     public List<GameObject> LoadGames_ = new List<GameObject>();
-
+    public GameObject LoadWait_;
     public int saveSlot;
 
-    public GameObject ContinuePoint_; // UI-knapp eller panel för Continue
+    public GameObject ContinuePoint_; // UI-knapp/panel för "Continue" i huvudmenyn
 
     public static void SetDirectMap(string sceneName, int mapId)
     {
@@ -41,70 +42,69 @@ public class LoadMapName : MonoBehaviour
         Instance = this;
         saveSlot = NextSaveSlot;
 
-        Debug.Log("LoadMapName Start() called in scene: " + gameObject.scene.name);
-
-        // 1. Kontrollera om det finns sparade filer och visa/dölj Continue-knappen
+        // Kontrollera sparfiler och bygg menyn
         CheckContinueButton();
         SpawnPrefabs();
 
         if (LoadingExistingSave && !DirectMapNavigation)
         {
-            // Load save data only when the user selected a save card.
             SaveSystem.LoadGame(saveSlot, true);
         }
         else
         {
-            // Direct ship navigation must keep its selected map.
             LoadMap = NextMapToLoad;
             mapid = NextMapId;
         }
     }
 
     /// <summary>
-    /// Aktiverar ContinuePoint_ om minst en sparfil (slot 0-4) existerar
+    /// Aktiverar Continue-knappen om minst en sparfil finns
     /// </summary>
     public void CheckContinueButton()
     {
-        bool hasSave = false;
-
-        for (int i = 0; i < 5; i++)
-        {
-            if (File.Exists(SaveUtility.GetSavePath(i)))
-            {
-                hasSave = true;
-                break;
-            }
-        }
-
+        // Dölj UI-objektet när scenen startar så det bara visas vid trigger
         if (ContinuePoint_ != null)
         {
-            ContinuePoint_.SetActive(hasSave);
+            ContinuePoint_.SetActive(false);
         }
     }
 
     /// <summary>
-    /// Anropa denna via Button OnClick() på din "Continue"-knapp i UI:t
+    /// KOPPLA DENNA TILL DIN "CONTINUE"-KNAPP I HUVUDMENYN (On Click)
     /// </summary>
     public void OnContinuePressed()
     {
-        // Laddar slot 0 (eller den senast sparade slotten)
-        if (File.Exists(SaveUtility.GetSavePath(saveSlot)))
+        int slotToLoad = saveSlot;
+
+        // Om vald slot saknas, leta reda på den senaste/första giltiga sparfilen
+        if (!File.Exists(SaveUtility.GetSavePath(slotToLoad)))
         {
-            SaveSystem.LoadGame(saveSlot, false);
-        }
-        else
-        {
-            // Om vald slot saknas, leta efter första tillgängliga slot
+            slotToLoad = -1;
             for (int i = 0; i < 5; i++)
             {
                 if (File.Exists(SaveUtility.GetSavePath(i)))
                 {
-                    saveSlot = i;
-                    NextSaveSlot = saveSlot;
-                    SaveSystem.LoadGame(saveSlot, false);
+                    slotToLoad = i;
                     break;
                 }
             }
+        }
+
+        // Om en giltig sparfil hittades:
+      
+
+        if (slotToLoad != -1)
+        {
+            // REA BORT temporära checkpoints inför ny laddning
+            TempCheckpoint.Reset();
+
+            if (AllGameData.Instance != null)
+            {
+                AllGameData.Instance.hasCheckpoint = false;
+            }
+
+            SaveSystem.LoadGame(slotToLoad, false);
+            UnityEngine.SceneManagement.SceneManager.LoadScene("LoadingMap 1");
         }
     }
 
@@ -140,10 +140,7 @@ public class LoadMapName : MonoBehaviour
         SaveSystem.SaveNewGame(saveSlot);
         prefab.SetActive(true);
 
-        // Uppdatera synligheten för Continue-knappen
         CheckContinueButton();
-
-        Debug.Log("Spawned and saved new prefab in slot: " + saveSlot);
     }
 
     private int FindAvailableSlot()
